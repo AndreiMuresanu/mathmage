@@ -1,45 +1,95 @@
 import Phaser from 'phaser';
+import 'katex/dist/katex.min.css';
+import './ui/ui.css';
+import { ARENA_HEIGHT, ARENA_WIDTH, cloneConfig, type GameConfig } from './config/gameConfig';
+import { loadCurrentConfig, saveCurrentConfig } from './config/presets';
+import { GameScene } from './game/GameScene';
+import { Match } from './game/Match';
+import { MenuScene } from './game/MenuScene';
+import { QuestionRegistry } from './questions/registry';
+import { createConfigScreen } from './ui/ConfigScreen';
+import { createDeckManager } from './ui/DeckManager';
+import { createMainMenu } from './ui/MainMenu';
 
-class MathMageScene extends Phaser.Scene {
-  constructor() {
-    super('MathMageScene');
-  }
+const uiRoot = document.getElementById('ui-root')!;
+let config: GameConfig = loadCurrentConfig();
+const registry = new QuestionRegistry(() => config.arithmetic);
 
-  preload() {
-    // Phaser asset loading will go here
-  }
+const game = new Phaser.Game({
+  type: Phaser.AUTO,
+  backgroundColor: '#07070f',
+  scale: {
+    parent: 'game-container',
+    mode: Phaser.Scale.FIT,
+    autoCenter: Phaser.Scale.CENTER_BOTH,
+    width: ARENA_WIDTH,
+    height: ARENA_HEIGHT,
+  },
+  scene: [MenuScene, GameScene],
+});
 
-  create() {
-    // Display a test background and message
-    this.cameras.main.setBackgroundColor('#1a1a2e');
+let screen: HTMLElement | null = null;
+let match: Match | null = null;
 
-    this.add.text(100, 100, 'Math Mage: Initiating Spellbooks!', {
-      fontSize: '32px',
-      color: '#00ffcc',
-      fontStyle: 'bold'
-    });
-
-    console.log('Phaser Engine initialized.');
-  }
-
-  update() {
-    // Game tick loop runs at 60fps (rendering)
-  }
+function showScreen(el: HTMLElement | null): void {
+  screen?.remove();
+  screen = el;
+  if (el) uiRoot.append(el);
 }
 
-const config: Phaser.Types.Core.GameConfig = {
-  type: Phaser.AUTO,
-  width: 800,
-  height: 600,
-  physics: {
-    default: 'arcade',
-    arcade: {
-      gravity: { x: 0, y: 0 },
-      debug: true // Draws hitboxes during development
-    }
-  },
-  scene: MathMageScene,
-  parent: 'game-container'
-};
+function endMatch(): void {
+  match?.destroy();
+  match = null;
+}
 
-new Phaser.Game(config);
+function showMenu(): void {
+  endMatch();
+  if (!game.scene.isActive('menu')) {
+    game.scene.stop('game');
+    game.scene.start('menu');
+  }
+  showScreen(
+    createMainMenu({
+      play: () => startMatch(config),
+      configure: showConfig,
+      decks: showDecks,
+    }),
+  );
+}
+
+function showConfig(): void {
+  showScreen(
+    createConfigScreen({
+      config,
+      registry,
+      onStart: (cfg) => {
+        config = cfg;
+        saveCurrentConfig(config);
+        startMatch(config);
+      },
+      onBack: (cfg) => {
+        config = cfg;
+        showMenu();
+      },
+    }),
+  );
+}
+
+function showDecks(): void {
+  showScreen(createDeckManager({ registry, onBack: showMenu }));
+}
+
+function startMatch(cfg: GameConfig): void {
+  endMatch();
+  showScreen(null);
+  const gameScene = game.scene.getScene('game') as GameScene;
+  match = new Match(cloneConfig(cfg), registry, uiRoot, {
+    onTypingChange: (typing) => gameScene.setTyping(typing),
+    playAgain: () => startMatch(config),
+    exitToMenu: showMenu,
+  });
+  game.scene.stop('menu');
+  game.scene.start('game', { match });
+}
+
+showMenu();

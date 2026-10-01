@@ -1,0 +1,346 @@
+{
+  "name": "Hard Math",
+  "questions": [
+    {
+      "id": "hm-001",
+      "prompt": "If $x + y = 5$ and $x^2 - y^2 = 15$, what is the value of $x$?",
+      "answer": "4",
+      "tags": ["algebra"],
+      "steps": ["$x^2 - y^2 = (x+y)(x-y)$, so $5(x-y) = 15$ and $x - y = 3$.", "Add $x + y = 5$ and $x - y = 3$: $2x = 8$, so $x = 4$."]
+    },
+    {
+      "id": "hm-002",
+      "prompt": "The four-digit integer 2018 is composed of four distinct digits whose sum is 11. Including 2018, how many positive four-digit integers are composed of four distinct digits whose sum is 11?",
+      "answer": "114",
+      "tags": ["counting"],
+      "steps": [
+        "Sets of 4 distinct digits summing to 11: $\\{0,1,2,8\\}, \\{0,1,3,7\\}, \\{0,1,4,6\\}, \\{0,2,3,6\\}, \\{0,2,4,5\\}, \\{1,2,3,5\\}$.",
+        "Each of the 5 sets containing 0 gives $4! - 3! = 18$ numbers (0 can't lead): $5 \\cdot 18 = 90$.",
+        "The set $\\{1,2,3,5\\}$ gives $4! = 24$ numbers.",
+        "Total: $90 + 24 = 114$."
+      ]
+    },
+    {
+      "id": "hm-003",
+      "prompt": "In a certain sequence, $a_0 = 20$ and $a_n = \\sqrt{a_{n-1} + 1}^{\\,2}$ for any positive integer $n$. What is the value of $a_{500}$?",
+      "answer": "520",
+      "tags": ["sequences"],
+      "steps": ["$\\sqrt{a_{n-1}+1}^{\\,2} = a_{n-1} + 1$ since $a_{n-1} + 1 \\ge 0$.", "So the sequence increases by 1 each step: $a_{500} = 20 + 500 = 520$."]
+    },
+    {
+      "id": "hm-004",
+      "prompt": "If $x$ is a positive real number satisfying $x^x = 3$, what is $x^{x^{x+1}}$?",
+      "answer": "27",
+      "tags": ["exponents"],
+      "steps": ["$x^{x+1} = x^x \\cdot x = 3x$.", "So $x^{x^{x+1}} = x^{3x} = (x^x)^3 = 3^3 = 27$."]
+    },
+    {
+      "id": "hm-005",
+      "prompt": "If $a + b = 7$ and $ab = 10$, what is $a^2 + b^2$?",
+      "answer": "29",
+      "tags": ["algebra"],
+      "steps": ["$a^2 + b^2 = (a+b)^2 - 2ab = 49 - 20 = 29$."]
+    },
+    {
+      "id": "hm-006",
+      "prompt": "If $x + \\frac{1}{x} = 4$, what is $x^2 + \\frac{1}{x^2}$?",
+      "answer": "14",
+      "tags": ["algebra"],
+      "steps": ["Square both sides: $x^2 + 2 + \\frac{1}{x^2} = 16$.", "So $x^2 + \\frac{1}{x^2} = 14$."]
+    },
+    {
+      "id": "hm-007",
+      "prompt": "If $x + \\frac{1}{x} = 3$, what is $x^3 + \\frac{1}{x^3}$?",
+      "answer": "18",
+      "tags": ["algebra"],
+      "steps": ["$\\left(x + \\frac1x\\right)^3 = x^3 + \\frac{1}{x^3} + 3\\left(x + \\frac1x\\right)$.", "$27 = x^3 + \\frac{1}{x^3} + 9$, so $x^3 + \\frac{1}{x^3} = 18$."]
+    },
+    {
+      "id": "hm-008",
+      "prompt": "What is the sum of the squares of the roots of $x^3 - 6x^2 + 11x - 6 = 0$?",
+      "answer": "14",
+      "tags": ["polynomials"],
+      "steps": ["By Vieta: $r_1 + r_2 + r_3 = 6$ and $r_1r_2 + r_2r_3 + r_1r_3 = 11$.", "$\\sum r_i^2 = 6^2 - 2 \\cdot 11 = 14$."]
+    },
+    {
+      "id": "hm-009",
+      "prompt": "If $2^a = 3$ and $3^b = 16$, what is $ab$?",
+      "answer": "4",
+      "tags": ["exponents"],
+      "steps": ["$2^{ab} = (2^a)^b = 3^b = 16 = 2^4$.", "So $ab = 4$."]
+    },
+    {
+      "id": "hm-010",
+      "prompt": "Evaluate $\\log_2 3 \\cdot \\log_3 4 \\cdot \\log_4 5 \\cdots \\log_{63} 64$.",
+      "answer": "6",
+      "tags": ["logarithms"],
+      "steps": ["Change of base: $\\log_k (k+1) = \\frac{\\ln(k+1)}{\\ln k}$, so the product telescopes.", "It equals $\\frac{\\ln 64}{\\ln 2} = \\log_2 64 = 6$."]
+    },
+    {
+      "id": "hm-011",
+      "prompt": "Let $f(x) = 3x + 2$. If $f(g(x)) = 6x + 11$ for all $x$, what is $g(5)$?",
+      "answer": "13",
+      "tags": ["functions"],
+      "steps": ["$3g(x) + 2 = 6x + 11$, so $g(x) = 2x + 3$.", "$g(5) = 13$."]
+    },
+    {
+      "id": "hm-012",
+      "prompt": "Evaluate $\\sqrt{12 + \\sqrt{12 + \\sqrt{12 + \\cdots}}}$.",
+      "answer": "4",
+      "tags": ["algebra"],
+      "steps": ["Let $s$ be the value. Then $s = \\sqrt{12 + s}$, so $s^2 - s - 12 = 0$.", "$(s-4)(s+3) = 0$ and $s > 0$, so $s = 4$."]
+    },
+    {
+      "id": "hm-013",
+      "prompt": "Evaluate $\\frac{1}{1 \\cdot 2} + \\frac{1}{2 \\cdot 3} + \\cdots + \\frac{1}{99 \\cdot 100}$.",
+      "answer": "99/100",
+      "tags": ["series"],
+      "steps": ["$\\frac{1}{k(k+1)} = \\frac1k - \\frac{1}{k+1}$, so the sum telescopes.", "It equals $1 - \\frac{1}{100} = \\frac{99}{100}$."]
+    },
+    {
+      "id": "hm-014",
+      "prompt": "Evaluate $\\dfrac{2^{2024} + 2^{2022}}{2^{2023} - 2^{2021}}$.",
+      "answer": "10/3",
+      "tags": ["exponents"],
+      "steps": ["Numerator: $2^{2022}(4 + 1) = 5 \\cdot 2^{2022}$. Denominator: $2^{2021}(4 - 1) = 3 \\cdot 2^{2021}$.", "Ratio: $\\frac{5 \\cdot 2}{3} = \\frac{10}{3}$."]
+    },
+    {
+      "id": "hm-015",
+      "prompt": "What is the remainder when $2^{100}$ is divided by 7?",
+      "answer": "2",
+      "tags": ["number theory"],
+      "steps": ["$2^3 = 8 \\equiv 1 \\pmod 7$.", "$2^{100} = (2^3)^{33} \\cdot 2 \\equiv 2 \\pmod 7$."]
+    },
+    {
+      "id": "hm-016",
+      "prompt": "What is the last digit of $7^{2026}$?",
+      "answer": "9",
+      "tags": ["number theory"],
+      "steps": ["Last digits of powers of 7 cycle: 7, 9, 3, 1.", "$2026 \\equiv 2 \\pmod 4$, so the last digit is 9."]
+    },
+    {
+      "id": "hm-017",
+      "prompt": "How many positive divisors does 360 have?",
+      "answer": "24",
+      "tags": ["number theory"],
+      "steps": ["$360 = 2^3 \\cdot 3^2 \\cdot 5$.", "Number of divisors: $(3+1)(2+1)(1+1) = 24$."]
+    },
+    {
+      "id": "hm-018",
+      "prompt": "What is $\\gcd(2^{12} - 1,\\ 2^{18} - 1)$?",
+      "answer": "63",
+      "tags": ["number theory"],
+      "steps": ["$\\gcd(2^a - 1, 2^b - 1) = 2^{\\gcd(a,b)} - 1$.", "$\\gcd(12, 18) = 6$, so the answer is $2^6 - 1 = 63$."]
+    },
+    {
+      "id": "hm-019",
+      "prompt": "How many zeros does $100!$ end with?",
+      "answer": "24",
+      "tags": ["number theory"],
+      "steps": ["Count factors of 5: $\\lfloor 100/5 \\rfloor + \\lfloor 100/25 \\rfloor = 20 + 4 = 24$."]
+    },
+    {
+      "id": "hm-020",
+      "prompt": "In how many distinct ways can the letters of MISSISSIPPI be arranged?",
+      "answer": "34650",
+      "tags": ["counting"],
+      "steps": ["11 letters: M×1, I×4, S×4, P×2.", "$\\frac{11!}{4!\\,4!\\,2!} = 34650$."]
+    },
+    {
+      "id": "hm-021",
+      "prompt": "Two fair six-sided dice are rolled. What is the probability that the sum is 7?",
+      "answer": "1/6",
+      "tags": ["probability"],
+      "steps": ["Favorable outcomes: (1,6), (2,5), (3,4), (4,3), (5,2), (6,1) — 6 of 36.", "$\\frac{6}{36} = \\frac16$."]
+    },
+    {
+      "id": "hm-022",
+      "prompt": "How many subsets of $\\{1, 2, \\ldots, 10\\}$ (including the empty set) contain no two consecutive integers?",
+      "answer": "144",
+      "tags": ["counting"],
+      "steps": ["Let $a_n$ count such subsets of $\\{1..n\\}$. Either $n$ is excluded ($a_{n-1}$) or included ($a_{n-2}$).", "$a_1 = 2, a_2 = 3$, Fibonacci-like: 2, 3, 5, 8, 13, 21, 34, 55, 89, 144."]
+    },
+    {
+      "id": "hm-023",
+      "prompt": "How many diagonals does a convex 12-gon have?",
+      "answer": "54",
+      "tags": ["counting", "geometry"],
+      "steps": ["Each vertex connects to $12 - 3 = 9$ non-adjacent vertices.", "$\\frac{12 \\cdot 9}{2} = 54$."]
+    },
+    {
+      "id": "hm-024",
+      "prompt": "How many integers from 1 to 1000 are divisible by 3 or 5?",
+      "answer": "467",
+      "tags": ["counting"],
+      "steps": ["Divisible by 3: 333. By 5: 200. By 15: 66.", "Inclusion–exclusion: $333 + 200 - 66 = 467$."]
+    },
+    {
+      "id": "hm-025",
+      "prompt": "What is the sum of the digits of $10^{20} - 20$?",
+      "answer": "170",
+      "tags": ["number theory"],
+      "steps": ["$10^{20} - 20 = 99\\ldots980$: eighteen 9s followed by 8 and 0.", "$18 \\cdot 9 + 8 = 170$."]
+    },
+    {
+      "id": "hm-026",
+      "prompt": "A right triangle has legs of length 20 and 21. What is the length of its hypotenuse?",
+      "answer": "29",
+      "tags": ["geometry"],
+      "steps": ["$\\sqrt{20^2 + 21^2} = \\sqrt{400 + 441} = \\sqrt{841} = 29$."]
+    },
+    {
+      "id": "hm-027",
+      "prompt": "What is the area of a triangle with side lengths 13, 14, and 15?",
+      "answer": "84",
+      "tags": ["geometry"],
+      "steps": ["Heron: $s = 21$, area $= \\sqrt{21 \\cdot 8 \\cdot 7 \\cdot 6} = \\sqrt{7056} = 84$."]
+    },
+    {
+      "id": "hm-028",
+      "prompt": "What is the radius of the circle inscribed in a triangle with sides 3, 4, and 5?",
+      "answer": "1",
+      "tags": ["geometry"],
+      "steps": ["Area $= 6$, semiperimeter $s = 6$.", "$r = \\frac{\\text{Area}}{s} = 1$."]
+    },
+    {
+      "id": "hm-029",
+      "prompt": "What is the area of a regular hexagon with side length 2? (Exact form like 6sqrt(3) is fine.)",
+      "answer": "6sqrt(3)",
+      "tags": ["geometry"],
+      "steps": ["A regular hexagon is 6 equilateral triangles of side 2, each with area $\\frac{\\sqrt3}{4} \\cdot 4 = \\sqrt3$.", "Total: $6\\sqrt3$."]
+    },
+    {
+      "id": "hm-030",
+      "prompt": "Evaluate $\\displaystyle\\int_0^{\\pi/2} \\sin^2 x \\, dx$.",
+      "answer": "pi/4",
+      "tags": ["calculus"],
+      "steps": ["$\\sin^2 x = \\frac{1 - \\cos 2x}{2}$.", "$\\int_0^{\\pi/2} \\frac{1 - \\cos 2x}{2}\\,dx = \\frac{\\pi}{4} - \\left[\\frac{\\sin 2x}{4}\\right]_0^{\\pi/2} = \\frac{\\pi}{4}$."]
+    },
+    {
+      "id": "hm-031",
+      "prompt": "Evaluate $\\displaystyle\\int_0^1 x e^x \\, dx$.",
+      "answer": "1",
+      "tags": ["calculus"],
+      "steps": ["By parts: $\\int x e^x dx = x e^x - e^x$.", "$[x e^x - e^x]_0^1 = (e - e) - (0 - 1) = 1$."]
+    },
+    {
+      "id": "hm-032",
+      "prompt": "Evaluate $\\displaystyle\\int_1^e \\ln x \\, dx$.",
+      "answer": "1",
+      "tags": ["calculus"],
+      "steps": ["By parts: $\\int \\ln x\\,dx = x\\ln x - x$.", "$[x \\ln x - x]_1^e = (e - e) - (0 - 1) = 1$."]
+    },
+    {
+      "id": "hm-033",
+      "prompt": "Evaluate $\\displaystyle\\int_0^\\infty x^3 e^{-x} \\, dx$.",
+      "answer": "6",
+      "tags": ["calculus"],
+      "steps": ["$\\int_0^\\infty x^n e^{-x}\\,dx = \\Gamma(n+1) = n!$.", "$3! = 6$."]
+    },
+    {
+      "id": "hm-034",
+      "prompt": "Evaluate $\\displaystyle\\int_0^1 \\frac{4}{1 + x^2} \\, dx$.",
+      "answer": "pi",
+      "tags": ["calculus"],
+      "steps": ["$\\int \\frac{dx}{1+x^2} = \\arctan x$.", "$4(\\arctan 1 - \\arctan 0) = 4 \\cdot \\frac{\\pi}{4} = \\pi$."]
+    },
+    {
+      "id": "hm-035",
+      "prompt": "Evaluate $\\displaystyle\\int_{-2}^{2} \\left(x^3 \\cos x + 1\\right) dx$.",
+      "answer": "4",
+      "tags": ["calculus"],
+      "steps": ["$x^3 \\cos x$ is odd, so it integrates to 0 over $[-2, 2]$.", "$\\int_{-2}^{2} 1\\,dx = 4$."]
+    },
+    {
+      "id": "hm-036",
+      "prompt": "Evaluate $\\displaystyle\\int_0^\\pi x \\sin x \\, dx$.",
+      "answer": "pi",
+      "tags": ["calculus"],
+      "steps": ["By parts: $\\int x\\sin x\\,dx = -x\\cos x + \\sin x$.", "$[-x\\cos x + \\sin x]_0^\\pi = \\pi$."]
+    },
+    {
+      "id": "hm-037",
+      "prompt": "Evaluate $\\displaystyle\\lim_{x \\to 0} \\frac{\\sin 5x}{x}$.",
+      "answer": "5",
+      "tags": ["calculus"],
+      "steps": ["$\\frac{\\sin 5x}{x} = 5 \\cdot \\frac{\\sin 5x}{5x} \\to 5 \\cdot 1 = 5$."]
+    },
+    {
+      "id": "hm-038",
+      "prompt": "What is the derivative of $x^x$ at $x = 1$?",
+      "answer": "1",
+      "tags": ["calculus"],
+      "steps": ["$\\frac{d}{dx} x^x = x^x(\\ln x + 1)$.", "At $x = 1$: $1 \\cdot (0 + 1) = 1$."]
+    },
+    {
+      "id": "hm-039",
+      "prompt": "Let $A = \\begin{pmatrix} 3 & 1 \\\\ 4 & 2 \\end{pmatrix}$. What is $\\det(A^5)$?",
+      "answer": "32",
+      "tags": ["matrices"],
+      "steps": ["$\\det A = 3 \\cdot 2 - 1 \\cdot 4 = 2$.", "$\\det(A^5) = (\\det A)^5 = 32$."]
+    },
+    {
+      "id": "hm-040",
+      "prompt": "$A$ is a $3 \\times 3$ matrix with $\\det A = 2$. What is $\\det(3A)$?",
+      "answer": "54",
+      "tags": ["matrices"],
+      "steps": ["Scaling an $n \\times n$ matrix by $c$ scales the determinant by $c^n$.", "$3^3 \\cdot 2 = 54$."]
+    },
+    {
+      "id": "hm-041",
+      "prompt": "What is the trace of $\\begin{pmatrix} 1 & 2 \\\\ 3 & 4 \\end{pmatrix}^2$?",
+      "answer": "29",
+      "tags": ["matrices"],
+      "steps": ["$A^2 = \\begin{pmatrix} 7 & 10 \\\\ 15 & 22 \\end{pmatrix}$.", "Trace $= 7 + 22 = 29$."]
+    },
+    {
+      "id": "hm-042",
+      "prompt": "What is the largest eigenvalue of $\\begin{pmatrix} 2 & 1 \\\\ 1 & 2 \\end{pmatrix}$?",
+      "answer": "3",
+      "tags": ["matrices"],
+      "steps": ["$\\det(A - \\lambda I) = (2-\\lambda)^2 - 1 = 0$, so $\\lambda = 1$ or $3$.", "The largest is 3."]
+    },
+    {
+      "id": "hm-043",
+      "prompt": "Evaluate $\\det \\begin{pmatrix} 1 & 2 & 3 \\\\ 4 & 5 & 6 \\\\ 7 & 8 & 10 \\end{pmatrix}$.",
+      "answer": "-3",
+      "tags": ["matrices"],
+      "steps": ["Expand along the first row: $1(50 - 48) - 2(40 - 42) + 3(32 - 35)$.", "$= 2 + 4 - 9 = -3$."]
+    },
+    {
+      "id": "hm-044",
+      "prompt": "Let $A = \\begin{pmatrix} 2 & 1 \\\\ 5 & 3 \\end{pmatrix}$. What is the top-right entry of $A^{-1}$?",
+      "answer": "-1",
+      "tags": ["matrices"],
+      "steps": ["$\\det A = 6 - 5 = 1$.", "$A^{-1} = \\frac{1}{1}\\begin{pmatrix} 3 & -1 \\\\ -5 & 2 \\end{pmatrix}$, so the top-right entry is $-1$."]
+    },
+    {
+      "id": "hm-045",
+      "prompt": "What is the sum of all positive divisors of 28?",
+      "answer": "56",
+      "tags": ["number theory"],
+      "steps": ["Divisors: 1, 2, 4, 7, 14, 28.", "Sum: 56 (28 is a perfect number)."]
+    },
+    {
+      "id": "hm-046",
+      "prompt": "Evaluate $1^3 + 2^3 + \\cdots + 10^3$.",
+      "answer": "3025",
+      "tags": ["series"],
+      "steps": ["$\\sum_{k=1}^n k^3 = \\left(\\frac{n(n+1)}{2}\\right)^2$.", "$55^2 = 3025$."]
+    },
+    {
+      "id": "hm-047",
+      "prompt": "Let $i^2 = -1$. What is $i^{2026}$?",
+      "answer": "-1",
+      "tags": ["complex numbers"],
+      "steps": ["Powers of $i$ cycle with period 4.", "$2026 \\equiv 2 \\pmod 4$, so $i^{2026} = i^2 = -1$."]
+    },
+    {
+      "id": "hm-048",
+      "prompt": "Let $i^2 = -1$. What is $(1 + i)^8$?",
+      "answer": "16",
+      "tags": ["complex numbers"],
+      "steps": ["$(1+i)^2 = 2i$.", "$(1+i)^8 = (2i)^4 = 16 i^4 = 16$."]
+    }
+  ]
+}
