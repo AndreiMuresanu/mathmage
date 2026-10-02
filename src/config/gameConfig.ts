@@ -99,6 +99,8 @@ export interface GameConfig {
     countGrowth: number;
     hpGrowthPerRound: number;
     damageGrowthPerRound: number;
+    /** Seconds before round 1 starts. */
+    firstWaveDelay: number;
     breakSeconds: number;
     spawnInterval: number;
     casterStartRound: number;
@@ -131,7 +133,7 @@ export const DEFAULT_CONFIG: GameConfig = {
       label: 'Easy',
       sources: [{ sourceId: 'arithmetic', weight: 1 }],
       manaReward: 12,
-      stunSeconds: 3,
+      stunSeconds: 4,
       autoNextOnCorrect: true,
     },
     {
@@ -139,7 +141,7 @@ export const DEFAULT_CONFIG: GameConfig = {
       label: 'Hard',
       sources: [{ sourceId: 'deck:hard-math', weight: 1 }],
       manaReward: 70,
-      stunSeconds: 8,
+      stunSeconds: 4,
       autoNextOnCorrect: false,
     },
   ],
@@ -164,14 +166,15 @@ export const DEFAULT_CONFIG: GameConfig = {
     hpMult: 1,
     damageMult: 1,
     speedMult: 1,
-    chaser: { hp: 30, speed: 90, damage: 10, radius: 14, attackCooldown: 0.8 },
-    caster: { hp: 25, speed: 70, damage: 8, radius: 13, fireInterval: 2.2, range: 320, projectileSpeed: 220 },
+    chaser: { hp: 30, speed: 90, damage: 2, radius: 14, attackCooldown: 0.8 },
+    caster: { hp: 25, speed: 70, damage: 2, radius: 13, fireInterval: 2.2, range: 320, projectileSpeed: 220 },
   },
   waves: {
     baseCount: 4,
     countGrowth: 2,
     hpGrowthPerRound: 0.12,
     damageGrowthPerRound: 0.05,
+    firstWaveDelay: 0,
     breakSeconds: 5,
     spawnInterval: 0.6,
     casterStartRound: 2,

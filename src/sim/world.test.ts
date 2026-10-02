@@ -8,7 +8,7 @@ const idle: PlayerIntent = { move: { x: 0, y: 0 }, aim: 0, casting: false };
 
 function config(edit: (c: GameConfig) => void = () => {}): GameConfig {
   const c = cloneConfig(DEFAULT_CONFIG);
-  c.waves.breakSeconds = 1000; // keep enemies away unless a test wants them
+  c.waves.firstWaveDelay = 1000; // keep enemies away unless a test wants them
   edit(c);
   return c;
 }
@@ -73,7 +73,7 @@ describe('combat and waves', () => {
   });
 
   it('enemies spawn, damage the player (with damageTakenMult) and can end the game', () => {
-    const world = new World(config((c) => { c.waves.breakSeconds = 0.1; c.player.damageTakenMult = 3; c.player.maxHp = 50; }), 42);
+    const world = new World(config((c) => { c.waves.firstWaveDelay = 0.1; c.player.damageTakenMult = 3; c.player.maxHp = 50; }), 42);
     const hits: number[] = [];
     let over = false;
     for (let t = 0; t < 120 && !over; t += 1 / 60) {

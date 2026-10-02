@@ -12,6 +12,16 @@ function renderPlain(text: string): string {
 
 const MATH = /(\$\$[\s\S]+?\$\$|\$[^$\n]+?\$)/g;
 
+/**
+ * KaTeX's fonts use `font-display: block` and are only fetched the first time an equation needs
+ * them, which leaves math invisible for a moment. Start fetching them all up front instead.
+ */
+export function preloadMathFonts(): void {
+  document.fonts.forEach((face) => {
+    if (face.family.replace(/["']/g, '').startsWith('KaTeX_')) face.load().catch(() => {});
+  });
+}
+
 /** Render question text: $inline$ and $$display$$ LaTeX via KaTeX, **bold**, and line breaks. */
 export function renderRich(text: string): string {
   return text

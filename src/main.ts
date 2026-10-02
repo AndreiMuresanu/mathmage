@@ -10,6 +10,9 @@ import { QuestionRegistry } from './questions/registry';
 import { createConfigScreen } from './ui/ConfigScreen';
 import { createDeckManager } from './ui/DeckManager';
 import { createMainMenu } from './ui/MainMenu';
+import { preloadMathFonts } from './ui/markup';
+
+preloadMathFonts();
 
 const uiRoot = document.getElementById('ui-root')!;
 let config: GameConfig = loadCurrentConfig();

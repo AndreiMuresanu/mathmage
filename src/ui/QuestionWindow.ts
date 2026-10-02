@@ -52,6 +52,11 @@ export class QuestionWindow {
       // Keep keys away from the game while typing.
       e.stopPropagation();
       if (e.key === 'Enter') this.submit();
+      else if (e.key === 'Backspace') {
+        // Clear the whole answer at once — faster than deleting characters mid-fight.
+        e.preventDefault();
+        this.input.value = '';
+      }
       else if (e.key === 'Escape') this.close();
     });
   }

@@ -55,7 +55,7 @@ export class World {
       invulnRemaining: 0,
       alive: true,
     }));
-    this.wave = { round: 0, phase: 'break', timer: cfg.waves.breakSeconds, queue: [] };
+    this.wave = { round: 0, phase: 'break', timer: cfg.waves.firstWaveDelay, queue: [] };
     this.stats = {
       kills: 0,
       timeSurvived: 0,

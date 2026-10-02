@@ -159,6 +159,7 @@ export const CONFIG_GROUPS: GroupDef[] = [
       num('countGrowth', 'Extra enemies per round', 0, 100, 0.5),
       num('hpGrowthPerRound', 'Enemy HP growth per round', 0, 5, 0.01, '0.12 = +12% HP each round'),
       num('damageGrowthPerRound', 'Enemy damage growth per round', 0, 5, 0.01),
+      num('firstWaveDelay', 'Delay before round 1 (s)', 0, 120, 0.5),
       num('breakSeconds', 'Break between rounds (s)', 0, 120, 0.5),
       num('spawnInterval', 'Time between spawns (s)', 0, 10, 0.05),
       num('casterStartRound', 'Casters appear from round', 1, 100, 1),
