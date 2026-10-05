@@ -40,6 +40,8 @@ export class GameScene extends Phaser.Scene {
     const kb = this.input.keyboard!;
     // No capture: the answer field must still receive these letters when focused.
     this.keys = kb.addKeys('W,A,S,D', false) as WasdKeys;
+    // Space opens questions; capture it so it doesn't also "click" a focused button.
+    kb.addCapture('SPACE');
     kb.on('keydown', (e: KeyboardEvent) => {
       if (!e.repeat) this.match.onKey(e.code);
     });
@@ -54,6 +56,7 @@ export class GameScene extends Phaser.Scene {
     this.events.once('shutdown', () => {
       kb.removeAllListeners('keydown');
       kb.removeAllKeys(true);
+      kb.removeCapture('SPACE');
       kb.enabled = true;
       this.input.off('pointerdown');
     });
@@ -84,6 +87,8 @@ export class GameScene extends Phaser.Scene {
       casting: pointer.leftButtonDown(),
     });
     for (const e of events) this.handleEvent(e);
+    // Effects (bursts, floating text) follow the game speed: frozen when paused, slow during slow motion.
+    this.tweens.timeScale = this.match.paused ? 0 : world.timeScale();
     this.render();
   }
 
@@ -140,9 +145,11 @@ export class GameScene extends Phaser.Scene {
       g.fillStyle(0x000000, 0.6).fillRect(e.x - w / 2, e.y - e.radius - 9, w, 4);
       g.fillStyle(0xff5c5c, 1).fillRect(e.x - w / 2, e.y - e.radius - 9, (w * Math.max(0, e.hp)) / e.maxHp, 4);
     }
-    if (p.alive && p.stunRemaining > 0) {
+    if (p.alive && (p.stunRemaining > 0 || p.hitStunRemaining > 0)) {
+      // Yellow ring for a wrong-answer stun, pink for a projectile hit-stun.
       const pulse = 4 + Math.sin(this.time.now / 80) * 2;
-      g.lineStyle(3, 0xffd166, 0.9).strokeCircle(p.x, p.y, p.radius + pulse + 4);
+      const color = p.stunRemaining > 0 ? 0xffd166 : 0xff4d6d;
+      g.lineStyle(3, color, 0.9).strokeCircle(p.x, p.y, p.radius + pulse + 4);
     }
   }
 
@@ -172,7 +179,7 @@ export class GameScene extends Phaser.Scene {
 
   private banner(text: string): void {
     const label = this.add
-      .text(this.scale.width / 2, this.scale.height / 2 - 120, text, {
+      .text(this.scale.width / 2, this.scale.height * 0.2, text, {
         fontFamily: 'system-ui, sans-serif',
         fontSize: '48px',
         color: '#00ffcc',

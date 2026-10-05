@@ -1,8 +1,8 @@
-import { CONFIG_GROUPS, SLOT_KEYS, getPath, type FieldDef, type GroupDef } from '../config/configSchema';
+import { CONFIG_GROUPS, getPath, type FieldDef, type GroupDef } from '../config/configSchema';
 import { DEFAULT_CONFIG, cloneConfig, type GameConfig } from '../config/gameConfig';
 import { deletePreset, listPresets, parseConfigJson, saveCurrentConfig, savePreset } from '../config/presets';
 import type { QuestionRegistry } from '../questions/registry';
-import { downloadText, h, keyLabel } from './dom';
+import { downloadText, h } from './dom';
 
 export interface ConfigScreenOptions {
   config: GameConfig;
@@ -17,7 +17,7 @@ export function createConfigScreen(opts: ConfigScreenOptions): HTMLDivElement {
   const body = h('div.config-body');
   const presetBar = h('div.preset-bar');
   const status = h('div.config-status');
-  const openGroups = new Set<string>(['Player', 'Spells', 'Question slots']);
+  const openGroups = new Set<string>(['Player', 'Spells', 'Question types']);
 
   const changed = () => {
     saveCurrentConfig(draft);
@@ -27,11 +27,14 @@ export function createConfigScreen(opts: ConfigScreenOptions): HTMLDivElement {
   function renderStatus(): void {
     const problems: string[] = [];
     if (draft.spells.length === 0) problems.push('Add at least one spell.');
-    draft.questionSlots.forEach((slot) => {
-      if (!slot.sources.some((s) => s.weight > 0 && opts.registry.has(s.sourceId))) {
-        problems.push(`Slot ${keyLabel(slot.key)} (${slot.label}) has no question sources.`);
+    draft.questionTypes.forEach((type) => {
+      if (type.weight > 0 && !opts.registry.isUsable(type)) {
+        problems.push(`Question type "${type.label}" has no question sources, so it will never be picked.`);
       }
     });
+    if (!draft.questionTypes.some((t) => t.weight > 0 && opts.registry.isUsable(t))) {
+      problems.push('No question type can be picked: give at least one type a weight above 0 and a source.');
+    }
     if (draft.player.startMana > draft.player.maxMana) problems.push('Starting mana is above max mana (it will be capped).');
     status.replaceChildren(...problems.map((p) => h('div.warning', {}, p)));
   }
@@ -77,8 +80,8 @@ export function createConfigScreen(opts: ConfigScreenOptions): HTMLDivElement {
     );
   }
 
-  function sourcesEditor(slotIndex: number): HTMLElement {
-    const slot = draft.questionSlots[slotIndex];
+  function sourcesEditor(typeIndex: number): HTMLElement {
+    const slot = draft.questionTypes[typeIndex];
     const known = opts.registry.list();
     const rows = known.map((info) => {
       const entry = slot.sources.find((s) => s.sourceId === info.id);
@@ -119,15 +122,17 @@ export function createConfigScreen(opts: ConfigScreenOptions): HTMLDivElement {
     }
 
     const list = draft[group.path] as unknown as Record<string, any>[];
+    const totalWeight = draft.questionTypes.reduce((sum, t) => sum + Math.max(0, t.weight), 0) || 1;
     list.forEach((item, index) => {
       const title =
         group.path === 'spells'
           ? `${group.itemTitle} ${index + 1} (key ${index + 1})`
-          : `${group.itemTitle} ${index + 1} (key ${keyLabel(SLOT_KEYS[index])})`;
+          : `${item.label} · ${Math.round((100 * Math.max(0, item.weight)) / totalWeight)}% of questions`;
+      // Weight changes update every type's percentage, so re-render the list.
+      const onFieldChange = group.path === 'questionTypes' ? () => { changed(); render(); } : changed;
       const remove = h('button.small.danger', { textContent: 'Remove' });
       remove.addEventListener('click', () => {
         list.splice(index, 1);
-        reassignSlotKeys();
         changed();
         render();
       });
@@ -136,8 +141,8 @@ export function createConfigScreen(opts: ConfigScreenOptions): HTMLDivElement {
           'div.list-item',
           {},
           h('div.list-item-header', {}, h('strong', {}, title), remove),
-          h('div.field-grid', {}, ...group.fields.map((f) => fieldInput(item, f))),
-          group.path === 'questionSlots' ? sourcesEditor(index) : null,
+          h('div.field-grid', {}, ...group.fields.map((f) => fieldInput(item, f, onFieldChange))),
+          group.path === 'questionTypes' ? sourcesEditor(index) : null,
         ),
       );
     });
@@ -146,17 +151,12 @@ export function createConfigScreen(opts: ConfigScreenOptions): HTMLDivElement {
       add.addEventListener('click', () => {
         const template = list.at(-1) ?? (DEFAULT_CONFIG[group.path][0] as unknown as Record<string, any>);
         list.push(structuredClone(template));
-        reassignSlotKeys();
         changed();
         render();
       });
       details.append(add);
     }
     return details;
-  }
-
-  function reassignSlotKeys(): void {
-    draft.questionSlots.forEach((slot, i) => (slot.key = SLOT_KEYS[i]));
   }
 
   function renderPresetBar(): void {
@@ -202,7 +202,6 @@ export function createConfigScreen(opts: ConfigScreenOptions): HTMLDivElement {
       if (!f) return;
       try {
         draft = parseConfigJson(await f.text());
-        reassignSlotKeys();
         changed();
         render();
       } catch (e) {

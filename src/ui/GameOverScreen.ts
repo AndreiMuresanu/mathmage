@@ -1,17 +1,17 @@
 import type { World } from '../sim/world';
-import { h, keyLabel } from './dom';
+import { h } from './dom';
 
 export function createGameOverScreen(world: World, actions: { playAgain(): void; menu(): void }): HTMLDivElement {
   const s = world.stats;
   const minutes = Math.floor(s.timeSurvived / 60);
   const seconds = Math.floor(s.timeSurvived % 60).toString().padStart(2, '0');
-  const rows = world.cfg.questionSlots.map((slot, i) => {
-    const st = s.slots[i];
+  const rows = world.cfg.questionTypes.map((type, i) => {
+    const st = s.questionTypes[i];
     const pct = st.attempts ? Math.round((100 * st.correct) / st.attempts) : 0;
     return h(
       'tr',
       {},
-      h('td', {}, `${keyLabel(slot.key)} · ${slot.label}`),
+      h('td', {}, type.label),
       h('td', {}, `${st.correct} / ${st.attempts}`),
       h('td', {}, st.attempts ? `${pct}%` : '—'),
       h('td', {}, String(Math.round(st.manaEarned))),
@@ -36,7 +36,7 @@ export function createGameOverScreen(world: World, actions: { playAgain(): void;
       h(
         'table.stats-table',
         {},
-        h('thead', {}, h('tr', {}, h('th', {}, 'Slot'), h('th', {}, 'Correct'), h('th', {}, 'Accuracy'), h('th', {}, 'Mana'))),
+        h('thead', {}, h('tr', {}, h('th', {}, 'Type'), h('th', {}, 'Correct'), h('th', {}, 'Accuracy'), h('th', {}, 'Mana'))),
         h('tbody', {}, ...rows),
       ),
       h(

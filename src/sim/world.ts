@@ -10,12 +10,14 @@ import type {
   SimEvent,
   WaveState,
 } from './types';
-import { buildWaveQueue, damageScale, hpScale } from './waves';
+import { buildWaveQueue, damageScale, hpScale, roundTimeLimit } from './waves';
 
 const SPAWN_MARGIN = 30;
 const PROJECTILE_TTL = 3;
 /** Delay before the "not enough mana" feedback can repeat while the cast button is held. */
 const NO_MANA_FEEDBACK_DELAY = 0.4;
+/** How strongly casters avoid each other relative to their other movement. */
+const SEPARATION_STRENGTH = 2;
 
 /**
  * The whole match state and rules, independent of Phaser. The scene feeds it intents and
@@ -52,16 +54,17 @@ export class World {
       selectedSpell: 0,
       cooldowns: cfg.spells.map(() => 0),
       stunRemaining: 0,
+      hitStunRemaining: 0,
       invulnRemaining: 0,
       alive: true,
     }));
-    this.wave = { round: 0, phase: 'break', timer: cfg.waves.firstWaveDelay, queue: [] };
+    this.wave = { round: 0, phase: 'break', timer: cfg.waves.firstWaveDelay, queue: [], roundTimeLeft: Infinity };
     this.stats = {
       kills: 0,
       timeSurvived: 0,
       manaSpent: 0,
       damageDealt: 0,
-      slots: cfg.questionSlots.map(() => ({ attempts: 0, correct: 0, manaEarned: 0 })),
+      questionTypes: cfg.questionTypes.map(() => ({ attempts: 0, correct: 0, manaEarned: 0 })),
     };
   }
 
@@ -89,19 +92,19 @@ export class World {
   }
 
   /** Apply the result of an answered question. Returns the mana actually gained. */
-  answerQuestion(playerId: string, slotIndex: number, correct: boolean): number {
+  answerQuestion(playerId: string, typeIndex: number, correct: boolean): number {
     const p = this.player(playerId);
-    const slot = this.cfg.questionSlots[slotIndex];
-    if (!p || !slot || !this.canAnswer(playerId)) return 0;
-    const stats = this.stats.slots[slotIndex];
+    const type = this.cfg.questionTypes[typeIndex];
+    if (!p || !type || !this.canAnswer(playerId)) return 0;
+    const stats = this.stats.questionTypes[typeIndex];
     stats.attempts++;
     if (!correct) {
-      p.stunRemaining = slot.stunSeconds;
-      this.events.push({ type: 'stunned', playerId, seconds: slot.stunSeconds });
+      p.stunRemaining = type.stunSeconds;
+      this.events.push({ type: 'stunned', playerId, seconds: type.stunSeconds });
       return 0;
     }
     stats.correct++;
-    const gained = Math.max(0, Math.min(slot.manaReward, p.maxMana - p.mana));
+    const gained = Math.max(0, Math.min(type.manaReward, p.maxMana - p.mana));
     p.mana += gained;
     stats.manaEarned += gained;
     this.events.push({ type: 'mana', playerId, amount: gained });
@@ -110,10 +113,22 @@ export class World {
 
   // ---- Tick ----
 
+  /**
+   * Game speed multiplier: slowed while a player reads the solution to a wrong answer.
+   * (In co-op this slows everyone; revisit when co-op lands.)
+   */
+  timeScale(): number {
+    const reading = this.players.some((p) => p.alive && p.stunRemaining > 0);
+    return reading ? Math.max(0, Math.min(1, this.cfg.stun.slowMotion)) : 1;
+  }
+
+  /** Advance by `dt` real seconds. Game time runs at timeScale(); wrong-answer stuns tick in real time. */
   step(dt: number, intents: Record<string, PlayerIntent>): void {
     if (this.over) return;
-    this.stats.timeSurvived += dt;
-    for (const p of this.players) this.updatePlayer(p, dt, intents[p.id]);
+    const realDt = dt;
+    dt *= this.timeScale();
+    this.stats.timeSurvived += realDt;
+    for (const p of this.players) this.updatePlayer(p, dt, realDt, intents[p.id]);
     this.updateWaves(dt);
     for (const e of this.enemies) this.updateEnemy(e, dt);
     this.separateEnemies();
@@ -124,14 +139,15 @@ export class World {
     }
   }
 
-  private updatePlayer(p: PlayerState, dt: number, intent: PlayerIntent | undefined): void {
+  private updatePlayer(p: PlayerState, dt: number, realDt: number, intent: PlayerIntent | undefined): void {
     if (!p.alive) return;
-    p.stunRemaining = Math.max(0, p.stunRemaining - dt);
+    p.stunRemaining = Math.max(0, p.stunRemaining - realDt);
+    p.hitStunRemaining = Math.max(0, p.hitStunRemaining - dt);
     p.invulnRemaining = Math.max(0, p.invulnRemaining - dt);
     for (let i = 0; i < p.cooldowns.length; i++) p.cooldowns[i] = Math.max(0, p.cooldowns[i] - dt);
     if (!intent) return;
     p.aim = intent.aim;
-    const stunned = p.stunRemaining > 0;
+    const stunned = p.stunRemaining > 0 || p.hitStunRemaining > 0;
 
     if (!stunned) {
       const len = Math.hypot(intent.move.x, intent.move.y);
@@ -170,6 +186,7 @@ export class World {
       vy: dy * spell.projectileSpeed,
       radius: spell.radius,
       damage: spell.damage * this.cfg.player.damageDealtMult,
+      stun: 0,
       ttl: PROJECTILE_TTL,
       color: spell.color,
     });
@@ -180,12 +197,13 @@ export class World {
     const w = this.wave;
     w.timer -= dt;
     if (w.phase === 'break') {
-      if (w.timer > 0) return;
-      w.round++;
-      w.phase = 'active';
-      w.queue = buildWaveQueue(this.cfg, w.round, this.rng);
-      w.timer = 0;
-      this.events.push({ type: 'roundStart', round: w.round });
+      if (w.timer <= 0) this.startRound();
+      return;
+    }
+    w.roundTimeLeft -= dt;
+    if (w.roundTimeLeft <= 0) {
+      // Out of time: the next wave arrives on top of whatever is still alive.
+      this.startRound();
       return;
     }
     if (w.queue.length > 0) {
@@ -198,6 +216,17 @@ export class World {
       w.phase = 'break';
       w.timer = this.cfg.waves.breakSeconds;
     }
+  }
+
+  private startRound(): void {
+    const w = this.wave;
+    w.round++;
+    w.phase = 'active';
+    // Unspawned enemies from a timed-out round still come, after the new wave's.
+    w.queue = [...w.queue, ...buildWaveQueue(this.cfg, w.round, this.rng)];
+    w.timer = 0;
+    w.roundTimeLeft = roundTimeLimit(this.cfg, w.round);
+    this.events.push({ type: 'roundStart', round: w.round });
   }
 
   private spawnEnemy(kind: EnemyKind): void {
@@ -274,6 +303,14 @@ export class World {
         mx = -uy * e.strafe * 0.5;
         my = ux * e.strafe * 0.5;
       }
+      const [sx, sy] = this.casterSeparation(e);
+      mx += sx;
+      my += sy;
+      const len = Math.hypot(mx, my);
+      if (len > 1) {
+        mx /= len;
+        my /= len;
+      }
       e.x = clamp(e.x + mx * e.speed * dt, e.radius, this.width - e.radius);
       e.y = clamp(e.y + my * e.speed * dt, e.radius, this.height - e.radius);
       if (e.attackTimer <= 0 && dist < range * 1.3) {
@@ -288,12 +325,42 @@ export class World {
           vy: uy * speed,
           radius: 6,
           damage: e.damage,
+          stun: this.cfg.enemies.caster.stunSeconds,
           ttl: PROJECTILE_TTL * 2,
           color: '#ff4d6d',
         });
         e.attackTimer = this.cfg.enemies.caster.fireInterval;
       }
     }
+  }
+
+  /**
+   * Steering away from nearby casters: each caster within `spacing` pushes with a strength
+   * that grows as they get closer, so casters spread out around the player.
+   */
+  private casterSeparation(e: EnemyState): [number, number] {
+    const spacing = this.cfg.enemies.caster.spacing;
+    if (spacing <= 0) return [0, 0];
+    let sx = 0;
+    let sy = 0;
+    for (const other of this.enemies) {
+      if (other === e || other.kind !== 'caster') continue;
+      const dx = e.x - other.x;
+      const dy = e.y - other.y;
+      const d = Math.hypot(dx, dy);
+      if (d >= spacing) continue;
+      const strength = (1 - d / spacing) * SEPARATION_STRENGTH;
+      if (d < 0.01) {
+        // Exactly on top of each other: split using ids so the two pick opposite directions.
+        const angle = e.id * 2.39996;
+        sx += Math.cos(angle) * strength;
+        sy += Math.sin(angle) * strength;
+      } else {
+        sx += (dx / d) * strength;
+        sy += (dy / d) * strength;
+      }
+    }
+    return [sx, sy];
   }
 
   /** Push overlapping enemies apart so they don't stack into one blob. */
@@ -351,16 +418,20 @@ export class World {
   private hitPlayer(pr: ProjectileState): boolean {
     const target = this.players.find((p) => p.alive && overlaps(pr, p));
     if (!target) return false;
-    this.damagePlayer(target, pr.damage);
+    this.damagePlayer(target, pr.damage, pr.stun);
     return true;
   }
 
-  private damagePlayer(p: PlayerState, rawDamage: number): void {
+  private damagePlayer(p: PlayerState, rawDamage: number, stunSeconds = 0): void {
     if (!p.alive || p.invulnRemaining > 0) return;
     const amount = rawDamage * this.cfg.player.damageTakenMult;
     p.hp = Math.max(0, p.hp - amount);
     p.invulnRemaining = this.cfg.player.invulnAfterHit;
     this.events.push({ type: 'playerHit', playerId: p.id, amount });
+    if (stunSeconds > 0) {
+      p.hitStunRemaining = Math.max(p.hitStunRemaining, stunSeconds);
+      this.events.push({ type: 'hitStunned', playerId: p.id, seconds: stunSeconds });
+    }
     if (p.hp <= 0) {
       p.alive = false;
       this.events.push({ type: 'playerDied', playerId: p.id });

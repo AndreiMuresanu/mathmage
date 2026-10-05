@@ -344,8 +344,28 @@ code {
   color: #7df9ff;
 }
 
-.slot-hint.locked {
+.slot-odds {
+  padding: 0 0.6em;
+  font-size: 0.85em;
+  color: var(--muted);
+}
+
+.hud-slots.locked {
   opacity: 0.35;
+}
+
+/* Question type label colored by tier (first type = easiest). */
+.qwin-title[data-tier='0'] {
+  color: var(--good);
+}
+
+.qwin-title[data-tier='1'] {
+  color: var(--warn);
+}
+
+.qwin-title[data-tier='2'],
+.qwin-title[data-tier='3'] {
+  color: var(--bad);
 }
 
 /* ---------- Question window ---------- */
@@ -452,8 +472,18 @@ code {
   background: var(--warn);
 }
 
-.stun-countdown {
+.stun-header {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
   margin-top: 0.4em;
+}
+
+.stun-pause {
+  justify-self: end;
+}
+
+.stun-countdown {
   text-align: center;
   font-size: 1.3em;
   font-weight: 700;
@@ -477,6 +507,11 @@ code {
   text-transform: uppercase;
   letter-spacing: 0.06em;
   color: var(--muted);
+}
+
+.stun-reveal {
+  display: block;
+  margin: 0.8em auto 0.2em;
 }
 
 .stun-answer {
@@ -749,4 +784,70 @@ code {
   padding: 0.3em 0.5em;
   text-align: left;
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+/* ---------- Pause ---------- */
+
+.pause-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(5, 5, 12, 0.45);
+  pointer-events: none !important;
+}
+
+.pause-banner {
+  position: absolute;
+  top: 3.5em;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 0.8em 1.4em;
+  text-align: center;
+  pointer-events: auto;
+}
+
+.pause-banner h2 {
+  margin: 0 0 0.5em;
+  color: var(--accent);
+}
+
+/* Hidden while paused so a pause can't be used as free thinking time. */
+.qwin.suspended {
+  display: none;
+}
+
+/* ---------- Question time limit ---------- */
+
+.qwin-timer {
+  margin-left: auto;
+  margin-right: 0.8em;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--muted);
+}
+
+.qwin-timer.urgent,
+.question-timer.urgent {
+  color: var(--bad);
+}
+
+.qwin-timer-bar {
+  height: 3px;
+  margin-top: -0.3em;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.qwin-timer-fill {
+  height: 100%;
+  background: var(--accent);
+}
+
+.qwin-timer-bar.urgent .qwin-timer-fill {
+  background: var(--bad);
+}
+
+.question-timer {
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
 }

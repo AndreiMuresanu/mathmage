@@ -26,7 +26,7 @@ export interface ObjectGroupDef {
 export interface ListGroupDef {
   kind: 'list';
   title: string;
-  path: 'spells' | 'questionSlots';
+  path: 'spells' | 'questionTypes';
   itemTitle: string;
   maxItems: number;
   fields: FieldDef[];
@@ -39,8 +39,6 @@ const num = (key: string, label: string, min: number, max: number, step: number,
 });
 const bool = (key: string, label: string, help?: string): FieldDef => ({ key, label, type: 'boolean', help });
 
-/** Keys for question slots, assigned by position. */
-export const SLOT_KEYS = ['KeyZ', 'KeyX', 'KeyC', 'KeyV'];
 
 export const CONFIG_GROUPS: GroupDef[] = [
   {
@@ -76,15 +74,17 @@ export const CONFIG_GROUPS: GroupDef[] = [
   },
   {
     kind: 'list',
-    title: 'Question slots',
-    path: 'questionSlots',
-    itemTitle: 'Slot',
-    maxItems: SLOT_KEYS.length,
+    title: 'Question types',
+    path: 'questionTypes',
+    itemTitle: 'Question type',
+    maxItems: 8,
     fields: [
       { key: 'label', label: 'Label', type: 'text' },
+      num('weight', 'Chance weight', 0, 1000, 0.5, 'Relative odds of this type when Space draws a new question. Weights 6 / 3 / 1 = 60% / 30% / 10%.'),
       num('manaReward', 'Mana for a correct answer', 0, 10000, 1),
       num('stunSeconds', 'Stun on a wrong answer (s)', 0, 120, 0.5),
       bool('autoNextOnCorrect', 'Next question right after a correct answer'),
+      num('timeLimit', 'Time limit (s)', 0, 600, 1, 'Fail and get stunned if not answered in time. The clock keeps running while the window is closed; 0 = no limit.'),
     ],
   },
   {
@@ -107,11 +107,28 @@ export const CONFIG_GROUPS: GroupDef[] = [
   },
   {
     kind: 'object',
+    title: 'Medium questions',
+    path: 'medium',
+    fields: [
+      bool('linearEquations', 'Linear equations', 'Solve 7x - 12 = 30, or x on both sides.'),
+      bool('percentages', 'Percentages', '15% of 240; 36 is 15% of what?'),
+      bool('powersAndRoots', 'Powers and roots', '17², √324, 2⁹, 3⁵, ∛343'),
+      bool('fractions', 'Fractions', 'Add, subtract or multiply two fractions.'),
+      bool('bigMultiplication', 'Multi-digit multiplication', '47 × 38, 356 × 7'),
+      bool('orderOfOperations', 'Order of operations', '5 + 3 × 4², 2 × (−3)² − 4²'),
+      bool('averages', 'Averages', 'Mean of a list, or the missing number for a given mean.'),
+      bool('quadraticRoots', 'Quadratic roots', 'Larger solution of x² − 5x + 6 = 0'),
+    ],
+  },
+  {
+    kind: 'object',
     title: 'Stun',
     path: 'stun',
     fields: [
       bool('blocksCasting', 'Stun blocks casting'),
       bool('showSolution', 'Show the solution while stunned'),
+      bool('autoRevealSolution', 'Reveal the solution automatically', 'Off: the correct answer and steps stay hidden until you click "Show solution".'),
+      num('slowMotion', 'Game speed while reading the solution', 0, 1, 0.05, '1 = normal speed, 0.3 = slow motion, 0 = frozen. The stun countdown always runs in real time.'),
     ],
   },
   {
@@ -146,7 +163,9 @@ export const CONFIG_GROUPS: GroupDef[] = [
       num('damage', 'Projectile damage', 0, 1000, 1),
       num('radius', 'Size (radius)', 4, 64, 1),
       num('fireInterval', 'Time between shots (s)', 0.1, 20, 0.1),
+      num('stunSeconds', 'Stun when hit (s)', 0, 10, 0.1, 'Roots the player; does not close the question window.'),
       num('range', 'Preferred range', 50, 1200, 10),
+      num('spacing', 'Spacing from other casters', 0, 600, 10, 'Casters steer away from each other inside this distance. 0 = no spreading.'),
       num('projectileSpeed', 'Projectile speed', 20, 2000, 10),
     ],
   },
@@ -161,6 +180,8 @@ export const CONFIG_GROUPS: GroupDef[] = [
       num('damageGrowthPerRound', 'Enemy damage growth per round', 0, 5, 0.01),
       num('firstWaveDelay', 'Delay before round 1 (s)', 0, 120, 0.5),
       num('breakSeconds', 'Break between rounds (s)', 0, 120, 0.5),
+      num('roundTimeLimit', 'Round time limit (s)', 0, 600, 1, 'The next wave starts after this long even if enemies are left. 0 = only when all enemies are dead.'),
+      num('roundTimeGrowth', 'Extra time per round (s)', 0, 60, 0.5, 'Added to the time limit each round: round N gets limit + growth × (N − 1).'),
       num('spawnInterval', 'Time between spawns (s)', 0, 10, 0.05),
       num('casterStartRound', 'Casters appear from round', 1, 100, 1),
       num('casterFraction', 'Fraction of casters', 0, 1, 0.05),

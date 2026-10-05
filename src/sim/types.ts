@@ -26,7 +26,10 @@ export interface PlayerState {
   selectedSpell: number;
   /** Remaining cooldown per spell, in seconds. */
   cooldowns: number[];
+  /** Stun from a wrong answer: rooted and can't open questions. */
   stunRemaining: number;
+  /** Short stun from enemy projectiles: rooted only. */
+  hitStunRemaining: number;
   invulnRemaining: number;
   alive: boolean;
 }
@@ -59,6 +62,8 @@ export interface ProjectileState {
   vy: number;
   radius: number;
   damage: number;
+  /** Seconds of hit-stun applied to a player on impact. */
+  stun: number;
   ttl: number;
   color: string;
 }
@@ -70,9 +75,11 @@ export interface WaveState {
   timer: number;
   /** Enemies still to spawn this round. */
   queue: EnemyKind[];
+  /** Active: seconds until the next wave starts regardless of survivors (Infinity = no limit). */
+  roundTimeLeft: number;
 }
 
-export interface SlotStats {
+export interface QuestionTypeStats {
   attempts: number;
   correct: number;
   manaEarned: number;
@@ -83,7 +90,8 @@ export interface MatchStats {
   timeSurvived: number;
   manaSpent: number;
   damageDealt: number;
-  slots: SlotStats[];
+  /** Indexed like cfg.questionTypes. */
+  questionTypes: QuestionTypeStats[];
 }
 
 export type SimEvent =
@@ -92,6 +100,7 @@ export type SimEvent =
   | { type: 'mana'; playerId: string; amount: number }
   | { type: 'stunned'; playerId: string; seconds: number }
   | { type: 'playerHit'; playerId: string; amount: number }
+  | { type: 'hitStunned'; playerId: string; seconds: number }
   | { type: 'playerDied'; playerId: string }
   | { type: 'enemyHit'; enemyId: number; x: number; y: number; amount: number }
   | { type: 'enemyDied'; x: number; y: number; kind: EnemyKind }

@@ -16,7 +16,7 @@ preloadMathFonts();
 
 const uiRoot = document.getElementById('ui-root')!;
 let config: GameConfig = loadCurrentConfig();
-const registry = new QuestionRegistry(() => config.arithmetic);
+const registry = new QuestionRegistry(() => config);
 
 const game = new Phaser.Game({
   type: Phaser.AUTO,

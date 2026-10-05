@@ -6,6 +6,12 @@ export function enemyCount(cfg: GameConfig, round: number): number {
   return Math.max(1, Math.round(cfg.waves.baseCount + cfg.waves.countGrowth * (round - 1)));
 }
 
+/** Time limit for a round before the next one starts anyway; Infinity when disabled. */
+export function roundTimeLimit(cfg: GameConfig, round: number): number {
+  if (cfg.waves.roundTimeLimit <= 0) return Infinity;
+  return cfg.waves.roundTimeLimit + cfg.waves.roundTimeGrowth * (round - 1);
+}
+
 export function hpScale(cfg: GameConfig, round: number): number {
   return cfg.enemies.hpMult * (1 + cfg.waves.hpGrowthPerRound * (round - 1));
 }
