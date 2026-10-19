@@ -114,6 +114,20 @@ export class Hud {
     setTimeout(() => pop.remove(), 900);
   }
 
+  /** Screen (client) coordinates of the end of the mana bar's fill — where mana orbs fly to. */
+  manaFillEnd(): { x: number; y: number } {
+    const fill = this.mana.fill.getBoundingClientRect();
+    const bar = this.mana.el.getBoundingClientRect();
+    return { x: Math.max(fill.right, bar.left + 4), y: bar.top + bar.height / 2 };
+  }
+
+  /** Brief glow on the mana bar as an orb is absorbed. */
+  pulseMana(): void {
+    this.mana.el.classList.remove('absorb');
+    void this.mana.el.offsetWidth; // restart the animation
+    this.mana.el.classList.add('absorb');
+  }
+
   showNoMana(): void {
     this.mana.el.classList.remove('shake');
     void this.mana.el.offsetWidth; // restart the animation

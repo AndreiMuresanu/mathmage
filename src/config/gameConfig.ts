@@ -3,8 +3,12 @@
  * before each match (see configSchema.ts for labels and ranges).
  */
 
+export type SpellKind = 'projectile' | 'laser';
+
 export interface SpellConfig {
   name: string;
+  /** projectile: a moving bolt that hits the first enemy. laser: an instant beam that hits every enemy along it. */
+  kind: SpellKind;
   manaCost: number;
   damage: number;
   projectileSpeed: number;
@@ -12,6 +16,10 @@ export interface SpellConfig {
   cooldown: number;
   radius: number;
   color: string;
+  /** On hitting the first enemy, damage every enemy within this radius of the impact (0 = single target). */
+  explosionRadius: number;
+  /** Laser only: how far the beam reaches. */
+  beamLength: number;
 }
 
 export interface SlotSource {
@@ -113,11 +121,15 @@ export interface GameConfig {
     autoRevealSolution: boolean;
     /** Game speed while reading the solution after a wrong answer (1 = normal, 0 = frozen). */
     slowMotion: number;
+    /** Skipping a question stuns for the question type's stun length × this. */
+    skipStunMultiplier: number;
   };
   enemies: {
     hpMult: number;
     damageMult: number;
     speedMult: number;
+    /** Casters spread out to evenly spaced angles around the player instead of all coming from one side. */
+    surround: boolean;
     chaser: ChaserConfig;
     caster: CasterConfig;
   };
@@ -155,8 +167,9 @@ export const DEFAULT_CONFIG: GameConfig = {
     invulnAfterHit: 0.2,
   },
   spells: [
-    { name: 'Spark', manaCost: 1, damage: 10, projectileSpeed: 650, cooldown: 0.2, radius: 5, color: '#7df9ff' },
-    { name: 'Fireball', manaCost: 5, damage: 55, projectileSpeed: 450, cooldown: 0.6, radius: 10, color: '#ff7b3a' },
+    { name: 'Spark', kind: 'projectile', manaCost: 1, damage: 10, projectileSpeed: 650, cooldown: 0.2, radius: 5, color: '#7df9ff', explosionRadius: 0, beamLength: 0 },
+    { name: 'Fireball', kind: 'projectile', manaCost: 3, damage: 55, projectileSpeed: 450, cooldown: 0.6, radius: 10, color: '#ff7b3a', explosionRadius: 150, beamLength: 0 },
+    { name: 'Laser', kind: 'laser', manaCost: 3, damage: 30, projectileSpeed: 0, cooldown: 0.8, radius: 12, color: '#b6ff3a', explosionRadius: 0, beamLength: 900 },
   ],
   questionTypes: [
     {
@@ -215,16 +228,18 @@ export const DEFAULT_CONFIG: GameConfig = {
     showSolution: true,
     autoRevealSolution: false,
     slowMotion: 0.3,
+    skipStunMultiplier: 0.5,
   },
   enemies: {
     hpMult: 1,
     damageMult: 1,
     speedMult: 1,
+    surround: true,
     chaser: { hp: 10, speed: 50, damage: 5, radius: 14, attackCooldown: 0.8 },
-    caster: { hp: 20, speed: 70, damage: 4, radius: 13, fireInterval: 2.2, stunSeconds: 0.1, range: 320, spacing: 140, projectileSpeed: 350 },
+    caster: { hp: 10, speed: 70, damage: 4, radius: 13, fireInterval: 2.2, stunSeconds: 0.1, range: 320, spacing: 140, projectileSpeed: 350 },
   },
   waves: {
-    baseCount: 6,
+    baseCount: 12,
     countGrowth: 4,
     hpGrowthPerRound: 0.0,
     damageGrowthPerRound: 0.05,
@@ -234,7 +249,7 @@ export const DEFAULT_CONFIG: GameConfig = {
     roundTimeGrowth: 2,
     spawnInterval: 0.6,
     casterStartRound: 2,
-    casterFraction: 0.5,
+    casterFraction: 0.3,
   },
 };
 
@@ -249,11 +264,15 @@ export function cloneConfig(config: GameConfig): GameConfig {
 export function mergeWithDefaults(partial: unknown, defaults: unknown = DEFAULT_CONFIG): any {
   if (Array.isArray(defaults)) {
     if (!Array.isArray(partial)) return structuredClone(defaults);
-    // Arrays of objects (spells, question types): merge each element with the first default as a template.
-    const template = defaults[0];
-    return partial.map((item) =>
-      template && typeof template === 'object' ? mergeWithDefaults(item, template) : item,
-    );
+    // Arrays of objects (spells, question types): fill each element from the default with the same
+    // name/label (so a saved "Fireball" gets Fireball's new fields), else from the first default.
+    const identity = (x: unknown) =>
+      x && typeof x === 'object' ? ((x as Record<string, unknown>).name ?? (x as Record<string, unknown>).label) : undefined;
+    return partial.map((item) => {
+      const id = identity(item);
+      const template = (id !== undefined && defaults.find((d) => identity(d) === id)) || defaults[0];
+      return template && typeof template === 'object' ? mergeWithDefaults(item, template) : item;
+    });
   }
   if (defaults && typeof defaults === 'object') {
     const src = partial && typeof partial === 'object' ? (partial as Record<string, unknown>) : {};

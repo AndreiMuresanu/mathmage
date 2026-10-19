@@ -19,12 +19,12 @@ export function createMainMenu(actions: { play(): void; configure(): void; decks
       h(
         'div.controls-help',
         {},
-        h('div', {}, h('span.key', {}, 'WASD'), ' move'),
+        h('div', {}, h('span.key', {}, 'WASD'), ' or ', h('span.key', {}, 'Arrow keys'), ' move'),
         h('div', {}, h('span.key', {}, 'Mouse'), ' aim · hold left click to cast'),
         h('div', {}, h('span.key', {}, '1'), h('span.key', {}, '2'), ' select spell'),
         h('div', {}, h('span.key', {}, 'Space'), ' open / close a question (mostly easy, sometimes hard)'),
-        h('div', {}, 'Click the answer field to type · ', h('span.key', {}, 'Enter'), ' submit · ', h('span.key', {}, 'Esc'), ' close'),
-        h('div', {}, h('span.key', {}, 'P'), ' pause'),
+        h('div', {}, 'Click the answer field to type · ', h('span.key', {}, 'Enter'), ' submit'),
+        h('div', {}, h('span.key', {}, 'P'), ' or ', h('span.key', {}, 'Esc'), ' pause'),
       ),
     ),
   );

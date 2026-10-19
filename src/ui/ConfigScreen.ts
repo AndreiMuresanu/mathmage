@@ -48,6 +48,19 @@ export function createConfigScreen(opts: ConfigScreenOptions): HTMLDivElement {
         target[field.key] = input.checked;
         onChange();
       });
+    } else if (field.type === 'select') {
+      const select = h('select', {}, ...(field.options ?? []).map(([v, label]) => h('option', { value: v, textContent: label })));
+      select.value = String(value);
+      select.addEventListener('change', () => {
+        target[field.key] = select.value;
+        onChange();
+      });
+      return h(
+        'label.field',
+        { title: field.help ?? '' },
+        h('span.field-label', {}, field.label, field.help ? h('span.help', {}, ' ⓘ') : null),
+        select,
+      );
     } else if (field.type === 'number') {
       input = h('input', { type: 'number', value: String(value) });
       if (field.min !== undefined) input.min = String(field.min);

@@ -3,7 +3,7 @@
  * so a new tunable only needs a field in GameConfig/DEFAULT_CONFIG plus one line here.
  */
 
-export type FieldType = 'number' | 'boolean' | 'text' | 'color';
+export type FieldType = 'number' | 'boolean' | 'text' | 'color' | 'select';
 
 export interface FieldDef {
   key: string;
@@ -13,6 +13,8 @@ export interface FieldDef {
   max?: number;
   step?: number;
   help?: string;
+  /** For 'select': [value, label] pairs. */
+  options?: [string, string][];
 }
 
 export interface ObjectGroupDef {
@@ -64,11 +66,20 @@ export const CONFIG_GROUPS: GroupDef[] = [
     maxItems: 9,
     fields: [
       { key: 'name', label: 'Name', type: 'text' },
+      {
+        key: 'kind',
+        label: 'Type',
+        type: 'select',
+        options: [['projectile', 'Projectile'], ['laser', 'Laser (instant line)']],
+        help: 'Projectile: a bolt that hits the first enemy (or explodes). Laser: an instant beam that hits every enemy along it.',
+      },
       num('manaCost', 'Mana cost', 0, 1000, 1),
       num('damage', 'Damage', 0, 10000, 1),
-      num('projectileSpeed', 'Projectile speed', 50, 3000, 10),
+      num('projectileSpeed', 'Projectile speed', 0, 3000, 10, 'Projectiles only.'),
       num('cooldown', 'Cooldown (s)', 0, 10, 0.05),
-      num('radius', 'Projectile radius', 1, 64, 1),
+      num('radius', 'Projectile radius / beam half-width', 1, 64, 1),
+      num('explosionRadius', 'Explosion radius', 0, 600, 5, 'Explodes on the first enemy hit, dealing full damage to every enemy within this radius. 0 = hits one enemy only. Projectiles only.'),
+      num('beamLength', 'Beam length', 0, 3000, 10, 'Lasers only: how far the beam reaches.'),
       { key: 'color', label: 'Color', type: 'color' },
     ],
   },
@@ -128,6 +139,7 @@ export const CONFIG_GROUPS: GroupDef[] = [
       bool('blocksCasting', 'Stun blocks casting'),
       bool('showSolution', 'Show the solution while stunned'),
       bool('autoRevealSolution', 'Reveal the solution automatically', 'Off: the correct answer and steps stay hidden until you click "Show solution".'),
+      num('skipStunMultiplier', 'Skip stun multiplier', 0, 2, 0.05, 'Skipping a question stuns for the stun length × this (0.5 = half as long as a wrong answer).'),
       num('slowMotion', 'Game speed while reading the solution', 0, 1, 0.05, '1 = normal speed, 0.3 = slow motion, 0 = frozen. The stun countdown always runs in real time.'),
     ],
   },
@@ -139,6 +151,7 @@ export const CONFIG_GROUPS: GroupDef[] = [
       num('hpMult', 'Enemy HP ×', 0.05, 50, 0.05),
       num('damageMult', 'Enemy damage ×', 0, 50, 0.05),
       num('speedMult', 'Enemy speed ×', 0.05, 10, 0.05),
+      bool('surround', 'Casters surround the player', 'Casters spread out to evenly spaced angles around the player instead of all coming from one side.'),
     ],
   },
   {

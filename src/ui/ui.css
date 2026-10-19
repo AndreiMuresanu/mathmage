@@ -248,6 +248,17 @@ code {
   }
 }
 
+.bar.absorb {
+  animation: absorb 0.25s ease-out;
+}
+
+@keyframes absorb {
+  from {
+    box-shadow: 0 0 14px rgba(125, 249, 255, 0.95);
+    border-color: #7df9ff;
+  }
+}
+
 .bar.shake {
   animation: shake 0.3s;
 }
@@ -429,8 +440,27 @@ code {
 }
 
 .qwin-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.6em;
   font-size: 0.8em;
   color: var(--muted);
+}
+
+.qwin-footer .qwin-skip {
+  padding: 0.35em 1.1em;
+  font-size: 1.15em;
+  font-weight: 600;
+  color: #fff;
+  background: rgba(255, 92, 92, 0.25);
+  border-color: var(--bad);
+}
+
+.qwin-footer .qwin-skip:hover {
+  background: rgba(255, 92, 92, 0.45);
+  border-color: #ff8a8a;
+  color: #fff;
 }
 
 .qwin.correct-flash {

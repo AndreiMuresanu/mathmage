@@ -1,6 +1,7 @@
 import { answerDisplay, type Question } from '../questions/types';
 import { h } from './dom';
 import { renderRich } from './markup';
+import type { ResultOutcome } from './QuestionWindow';
 
 /** Shown while stunned after a wrong answer: countdown, correct answer, and worked solution. */
 export class StunPanel {
@@ -9,7 +10,7 @@ export class StunPanel {
   private timerFill = h('div.stun-timer-fill');
   private body = h('div.stun-body');
   private title = h('div.stun-title', {}, 'Wrong answer!');
-  private pauseButton = h('button.small.stun-pause', { textContent: 'Pause (P)' });
+  private pauseButton = h('button.small.stun-pause', { textContent: 'Pause (P / Esc)' });
   private total = 1;
 
   constructor(onPauseClick: () => void) {
@@ -29,17 +30,24 @@ export class StunPanel {
   }
 
   setPaused(paused: boolean): void {
-    this.pauseButton.textContent = paused ? 'Resume (P)' : 'Pause (P)';
+    this.pauseButton.textContent = paused ? 'Resume (P / Esc)' : 'Pause (P / Esc)';
   }
 
   /**
    * @param showSolution whether the solution is available at all
    * @param autoReveal show it immediately instead of behind a "Show solution" button
-   * @param timedOut the player ran out of time rather than answering wrong
+   * @param outcome why the question failed: a wrong answer, the time limit, or a skip
    */
-  show(question: Question, given: string, seconds: number, showSolution: boolean, autoReveal: boolean, timedOut = false): void {
+  show(
+    question: Question,
+    given: string,
+    seconds: number,
+    showSolution: boolean,
+    autoReveal: boolean,
+    outcome: ResultOutcome = 'answered',
+  ): void {
     this.total = Math.max(seconds, 0.001);
-    this.title.textContent = timedOut ? "Time's up!" : 'Wrong answer!';
+    this.title.textContent = outcome === 'timeout' ? "Time's up!" : outcome === 'skipped' ? 'Skipped' : 'Wrong answer!';
     this.body.replaceChildren();
     if (showSolution) {
       const intro: string[] = [`<div class="stun-section"><div class="label">Question</div>${renderRich(question.prompt)}</div>`];

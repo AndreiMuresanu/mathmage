@@ -4,6 +4,12 @@ import type { Question } from '../questions/types';
 import { h } from './dom';
 import { renderRich } from './markup';
 
+/** Typing this (any case) always counts as a correct answer — a testing shortcut. */
+const TEST_ANSWER = 'andrei';
+
+/** How a question ended: answered (right or wrong), ran out of time, or skipped by the player. */
+export type ResultOutcome = 'answered' | 'timeout' | 'skipped';
+
 export interface DrawnQuestion {
   typeIndex: number;
   question: Question;
@@ -14,14 +20,16 @@ export interface QuestionWindowDeps {
   /** Draw a fresh question: a weighted-random type, then a question of that type. */
   draw(): DrawnQuestion | undefined;
   /** Called after an answer is judged (or time runs out); `given` is what the player typed. */
-  onResult(typeIndex: number, question: Question, correct: boolean, given: string, timedOut: boolean): void;
+  onResult(typeIndex: number, question: Question, correct: boolean, given: string, outcome: ResultOutcome): void;
   /** The game should stop reading keys while the answer field has focus. */
   onFocusChange(focused: boolean): void;
+  /** Esc pressed while typing (the game pauses). */
+  onEscape(): void;
 }
 
 /**
  * Translucent question panel. The answer field only receives keys once clicked; while focused,
- * every key goes to it (Enter submits, Esc closes). An unanswered question is kept when the
+ * every key goes to it (Enter submits, Esc pauses). An unanswered question is kept when the
  * window closes, so closing and reopening can't be used to reroll for an easier type.
  */
 export class QuestionWindow {
@@ -40,6 +48,10 @@ export class QuestionWindow {
     spellcheck: false,
     placeholder: 'Click here to type your answer',
   });
+  private skipButton = h('button.small.qwin-skip', {
+    textContent: 'Skip',
+    title: 'Give up on this question: counts as not answering it (no mana, stunned, solution shown).',
+  });
   private current: DrawnQuestion | undefined;
   /** Seconds left on the current question (Infinity = no limit). */
   private timeLeft = Infinity;
@@ -56,8 +68,12 @@ export class QuestionWindow {
       this.prompt,
       this.message,
       this.input,
-      h('div.qwin-footer', {}, 'Enter: submit · Esc / Space: close'),
+      h('div.qwin-footer', {}, h('span', {}, 'Enter: submit · Space: close · Esc: pause'), this.skipButton),
     );
+    this.skipButton.addEventListener('click', () => {
+      this.skipButton.blur(); // don't keep focus, or Space would "click" it again
+      this.skip();
+    });
     this.input.addEventListener('focus', () => deps.onFocusChange(true));
     this.input.addEventListener('blur', () => deps.onFocusChange(false));
     this.input.addEventListener('keydown', (e) => {
@@ -69,7 +85,10 @@ export class QuestionWindow {
         e.preventDefault();
         this.input.value = '';
       }
-      else if (e.key === 'Escape') this.close();
+      else if (e.key === 'Escape') {
+        this.blurInput();
+        this.deps.onEscape();
+      }
     });
   }
 
@@ -116,13 +135,26 @@ export class QuestionWindow {
     if (!drawn || !Number.isFinite(this.timeLeft)) return;
     this.timeLeft -= dt;
     if (this.timeLeft <= 0) {
-      this.current = undefined;
-      const given = this.open ? this.input.value : '';
-      this.close();
-      this.deps.onResult(drawn.typeIndex, drawn.question, false, given, true);
+      this.giveUp('timeout');
       return;
     }
     if (this.open) this.renderTimer();
+  }
+
+  /** Skip the current question: same as letting the time run out. */
+  skip(): void {
+    if (this.open && this.current) this.giveUp('skipped');
+  }
+
+  /** End the current question as not answered (no mana, stun + solution). */
+  private giveUp(outcome: 'timeout' | 'skipped'): void {
+    const drawn = this.current;
+    if (!drawn) return;
+    this.current = undefined;
+    this.timeLeft = Infinity;
+    const given = this.open ? this.input.value : '';
+    this.close();
+    this.deps.onResult(drawn.typeIndex, drawn.question, false, given, outcome);
   }
 
   private drawNext(): void {
@@ -157,6 +189,7 @@ export class QuestionWindow {
       : '<em>No question sources available. Pick some in Configure match → Question types.</em>';
     this.input.value = '';
     this.input.disabled = !drawn;
+    this.skipButton.disabled = !drawn;
     this.setMessage('');
     this.renderTimer();
   }
@@ -170,7 +203,8 @@ export class QuestionWindow {
     const drawn = this.current;
     if (!this.open || !drawn) return;
     const { typeIndex, question } = drawn;
-    const result = checkAnswer(question.answer, this.input.value);
+    // Testing shortcut: this answer is always accepted.
+    const result = this.input.value.trim().toLowerCase() === TEST_ANSWER ? 'correct' : checkAnswer(question.answer, this.input.value);
     if (result === 'invalid') {
       this.setMessage(
         question.answer.kind === 'numeric' ? "Couldn't read that as a number. Try e.g. 12, 3/2, sqrt(2), pi/4." : 'Type an answer first.',
@@ -180,7 +214,7 @@ export class QuestionWindow {
     const correct = result === 'correct';
     this.current = undefined;
     this.timeLeft = Infinity;
-    this.deps.onResult(typeIndex, question, correct, this.input.value, false);
+    this.deps.onResult(typeIndex, question, correct, this.input.value, 'answered');
     if (correct && this.deps.types[typeIndex].autoNextOnCorrect && this.open) {
       this.drawNext();
       this.render();

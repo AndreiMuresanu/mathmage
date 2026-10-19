@@ -12,6 +12,8 @@ import { StunPanel } from '../ui/StunPanel';
 export const LOCAL_PLAYER = 'local';
 /** Opens / closes the question window. */
 export const QUESTION_KEY = 'Space';
+/** Pause / resume. */
+export const PAUSE_KEYS = ['KeyP', 'Escape'];
 
 export interface MatchCallbacks {
   /** The answer field gained/lost focus: the scene should stop/resume reading game keys. */
@@ -44,13 +46,15 @@ export class Match {
     this.questions = new QuestionWindow({
       types: cfg.questionTypes,
       draw: () => registry.drawQuestion(cfg.questionTypes, questionRng),
-      onResult: (typeIndex, question, correct, given, timedOut) => {
-        this.world.answerQuestion(LOCAL_PLAYER, typeIndex, correct);
+      onResult: (typeIndex, question, correct, given, outcome) => {
+        const stunMultiplier = outcome === 'skipped' ? cfg.stun.skipStunMultiplier : 1;
+        this.world.answerQuestion(LOCAL_PLAYER, typeIndex, correct, stunMultiplier);
         if (!correct) {
-          this.stun.show(question, given, cfg.questionTypes[typeIndex].stunSeconds, cfg.stun.showSolution, cfg.stun.autoRevealSolution, timedOut);
+          this.stun.show(question, given, cfg.questionTypes[typeIndex].stunSeconds * stunMultiplier, cfg.stun.showSolution, cfg.stun.autoRevealSolution, outcome);
         }
       },
       onFocusChange: (focused) => callbacks.onTypingChange(focused),
+      onEscape: () => this.setPaused(true),
     });
     this.pauseOverlay = h(
       'div.pause-overlay.hidden',
@@ -62,7 +66,7 @@ export class Match {
         h(
           'div.button-row',
           {},
-          h('button.primary', { onclick: () => this.setPaused(false) }, 'Resume (P)'),
+          h('button.primary', { onclick: () => this.setPaused(false) }, 'Resume (P / Esc)'),
           h('button', { onclick: () => callbacks.exitToMenu() }, 'Main menu'),
         ),
       ),
@@ -77,21 +81,11 @@ export class Match {
   /** Keyboard action from the scene (never called while the answer field is focused). */
   onKey(code: string): void {
     if (this.world.over) return;
-    if (code === 'KeyP') {
-      this.togglePause();
-      return;
-    }
-    if (this._paused) {
-      if (code === 'Escape') this.setPaused(false);
-      return;
-    }
+    // Pause keys are handled directly by the scene's DOM listener.
+    if (PAUSE_KEYS.includes(code) || this._paused) return;
     const digit = /^Digit([1-9])$/.exec(code);
     if (digit) {
       this.world.selectSpell(LOCAL_PLAYER, Number(digit[1]) - 1);
-      return;
-    }
-    if (code === 'Escape') {
-      this.questions.close();
       return;
     }
     if (code === QUESTION_KEY && this.world.canAnswer(LOCAL_PLAYER)) this.questions.toggle();
@@ -116,6 +110,16 @@ export class Match {
     this.questions.setSuspended(paused);
     this.stun.setPaused(paused);
     this.pauseOverlay.classList.toggle('hidden', !paused);
+  }
+
+  /** Screen coordinates of the end of the mana bar's fill (target for mana orbs). */
+  manaBarTarget(): { x: number; y: number } {
+    return this.hud.manaFillEnd();
+  }
+
+  /** A mana orb reached the bar. */
+  manaOrbAbsorbed(): void {
+    this.hud.pulseMana();
   }
 
   get typing(): boolean {

@@ -1,4 +1,4 @@
-import { ARENA_HEIGHT, ARENA_WIDTH, type GameConfig } from '../config/gameConfig';
+import { ARENA_HEIGHT, ARENA_WIDTH, type GameConfig, type SpellConfig } from '../config/gameConfig';
 import { createRng, type Rng } from '../util/rng';
 import type {
   EnemyKind,
@@ -16,6 +16,8 @@ const SPAWN_MARGIN = 30;
 const PROJECTILE_TTL = 3;
 /** Delay before the "not enough mana" feedback can repeat while the cast button is held. */
 const NO_MANA_FEEDBACK_DELAY = 0.4;
+/** Overlap (px) tolerated when checking whether a player move ended up stuck inside an enemy. */
+const COLLISION_SLOP = 0.5;
 /** How strongly casters avoid each other relative to their other movement. */
 const SEPARATION_STRENGTH = 2;
 
@@ -36,6 +38,8 @@ export class World {
   over = false;
   /** Events since the last drainEvents() call. */
   private events: SimEvent[] = [];
+  /** This tick's surround angle per enemy id (empty when surrounding is off). */
+  private slots = new Map<number, number>();
   private nextId = 1;
 
   constructor(cfg: GameConfig, seed?: number, playerIds: string[] = ['local']) {
@@ -91,23 +95,27 @@ export class World {
     return !!p && p.alive && p.stunRemaining <= 0 && !this.over;
   }
 
-  /** Apply the result of an answered question. Returns the mana actually gained. */
-  answerQuestion(playerId: string, typeIndex: number, correct: boolean): number {
+  /**
+   * Apply the result of an answered question. Returns the mana actually gained.
+   * `stunMultiplier` scales the stun of a failed question (e.g. skips stun for less).
+   */
+  answerQuestion(playerId: string, typeIndex: number, correct: boolean, stunMultiplier = 1): number {
     const p = this.player(playerId);
     const type = this.cfg.questionTypes[typeIndex];
     if (!p || !type || !this.canAnswer(playerId)) return 0;
     const stats = this.stats.questionTypes[typeIndex];
     stats.attempts++;
     if (!correct) {
-      p.stunRemaining = type.stunSeconds;
-      this.events.push({ type: 'stunned', playerId, seconds: type.stunSeconds });
+      const seconds = type.stunSeconds * Math.max(0, stunMultiplier);
+      p.stunRemaining = seconds;
+      this.events.push({ type: 'stunned', playerId, seconds });
       return 0;
     }
     stats.correct++;
     const gained = Math.max(0, Math.min(type.manaReward, p.maxMana - p.mana));
     p.mana += gained;
     stats.manaEarned += gained;
-    this.events.push({ type: 'mana', playerId, amount: gained });
+    this.events.push({ type: 'mana', playerId, amount: gained, typeIndex });
     return gained;
   }
 
@@ -130,8 +138,10 @@ export class World {
     this.stats.timeSurvived += realDt;
     for (const p of this.players) this.updatePlayer(p, dt, realDt, intents[p.id]);
     this.updateWaves(dt);
+    this.assignSurroundSlots();
     for (const e of this.enemies) this.updateEnemy(e, dt);
     this.separateEnemies();
+    this.pushEnemiesOutOfPlayers();
     this.updateProjectiles(dt);
     if (this.players.every((p) => !p.alive)) {
       this.over = true;
@@ -152,10 +162,8 @@ export class World {
     if (!stunned) {
       const len = Math.hypot(intent.move.x, intent.move.y);
       if (len > 0) {
-        p.x += (intent.move.x / len) * this.cfg.player.speed * dt;
-        p.y += (intent.move.y / len) * this.cfg.player.speed * dt;
-        p.x = clamp(p.x, p.radius, this.width - p.radius);
-        p.y = clamp(p.y, p.radius, this.height - p.radius);
+        const step = this.cfg.player.speed * dt;
+        this.movePlayer(p, (intent.move.x / len) * step, (intent.move.y / len) * step);
       }
     }
 
@@ -176,6 +184,11 @@ export class World {
     p.cooldowns[index] = spell.cooldown;
     const dx = Math.cos(p.aim);
     const dy = Math.sin(p.aim);
+    this.events.push({ type: 'cast', playerId: p.id, spell: index });
+    if (spell.kind === 'laser') {
+      this.fireLaser(p, spell, dx, dy);
+      return;
+    }
     this.projectiles.push({
       id: this.nextId++,
       team: 'player',
@@ -187,10 +200,23 @@ export class World {
       radius: spell.radius,
       damage: spell.damage * this.cfg.player.damageDealtMult,
       stun: 0,
+      explosionRadius: spell.explosionRadius,
       ttl: PROJECTILE_TTL,
       color: spell.color,
     });
-    this.events.push({ type: 'cast', playerId: p.id, spell: index });
+  }
+
+  /** Instant beam: damages every enemy the line touches, out to the beam length. */
+  private fireLaser(p: PlayerState, spell: SpellConfig, dx: number, dy: number): void {
+    const x1 = p.x + dx * p.radius;
+    const y1 = p.y + dy * p.radius;
+    const x2 = x1 + dx * spell.beamLength;
+    const y2 = y1 + dy * spell.beamLength;
+    const halfWidth = spell.radius;
+    this.events.push({ type: 'beam', x1, y1, x2, y2, width: halfWidth * 2, color: spell.color });
+    const damage = spell.damage * this.cfg.player.damageDealtMult;
+    const hit = this.enemies.filter((e) => distanceToSegment(e.x, e.y, x1, y1, x2, y2) <= e.radius + halfWidth);
+    for (const e of hit) this.damageEnemy(e, damage);
   }
 
   private updateWaves(dt: number): void {
@@ -278,6 +304,8 @@ export class World {
     const ux = dx / dist;
     const uy = dy / dist;
 
+    const slot = this.slots.get(e.id);
+
     if (e.kind === 'chaser') {
       const reach = e.radius + target.radius;
       if (dist > reach) {
@@ -293,7 +321,10 @@ export class World {
       const range = this.cfg.enemies.caster.range;
       let mx = 0;
       let my = 0;
-      if (dist > range) {
+      if (slot !== undefined) {
+        // Hold our evenly spaced spot on a ring at the preferred range.
+        [mx, my] = steerAround(e, target, slot, range);
+      } else if (dist > range) {
         mx = ux;
         my = uy;
       } else if (dist < range * 0.7) {
@@ -326,11 +357,45 @@ export class World {
           radius: 6,
           damage: e.damage,
           stun: this.cfg.enemies.caster.stunSeconds,
+          explosionRadius: 0,
           ttl: PROJECTILE_TTL * 2,
           color: '#ff4d6d',
         });
         e.attackTimer = this.cfg.enemies.caster.fireInterval;
       }
+    }
+  }
+
+  /**
+   * Give casters evenly spaced angles ("slots") around the player they target. Casters are sorted by their current angle and the ring is rotated to match
+   * where they already are, so each moves a short way and no two cross paths.
+   */
+  private assignSurroundSlots(): void {
+    this.slots.clear();
+    if (!this.cfg.enemies.surround) return;
+    const groups = new Map<string, { e: EnemyState; angle: number }[]>();
+    for (const e of this.enemies) {
+      if (e.kind !== 'caster') continue; // chasers just charge straight in
+      const target = this.nearestPlayer(e.x, e.y);
+      if (!target) continue;
+      const key = target.id;
+      let group = groups.get(key);
+      if (!group) groups.set(key, (group = []));
+      group.push({ e, angle: Math.atan2(e.y - target.y, e.x - target.x) });
+    }
+    for (const group of groups.values()) {
+      const n = group.length;
+      group.sort((a, b) => a.angle - b.angle);
+      // Circular mean of (angle_i - 2πi/n) = the ring rotation that best fits current positions.
+      let sx = 0;
+      let sy = 0;
+      group.forEach(({ angle }, i) => {
+        const a = angle - (2 * Math.PI * i) / n;
+        sx += Math.cos(a);
+        sy += Math.sin(a);
+      });
+      const offset = Math.atan2(sy, sx);
+      group.forEach(({ e }, i) => this.slots.set(e.id, offset + (2 * Math.PI * i) / n));
     }
   }
 
@@ -361,6 +426,54 @@ export class World {
       }
     }
     return [sx, sy];
+  }
+
+  /**
+   * Move a player, treating enemies as solid. Tries the full move, then each axis alone (so the
+   * player slides along enemies), and stays put if every option would end inside an enemy —
+   * e.g. a gap between two enemies that's narrower than the player.
+   */
+  private movePlayer(p: PlayerState, dx: number, dy: number): void {
+    const startX = p.x;
+    const startY = p.y;
+    for (const [mx, my] of [[dx, dy], [dx, 0], [0, dy]]) {
+      if (mx === 0 && my === 0) continue;
+      p.x = clamp(startX + mx, p.radius, this.width - p.radius);
+      p.y = clamp(startY + my, p.radius, this.height - p.radius);
+      this.pushPlayerOutOfEnemies(p);
+      if (!this.enemies.some((e) => overlapPush(e, p, COLLISION_SLOP))) return;
+    }
+    p.x = startX;
+    p.y = startY;
+  }
+
+  /** Enemies are solid: push a player out of any enemy it overlaps. */
+  private pushPlayerOutOfEnemies(p: PlayerState): void {
+    // A few passes so being wedged between several enemies still resolves.
+    for (let pass = 0; pass < 3; pass++) {
+      let moved = false;
+      for (const e of this.enemies) {
+        const push = overlapPush(e, p);
+        if (!push) continue;
+        p.x = clamp(p.x + push.x, p.radius, this.width - p.radius);
+        p.y = clamp(p.y + push.y, p.radius, this.height - p.radius);
+        moved = true;
+      }
+      if (!moved) return;
+    }
+  }
+
+  /** Players are solid too: enemies that moved (or were shoved) into a player are pushed back out. */
+  private pushEnemiesOutOfPlayers(): void {
+    for (const p of this.players) {
+      if (!p.alive) continue;
+      for (const e of this.enemies) {
+        const push = overlapPush(p, e);
+        if (!push) continue;
+        e.x = clamp(e.x + push.x, e.radius, this.width - e.radius);
+        e.y = clamp(e.y + push.y, e.radius, this.height - e.radius);
+      }
+    }
   }
 
   /** Push overlapping enemies apart so they don't stack into one blob. */
@@ -403,16 +516,28 @@ export class World {
   private hitEnemy(pr: ProjectileState): boolean {
     const target = this.enemies.find((e) => overlaps(pr, e));
     if (!target) return false;
-    const amount = Math.min(pr.damage, target.hp);
-    target.hp -= pr.damage;
-    this.stats.damageDealt += amount;
-    this.events.push({ type: 'enemyHit', enemyId: target.id, x: target.x, y: target.y, amount: pr.damage });
+    if (pr.explosionRadius > 0) {
+      // Explode at the impact point: every enemy touching the blast takes full damage.
+      const blast = { x: pr.x, y: pr.y, radius: pr.explosionRadius };
+      const caught = this.enemies.filter((e) => overlaps(blast, e));
+      const targets = caught.map((e) => ({ id: e.id, x: e.x, y: e.y, radius: e.radius }));
+      this.events.push({ type: 'explosion', ...blast, color: pr.color, targets });
+      for (const e of caught) this.damageEnemy(e, pr.damage);
+    } else {
+      this.damageEnemy(target, pr.damage);
+    }
+    return true;
+  }
+
+  private damageEnemy(target: EnemyState, damage: number): void {
+    this.stats.damageDealt += Math.min(damage, target.hp);
+    target.hp -= damage;
+    this.events.push({ type: 'enemyHit', enemyId: target.id, x: target.x, y: target.y, amount: damage });
     if (target.hp <= 0) {
       this.enemies = this.enemies.filter((e) => e !== target);
       this.stats.kills++;
       this.events.push({ type: 'enemyDied', x: target.x, y: target.y, kind: target.kind });
     }
-    return true;
   }
 
   private hitPlayer(pr: ProjectileState): boolean {
@@ -437,6 +562,74 @@ export class World {
       this.events.push({ type: 'playerDied', playerId: p.id });
     }
   }
+}
+
+/** Distance over which steering eases off, so enemies settle on their spot instead of jittering. */
+const STEER_EASE = 40;
+
+/** a − b wrapped to (−π, π]. */
+function angleDiff(a: number, b: number): number {
+  const d = a - b;
+  return Math.atan2(Math.sin(d), Math.cos(d));
+}
+
+/**
+ * Unit-ish steering toward the point at `angle` / `radius` around `center`, moving along the
+ * circle (radial + tangential components) so enemies walk around the player, not through them.
+ */
+function steerAround(
+  e: { x: number; y: number },
+  center: { x: number; y: number },
+  angle: number,
+  radius: number,
+): [number, number] {
+  const dx = e.x - center.x;
+  const dy = e.y - center.y;
+  const d = Math.hypot(dx, dy) || 1;
+  const rx = dx / d;
+  const ry = dy / d;
+  // Angular error, converted to an arc length below.
+  const delta = angleDiff(angle, Math.atan2(dy, dx));
+  const radial = Math.max(-1, Math.min(1, (radius - d) / STEER_EASE));
+  const tangential = Math.max(-1, Math.min(1, (delta * d) / STEER_EASE));
+  // Tangent direction (counter-clockwise) is (-ry, rx).
+  let mx = rx * radial - ry * tangential;
+  let my = ry * radial + rx * tangential;
+  const len = Math.hypot(mx, my);
+  if (len > 1) {
+    mx /= len;
+    my /= len;
+  }
+  return [mx, my];
+}
+
+/** Distance from point (px, py) to the segment (x1, y1)-(x2, y2). */
+function distanceToSegment(px: number, py: number, x1: number, y1: number, x2: number, y2: number): number {
+  const vx = x2 - x1;
+  const vy = y2 - y1;
+  const lengthSq = vx * vx + vy * vy;
+  const t = lengthSq === 0 ? 0 : Math.max(0, Math.min(1, ((px - x1) * vx + (py - y1) * vy) / lengthSq));
+  return Math.hypot(px - (x1 + t * vx), py - (y1 + t * vy));
+}
+
+/**
+ * How far to move `mover` so it no longer overlaps `obstacle` (along the line between their
+ * centers), or undefined if they don't overlap.
+ */
+function overlapPush(
+  obstacle: { x: number; y: number; radius: number },
+  mover: { x: number; y: number; radius: number },
+  slop = 0,
+): { x: number; y: number } | undefined {
+  const dx = mover.x - obstacle.x;
+  const dy = mover.y - obstacle.y;
+  const minDist = obstacle.radius + mover.radius - slop;
+  const d2 = dx * dx + dy * dy;
+  if (d2 >= minDist * minDist) return undefined;
+  const d = Math.sqrt(d2);
+  if (d < 1e-6) return { x: minDist, y: 0 }; // exactly on top: pick a direction
+  const overlap = minDist - d;
+  return { x: (dx / d) * overlap, y: (dy / d) * overlap };
 }
 
 function clamp(value: number, min: number, max: number): number {

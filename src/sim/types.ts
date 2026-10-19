@@ -64,6 +64,8 @@ export interface ProjectileState {
   damage: number;
   /** Seconds of hit-stun applied to a player on impact. */
   stun: number;
+  /** Area damage radius on impact (0 = single target). */
+  explosionRadius: number;
   ttl: number;
   color: string;
 }
@@ -97,13 +99,15 @@ export interface MatchStats {
 export type SimEvent =
   | { type: 'cast'; playerId: string; spell: number }
   | { type: 'noMana'; playerId: string }
-  | { type: 'mana'; playerId: string; amount: number }
+  | { type: 'mana'; playerId: string; amount: number; /** Question type answered (index into cfg.questionTypes). */ typeIndex: number }
   | { type: 'stunned'; playerId: string; seconds: number }
   | { type: 'playerHit'; playerId: string; amount: number }
   | { type: 'hitStunned'; playerId: string; seconds: number }
   | { type: 'playerDied'; playerId: string }
   | { type: 'enemyHit'; enemyId: number; x: number; y: number; amount: number }
   | { type: 'enemyDied'; x: number; y: number; kind: EnemyKind }
+  | { type: 'explosion'; x: number; y: number; radius: number; color: string; targets: { id: number; x: number; y: number; radius: number }[] }
+  | { type: 'beam'; x1: number; y1: number; x2: number; y2: number; width: number; color: string }
   | { type: 'roundStart'; round: number }
   | { type: 'roundCleared'; round: number }
   | { type: 'gameOver' };

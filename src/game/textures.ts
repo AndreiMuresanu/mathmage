@@ -3,6 +3,8 @@ import { ARENA_HEIGHT, ARENA_WIDTH } from '../config/gameConfig';
 
 /** Radius of the generated white circle texture; scale images by radius / CIRCLE_RADIUS. */
 export const CIRCLE_RADIUS = 32;
+/** Side length of the square "pixel" texture used for blocky fire and smoke particles. */
+export const BLOCK_SIZE = 8;
 
 /**
  * Generate the placeholder textures once (Graphics is costly to redraw every frame, so we bake
@@ -18,6 +20,11 @@ export function ensureTextures(scene: Phaser.Scene): void {
 
   g.lineStyle(4, 0xffffff, 1).strokeCircle(CIRCLE_RADIUS, CIRCLE_RADIUS, CIRCLE_RADIUS - 2);
   g.generateTexture('ring', CIRCLE_RADIUS * 2, CIRCLE_RADIUS * 2);
+  g.clear();
+
+  // Solid square "pixel" for blocky, retro-style fire and smoke particles.
+  g.fillStyle(0xffffff, 1).fillRect(0, 0, BLOCK_SIZE, BLOCK_SIZE);
+  g.generateTexture('block', BLOCK_SIZE, BLOCK_SIZE);
   g.clear();
 
   // Arena floor: dark background with a faint grid and a glowing border.
