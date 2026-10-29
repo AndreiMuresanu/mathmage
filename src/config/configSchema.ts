@@ -133,6 +133,23 @@ export const CONFIG_GROUPS: GroupDef[] = [
   },
   {
     kind: 'object',
+    title: 'Algebra tricks (solve for x)',
+    path: 'algebraTricks',
+    fields: [
+      bool('completeSquare', 'Completing the square', 'x² + 6x = 2; minimum of 2x² − 12x + 7; circle radius; factor x⁴ + 4'),
+      bool('substitution', 'Hidden quadratics (substitution)', 'x⁴ − 5x² + 4, 4ˣ − 6·2ˣ + 8, x − 5√x + 6, x^(2/3), x(x+1)(x+2)(x+3) = 24, palindromic quartics'),
+      bool('radicals', 'Square roots', 'Isolate and square (reject fake roots), conjugates, telescoping sums, rationalizing'),
+      bool('factoring', 'Factoring', 'Grouping, factor instead of dividing, rational roots, cube identities, factor/remainder theorem'),
+      bool('fractions', 'Fractions', 'Clear denominators and reject bad roots, partial-fraction cover-up, telescoping'),
+      bool('absoluteValue', 'Absolute values', 'Split into cases and check each; |A| = |B|; |x| as the unknown; integer counts'),
+      bool('exponentsLogs', 'Exponents and logs', 'Same base, combine logs, ln both sides, change of base, nested logs'),
+      bool('structural', 'Structural tricks', 'Sum and product, Vieta, sum of squares = 0, guess and prove, plug in x = 1, self-similar'),
+      bool('trig', 'Trig equations', 'Quadratics in sin/cos, a sin x + b cos x = R sin(x + φ), double angles'),
+      bool('rearranging', 'Rearranging formulas', 'Solve y = (2x+1)/(3x−4) for x (answer is an expression), inverse functions, initial conditions'),
+    ],
+  },
+  {
+    kind: 'object',
     title: 'Stun',
     path: 'stun',
     fields: [

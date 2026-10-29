@@ -7,8 +7,11 @@ export type AnswerSpec =
   | { kind: 'text'; accepted: string[]; caseSensitive?: boolean }
   /** Not yet supported by the UI. */
   | { kind: 'choice'; options: string[]; correct: number }
-  /** Not yet supported by the UI. */
-  | { kind: 'symbolic'; expr: string; variables: string[] };
+  /**
+   * An expression in `variables` (mathjs syntax), checked by evaluating the player's input and
+   * `expr` at sample points drawn from `ranges` (default [0.5, 3.5] per variable).
+   */
+  | { kind: 'symbolic'; expr: string; variables: string[]; ranges?: Record<string, [number, number]>; display?: string };
 
 export interface Question {
   id: string;
@@ -44,6 +47,6 @@ export function answerDisplay(answer: AnswerSpec): string {
     case 'choice':
       return answer.options[answer.correct];
     case 'symbolic':
-      return answer.expr;
+      return answer.display ?? answer.expr;
   }
 }

@@ -25,7 +25,7 @@ describe('drawQuestion', () => {
   });
 
   it('never picks weight-0 types or types without usable sources', () => {
-    const types = cloneConfig(DEFAULT_CONFIG).questionTypes;
+    const types = cloneConfig(DEFAULT_CONFIG).questionTypes.slice(0, 3);
     types[0].weight = 0;
     types[1].sources = [{ sourceId: 'deck:deleted', weight: 1 }];
     expect(counts(types, 2000)).toEqual([0, 0, 1]);
@@ -40,7 +40,7 @@ describe('drawQuestion', () => {
     const rng = createRng(3);
     for (let i = 0; i < 200; i++) {
       const { typeIndex, question } = registry.drawQuestion(DEFAULT_CONFIG.questionTypes, rng)!;
-      const prefix = ['arith:', 'med:', 'hm-'][typeIndex];
+      const prefix = ['arith:', 'med:', 'hm-', 'algebra_tricks:'][typeIndex];
       expect(question.id.startsWith(prefix), `${typeIndex} ${question.id}`).toBe(true);
     }
   });

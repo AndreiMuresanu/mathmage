@@ -5,6 +5,7 @@ import { importJson } from './import/json';
 import { createArithmeticSource } from './sources/arithmetic';
 import { createDeckSource } from './sources/deck';
 import { createMediumSource } from './sources/medium';
+import { createAlgebraTricksSource } from './sources/algebra_tricks';
 import { loadImportedDecks, saveImportedDecks } from './storage';
 import type { Deck, Question, QuestionSource } from './types';
 
@@ -34,6 +35,7 @@ export class QuestionRegistry {
     this.config = config;
     this.addSource(createArithmeticSource(() => this.config().arithmetic), true);
     this.addSource(createMediumSource(() => this.config().medium), true);
+    this.addSource(createAlgebraTricksSource(() => this.config().algebraTricks), true);
     this.addDeck(loadBuiltInDeck('hard-math', hardMathFile), true);
     this.imported = loadImportedDecks();
     for (const deck of this.imported) this.addDeck(deck, false);

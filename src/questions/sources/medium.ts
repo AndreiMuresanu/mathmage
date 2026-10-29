@@ -1,6 +1,7 @@
 import type { MediumConfig } from '../../config/gameConfig';
 import type { Rng } from '../../util/rng';
 import type { Question, QuestionSource } from '../types';
+import { coefX, gcd, lcm, nonZero, paren, plusConst } from './format';
 
 /**
  * Medium questions: one or two steps beyond plain arithmetic (equations, percentages, powers,
@@ -8,41 +9,6 @@ import type { Question, QuestionSource } from '../types';
  */
 
 type Generator = (rng: Rng) => Question;
-
-function gcd(a: number, b: number): number {
-  a = Math.abs(a);
-  b = Math.abs(b);
-  while (b) [a, b] = [b, a % b];
-  return a;
-}
-
-function lcm(a: number, b: number): number {
-  return (a / gcd(a, b)) * b;
-}
-
-/** A nonzero integer in [min, max]. */
-function nonZero(rng: Rng, min: number, max: number): number {
-  let n = 0;
-  while (n === 0) n = rng.int(min, max);
-  return n;
-}
-
-/** " + 5" / " - 5" for appending a constant after another term. */
-function plusConst(n: number): string {
-  return n < 0 ? ` - ${-n}` : ` + ${n}`;
-}
-
-/** "3x", "-x", "x" for a leading coefficient. */
-function coefX(a: number): string {
-  if (a === 1) return 'x';
-  if (a === -1) return '-x';
-  return `${a}x`;
-}
-
-/** Wrap negatives in parentheses when they appear inside an expression. */
-function paren(n: number): string {
-  return n < 0 ? `(${n})` : String(n);
-}
 
 function numeric(id: string, prompt: string, value: number, steps: string[], display = String(value)): Question {
   return { id, prompt, answer: { kind: 'numeric', value, display }, steps, tags: ['medium'] };

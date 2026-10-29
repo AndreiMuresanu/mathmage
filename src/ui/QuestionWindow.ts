@@ -206,8 +206,13 @@ export class QuestionWindow {
     // Testing shortcut: this answer is always accepted.
     const result = this.input.value.trim().toLowerCase() === TEST_ANSWER ? 'correct' : checkAnswer(question.answer, this.input.value);
     if (result === 'invalid') {
+      const { answer } = question;
       this.setMessage(
-        question.answer.kind === 'numeric' ? "Couldn't read that as a number. Try e.g. 12, 3/2, sqrt(2), pi/4." : 'Type an answer first.',
+        answer.kind === 'numeric'
+          ? "Couldn't read that as a number. Try e.g. 12, 3/2, sqrt(2), ln(5)/ln(3)."
+          : answer.kind === 'symbolic'
+            ? `Couldn't read that. Use only ${answer.variables.join(', ')}, e.g. (2y+1)/(y-3), sqrt(y^2+1), ln(y).`
+            : 'Type an answer first.',
       );
       return;
     }

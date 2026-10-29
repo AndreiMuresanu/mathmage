@@ -73,6 +73,22 @@ export interface MediumConfig {
   quadraticRoots: boolean;
 }
 
+/** Which families of "solve for x" trick questions to include. */
+export interface AlgebraTricksConfig {
+  completeSquare: boolean;
+  substitution: boolean;
+  radicals: boolean;
+  factoring: boolean;
+  fractions: boolean;
+  absoluteValue: boolean;
+  exponentsLogs: boolean;
+  structural: boolean;
+  /** Trig equations: hidden quadratics in sin/cos, a sin x + b cos x, double angles. */
+  trig: boolean;
+  /** Solve a formula for one letter; the answer is an expression. */
+  rearranging: boolean;
+}
+
 export interface ChaserConfig {
   hp: number;
   speed: number;
@@ -114,6 +130,7 @@ export interface GameConfig {
   questionTypes: QuestionTypeConfig[];
   arithmetic: ArithmeticConfig;
   medium: MediumConfig;
+  algebraTricks: AlgebraTricksConfig;
   stun: {
     blocksCasting: boolean;
     showSolution: boolean;
@@ -199,6 +216,15 @@ export const DEFAULT_CONFIG: GameConfig = {
       autoNextOnCorrect: false,
       timeLimit: 30,
     },
+    {
+      label: 'Solve for x',
+      weight: 3,
+      sources: [{ sourceId: 'algebra_tricks', weight: 1 }],
+      manaReward: 20,
+      stunSeconds: 8,
+      autoNextOnCorrect: false,
+      timeLimit: 60,
+    },
   ],
   arithmetic: {
     allowAdd: true,
@@ -222,6 +248,18 @@ export const DEFAULT_CONFIG: GameConfig = {
     orderOfOperations: true,
     averages: true,
     quadraticRoots: true,
+  },
+  algebraTricks: {
+    completeSquare: true,
+    substitution: true,
+    radicals: true,
+    factoring: true,
+    fractions: true,
+    absoluteValue: true,
+    exponentsLogs: true,
+    structural: true,
+    trig: true,
+    rearranging: true,
   },
   stun: {
     blocksCasting: true,
