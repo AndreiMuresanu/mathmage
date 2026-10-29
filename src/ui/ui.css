@@ -881,3 +881,29 @@ code {
   color: var(--muted);
   font-variant-numeric: tabular-nums;
 }
+
+/* ---------- Adaptive difficulty ---------- */
+
+.slot-rating {
+  padding: 0 0.6em;
+  font-size: 0.85em;
+  color: var(--text);
+}
+
+.slot-rating .up {
+  color: var(--good);
+}
+
+.slot-rating .down {
+  color: var(--bad);
+}
+
+.qwin-rating {
+  margin-left: 0.6em;
+  font-size: 0.8em;
+  color: var(--muted);
+}
+
+.rating-summary {
+  margin: 0.2em 0;
+}

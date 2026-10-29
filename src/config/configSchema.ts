@@ -34,7 +34,13 @@ export interface ListGroupDef {
   fields: FieldDef[];
 }
 
-export type GroupDef = ObjectGroupDef | ListGroupDef;
+/** The global list of question sources (custom editor in ConfigScreen). */
+export interface SourcesGroupDef {
+  kind: 'sources';
+  title: string;
+}
+
+export type GroupDef = ObjectGroupDef | ListGroupDef | SourcesGroupDef;
 
 const num = (key: string, label: string, min: number, max: number, step: number, help?: string): FieldDef => ({
   key, label, type: 'number', min, max, step, help,
@@ -92,28 +98,28 @@ export const CONFIG_GROUPS: GroupDef[] = [
     fields: [
       { key: 'label', label: 'Label', type: 'text' },
       num('weight', 'Chance weight', 0, 1000, 0.5, 'Relative odds of this type when Space draws a new question. Weights 6 / 3 / 1 = 60% / 30% / 10%.'),
+      num('ratingOffset', 'Difficulty vs your rating', -1500, 1500, 10, 'Questions are rated near your rating + this. −382 = 90% chance of success, −147 = 70%, 0 = 50%, +150 ≈ 30%.'),
       num('manaReward', 'Mana for a correct answer', 0, 10000, 1),
       num('stunSeconds', 'Stun on a wrong answer (s)', 0, 120, 0.5),
       bool('autoNextOnCorrect', 'Next question right after a correct answer'),
       num('timeLimit', 'Time limit (s)', 0, 600, 1, 'Fail and get stunned if not answered in time. The clock keeps running while the window is closed; 0 = no limit.'),
     ],
   },
+  { kind: 'sources', title: 'Question sources' },
   {
     kind: 'object',
-    title: 'Arithmetic questions',
-    path: 'arithmetic',
+    title: 'Adaptive difficulty',
+    path: 'adaptive',
     fields: [
-      bool('allowAdd', 'Addition'),
-      bool('allowSubtract', 'Subtraction'),
-      bool('allowMultiply', 'Multiplication'),
-      bool('allowDivide', 'Division'),
-      num('minOperand', 'Smallest number', -1000, 1000, 1),
-      num('maxOperand', 'Largest number', -1000, 10000, 1),
-      num('minTerms', 'Min numbers per expression', 1, 8, 1),
-      num('maxTerms', 'Max numbers per expression', 1, 8, 1),
-      bool('allowParens', 'Allow parentheses'),
-      bool('integerOnly', 'Whole-number results only', 'Every intermediate result must be an integer.'),
-      num('maxAbsResult', 'Largest allowed result', 1, 1000000, 1),
+      num('startRating', 'Starting rating', 0, 3000, 10, 'Every match starts here and recalibrates from your answers. ~100 = 1 + 1, ~900 = fractions and percentages, ~1500 = algebra tricks, ~2000 = AMC.'),
+      num('kMax', 'Rating step at the start', 1, 1000, 5, 'How far one answer moves your rating while it is still uncertain.'),
+      num('kMin', 'Rating step once settled', 1, 500, 1, 'How far one answer moves your rating after many answers.'),
+      num('kDecayAnswers', 'Answers to settle halfway', 1, 200, 1, 'Counted from your first miss: after this many answers the step is halfway from the start value to the settled value.'),
+      num('calibrationMisses', 'Calibration misses', 0, 20, 1, 'Until you have missed this many questions, every question is pitched right at your rating so it climbs fast; the Easy/Hard offsets fade in with each miss.'),
+      num('timeWeight', 'Speed weight', 0, 1, 0.05, '0 = only right/wrong counts. Higher = answers faster than your usual pace count for more, slower ones for less (and the reverse for wrong answers). Measured against your own pace, so it never inflates the rating.'),
+      num('skipScore', 'Skip / timeout score', 0, 1, 0.05, 'How a skip or timeout counts, where a wrong answer = 0 and a correct one = 1.'),
+      num('referenceTime', 'Reference time (s)', 1, 600, 1, 'Used to judge speed when a question type has no time limit.'),
+      num('spread', 'Question match spread', 10, 1000, 10, 'How closely a question’s rating must match its target (rating points). Smaller = more precise, larger = more variety.'),
     ],
   },
   {

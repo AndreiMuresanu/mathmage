@@ -1,0 +1,3415 @@
+{
+  "name": "Contest Mix",
+  "questions": [
+    {
+      "id": "ct-001",
+      "difficulty": 1000,
+      "prompt": "Solve for $x$: $3x - 7 = 2x + 5$.",
+      "answer": "12",
+      "tags": [
+        "algebra"
+      ],
+      "steps": [
+        "Subtract $2x$ from both sides: $x - 7 = 5$, so $x = 12$."
+      ]
+    },
+    {
+      "id": "ct-002",
+      "difficulty": 1100,
+      "prompt": "What is the sum of the solutions of $x^2 - 7x + 10 = 0$?",
+      "answer": "7",
+      "tags": [
+        "algebra"
+      ],
+      "steps": [
+        "By Vieta, the sum of the roots of $x^2 + bx + c$ is $-b = 7$.",
+        "(Check: $x = 2$ and $x = 5$.)"
+      ]
+    },
+    {
+      "id": "ct-003",
+      "difficulty": 1250,
+      "prompt": "If $x + y = 10$ and $xy = 21$, what is $x^2 + y^2$?",
+      "answer": "58",
+      "tags": [
+        "algebra"
+      ],
+      "steps": [
+        "$x^2 + y^2 = (x+y)^2 - 2xy = 100 - 42 = 58$."
+      ]
+    },
+    {
+      "id": "ct-004",
+      "difficulty": 1300,
+      "prompt": "What is the product of the roots of $2x^2 + 5x - 12 = 0$?",
+      "answer": "-6",
+      "tags": [
+        "algebra"
+      ],
+      "steps": [
+        "By Vieta, the product of the roots of $ax^2 + bx + c$ is $c/a = -12/2 = -6$."
+      ]
+    },
+    {
+      "id": "ct-005",
+      "difficulty": 1050,
+      "prompt": "If $f(x) = 2x + 3$, what is $f(f(f(1)))$?",
+      "answer": "29",
+      "tags": [
+        "functions"
+      ],
+      "steps": [
+        "$f(1) = 5$, $f(5) = 13$, $f(13) = 29$."
+      ]
+    },
+    {
+      "id": "ct-006",
+      "difficulty": 1350,
+      "prompt": "What is the minimum value of $x^2 - 6x + 13$?",
+      "answer": "4",
+      "tags": [
+        "algebra"
+      ],
+      "steps": [
+        "Complete the square: $x^2 - 6x + 13 = (x-3)^2 + 4$.",
+        "The minimum is $4$, at $x = 3$."
+      ]
+    },
+    {
+      "id": "ct-007",
+      "difficulty": 1450,
+      "prompt": "Positive numbers $a$ and $b$ satisfy $\\frac{1}{a} + \\frac{1}{b} = \\frac{1}{2}$ and $a + b = 12$. What is $ab$?",
+      "answer": "24",
+      "tags": [
+        "algebra"
+      ],
+      "steps": [
+        "$\\frac{1}{a} + \\frac{1}{b} = \\frac{a+b}{ab}$, so $\\frac{12}{ab} = \\frac{1}{2}$.",
+        "$ab = 24$."
+      ]
+    },
+    {
+      "id": "ct-008",
+      "difficulty": 1300,
+      "prompt": "For what positive value of $k$ does $x^2 + kx + 16 = 0$ have exactly one real solution?",
+      "answer": "8",
+      "tags": [
+        "algebra"
+      ],
+      "steps": [
+        "One solution means the discriminant is zero: $k^2 - 64 = 0$.",
+        "The positive value is $k = 8$."
+      ]
+    },
+    {
+      "id": "ct-009",
+      "difficulty": 1350,
+      "prompt": "If $x^2 + y^2 = 25$, $x + y = 7$ and $x > y$, what is $x - y$?",
+      "answer": "1",
+      "tags": [
+        "algebra"
+      ],
+      "steps": [
+        "$2xy = (x+y)^2 - (x^2+y^2) = 49 - 25 = 24$.",
+        "$(x-y)^2 = 25 - 24 = 1$, and $x > y$, so $x - y = 1$."
+      ]
+    },
+    {
+      "id": "ct-010",
+      "difficulty": 1750,
+      "prompt": "If $a + b + c = 6$, $ab + bc + ca = 11$ and $abc = 6$, what is $a^3 + b^3 + c^3$?",
+      "answer": "36",
+      "tags": [
+        "algebra",
+        "polynomials"
+      ],
+      "steps": [
+        "$a^3+b^3+c^3 = (a+b+c)^3 - 3(a+b+c)(ab+bc+ca) + 3abc$.",
+        "$= 216 - 198 + 18 = 36$."
+      ]
+    },
+    {
+      "id": "ct-011",
+      "difficulty": 1500,
+      "prompt": "Simplify $\\sqrt{7 + 4\\sqrt{3}}$. (An answer like 2+sqrt(3) is fine.)",
+      "answer": "2+sqrt(3)",
+      "tags": [
+        "algebra",
+        "radicals"
+      ],
+      "steps": [
+        "Look for $(a + \\sqrt{b})^2 = a^2 + b + 2a\\sqrt{b} = 7 + 4\\sqrt3$.",
+        "$a = 2$, $b = 3$: $(2 + \\sqrt3)^2 = 7 + 4\\sqrt3$."
+      ]
+    },
+    {
+      "id": "ct-012",
+      "difficulty": 1450,
+      "prompt": "If $x^2 - 5x + 1 = 0$, what is $x^2 + \\frac{1}{x^2}$?",
+      "answer": "23",
+      "tags": [
+        "algebra"
+      ],
+      "steps": [
+        "Divide by $x$: $x + \\frac1x = 5$.",
+        "$x^2 + \\frac{1}{x^2} = \\left(x + \\frac1x\\right)^2 - 2 = 23$."
+      ]
+    },
+    {
+      "id": "ct-013",
+      "difficulty": 1250,
+      "prompt": "What is the sum of all solutions of $|2x - 3| = 7$?",
+      "answer": "3",
+      "tags": [
+        "algebra"
+      ],
+      "steps": [
+        "$2x - 3 = 7$ gives $x = 5$; $2x - 3 = -7$ gives $x = -2$.",
+        "Sum: $5 + (-2) = 3$."
+      ]
+    },
+    {
+      "id": "ct-014",
+      "difficulty": 1250,
+      "prompt": "How many real solutions does $x^4 - 5x^2 + 4 = 0$ have?",
+      "answer": "4",
+      "tags": [
+        "algebra"
+      ],
+      "steps": [
+        "Factor: $(x^2 - 1)(x^2 - 4) = 0$.",
+        "Solutions $\\pm1, \\pm2$: four of them."
+      ]
+    },
+    {
+      "id": "ct-015",
+      "difficulty": 1300,
+      "prompt": "If $2^x = 5$, what is $4^{x+1}$?",
+      "answer": "100",
+      "tags": [
+        "exponents"
+      ],
+      "steps": [
+        "$4^{x+1} = 4 \\cdot (2^x)^2 = 4 \\cdot 25 = 100$."
+      ]
+    },
+    {
+      "id": "ct-016",
+      "difficulty": 1350,
+      "prompt": "Solve for $x$: $\\log_2 x + \\log_2 (x - 2) = 3$.",
+      "answer": "4",
+      "tags": [
+        "logarithms"
+      ],
+      "steps": [
+        "$\\log_2[x(x-2)] = 3$, so $x^2 - 2x - 8 = 0$.",
+        "$(x-4)(x+2) = 0$; only $x = 4$ keeps both logs defined."
+      ]
+    },
+    {
+      "id": "ct-017",
+      "difficulty": 1900,
+      "prompt": "What is the sum of all real $x$ such that $(x^2 - 5x + 5)^{x^2 - 9x + 20} = 1$?",
+      "answer": "15",
+      "tags": [
+        "algebra"
+      ],
+      "steps": [
+        "Base $= 1$: $x^2 - 5x + 4 = 0$, so $x = 1, 4$.",
+        "Exponent $= 0$ (base $\\ne 0$): $x^2 - 9x + 20 = 0$, so $x = 4, 5$.",
+        "Base $= -1$ with an even exponent: $x^2 - 5x + 6 = 0$, so $x = 2$ (exponent 6) and $x = 3$ (exponent 2).",
+        "Distinct solutions $1, 2, 3, 4, 5$: sum $15$."
+      ]
+    },
+    {
+      "id": "ct-018",
+      "difficulty": 1300,
+      "prompt": "What is the positive solution of $(x + 2)(x - 3) = 14$?",
+      "answer": "5",
+      "tags": [
+        "algebra"
+      ],
+      "steps": [
+        "Expand: $x^2 - x - 6 = 14$, so $x^2 - x - 20 = 0$.",
+        "$(x - 5)(x + 4) = 0$: the positive solution is $5$."
+      ]
+    },
+    {
+      "id": "ct-019",
+      "difficulty": 950,
+      "prompt": "What is the slope of the line through $(2, 3)$ and $(6, 11)$?",
+      "answer": "2",
+      "tags": [
+        "algebra"
+      ],
+      "steps": [
+        "Slope $= \\frac{11 - 3}{6 - 2} = \\frac{8}{4} = 2$."
+      ]
+    },
+    {
+      "id": "ct-020",
+      "difficulty": 1350,
+      "prompt": "What is the remainder when $x^5 + 3x^3 - 2$ is divided by $x + 1$?",
+      "answer": "-6",
+      "tags": [
+        "polynomials"
+      ],
+      "steps": [
+        "Remainder theorem: plug in $x = -1$.",
+        "$-1 - 3 - 2 = -6$."
+      ]
+    },
+    {
+      "id": "ct-021",
+      "difficulty": 1350,
+      "prompt": "If $x = 3$ is a root of $x^3 - 2x^2 + ax + 6$, what is $a$?",
+      "answer": "-5",
+      "tags": [
+        "polynomials"
+      ],
+      "steps": [
+        "Plug in $x = 3$: $27 - 18 + 3a + 6 = 0$.",
+        "$3a = -15$, so $a = -5$."
+      ]
+    },
+    {
+      "id": "ct-022",
+      "difficulty": 1450,
+      "prompt": "What is the sum of the coefficients of $(3x - 1)^5$?",
+      "answer": "32",
+      "tags": [
+        "polynomials"
+      ],
+      "steps": [
+        "The sum of the coefficients is the value at $x = 1$: $(3 - 1)^5 = 32$."
+      ]
+    },
+    {
+      "id": "ct-023",
+      "difficulty": 1500,
+      "prompt": "What is the constant term of $\\left(x + \\frac{1}{x}\\right)^6$?",
+      "answer": "20",
+      "tags": [
+        "binomial"
+      ],
+      "steps": [
+        "The term $\\binom{6}{k} x^k x^{-(6-k)}$ is constant when $k = 3$.",
+        "$\\binom{6}{3} = 20$."
+      ]
+    },
+    {
+      "id": "ct-024",
+      "difficulty": 1450,
+      "prompt": "What is the coefficient of $x^3$ in $(1 + 2x)^6$?",
+      "answer": "160",
+      "tags": [
+        "binomial"
+      ],
+      "steps": [
+        "$\\binom{6}{3}(2x)^3 = 20 \\cdot 8x^3$.",
+        "Coefficient: $160$."
+      ]
+    },
+    {
+      "id": "ct-025",
+      "difficulty": 1500,
+      "prompt": "If $x + y = 2$ and $x^3 + y^3 = 26$, what is $xy$?",
+      "answer": "-3",
+      "tags": [
+        "algebra"
+      ],
+      "steps": [
+        "$x^3 + y^3 = (x+y)^3 - 3xy(x+y) = 8 - 6xy$.",
+        "$8 - 6xy = 26$, so $xy = -3$."
+      ]
+    },
+    {
+      "id": "ct-026",
+      "difficulty": 1800,
+      "prompt": "Let $f(x) = x^2 + 6x + 7$. What is the minimum value of $f(f(x))$?",
+      "answer": "-1",
+      "tags": [
+        "functions"
+      ],
+      "steps": [
+        "$f(x) = (x+3)^2 - 2 \\ge -2$, so the inner value $y = f(x)$ ranges over $[-2, \\infty)$.",
+        "$f(y)$ is increasing for $y \\ge -3$, so its minimum on $[-2, \\infty)$ is $f(-2) = 4 - 12 + 7 = -1$."
+      ]
+    },
+    {
+      "id": "ct-027",
+      "difficulty": 1800,
+      "prompt": "How many ordered pairs of positive integers $(x, y)$ satisfy $\\frac{1}{x} + \\frac{1}{y} = \\frac{1}{6}$?",
+      "answer": "9",
+      "tags": [
+        "number theory",
+        "algebra"
+      ],
+      "steps": [
+        "Clear denominators: $xy - 6x - 6y = 0$, so $(x-6)(y-6) = 36$.",
+        "Each positive divisor pair of 36 gives one solution: $36$ has $9$ divisors."
+      ]
+    },
+    {
+      "id": "ct-028",
+      "difficulty": 1550,
+      "prompt": "If $x$ is real and $x + \\frac{1}{x} = 2$, what is $x^{2025} + \\frac{1}{x^{2025}}$?",
+      "answer": "2",
+      "tags": [
+        "algebra"
+      ],
+      "steps": [
+        "$x + \\frac1x = 2$ means $(x - 1)^2 = 0$, so $x = 1$.",
+        "Then the expression is $1 + 1 = 2$."
+      ]
+    },
+    {
+      "id": "ct-029",
+      "difficulty": 1450,
+      "prompt": "What is the sum of the reciprocals of the roots of $x^2 - 13x + 4 = 0$?",
+      "answer": "13/4",
+      "tags": [
+        "polynomials"
+      ],
+      "steps": [
+        "$\\frac{1}{r} + \\frac{1}{s} = \\frac{r+s}{rs} = \\frac{13}{4}$ by Vieta."
+      ]
+    },
+    {
+      "id": "ct-030",
+      "difficulty": 1300,
+      "prompt": "The product of three consecutive integers is $210$. What is their sum?",
+      "answer": "18",
+      "tags": [
+        "algebra"
+      ],
+      "steps": [
+        "$210 = 5 \\cdot 6 \\cdot 7$ (try integers near $\\sqrt[3]{210} \\approx 6$).",
+        "Sum: $18$."
+      ]
+    },
+    {
+      "id": "ct-031",
+      "difficulty": 1450,
+      "prompt": "If $f(x) = \\frac{2x + 1}{x - 3}$, what is $f^{-1}(5)$? (A fraction like 16/3 is fine.)",
+      "answer": "16/3",
+      "tags": [
+        "functions"
+      ],
+      "steps": [
+        "Solve $\\frac{2x+1}{x-3} = 5$: $2x + 1 = 5x - 15$.",
+        "$3x = 16$, so $x = \\frac{16}{3}$."
+      ]
+    },
+    {
+      "id": "ct-032",
+      "difficulty": 1050,
+      "prompt": "If $f(x) = x^2$ and $g(x) = x + 3$, what is $f(g(2)) - g(f(2))$?",
+      "answer": "18",
+      "tags": [
+        "functions"
+      ],
+      "steps": [
+        "$f(g(2)) = f(5) = 25$ and $g(f(2)) = g(4) = 7$.",
+        "$25 - 7 = 18$."
+      ]
+    },
+    {
+      "id": "ct-033",
+      "difficulty": 1300,
+      "prompt": "If $f(x + 1) = x^2 + 2x$ for all $x$, what is $f(5)$?",
+      "answer": "24",
+      "tags": [
+        "functions"
+      ],
+      "steps": [
+        "$f(5)$ means $x + 1 = 5$, so $x = 4$: $16 + 8 = 24$.",
+        "(In general $f(t) = t^2 - 1$.)"
+      ]
+    },
+    {
+      "id": "ct-034",
+      "difficulty": 1750,
+      "prompt": "A function satisfies $f(x) + 2f\\!\\left(\\frac{1}{x}\\right) = 3x$ for all $x \\ne 0$. What is $f(2)$?",
+      "answer": "-1",
+      "tags": [
+        "functions"
+      ],
+      "steps": [
+        "$x = 2$: $f(2) + 2f(\\tfrac12) = 6$. $x = \\tfrac12$: $f(\\tfrac12) + 2f(2) = \\tfrac32$.",
+        "Substitute $f(\\tfrac12) = \\tfrac32 - 2f(2)$: $f(2) + 3 - 4f(2) = 6$, so $f(2) = -1$."
+      ]
+    },
+    {
+      "id": "ct-035",
+      "difficulty": 1150,
+      "prompt": "How many integers $x$ satisfy $x^2 < 30$?",
+      "answer": "11",
+      "tags": [
+        "algebra"
+      ],
+      "steps": [
+        "$x^2 < 30$ means $-5 \\le x \\le 5$ for integers ($6^2 = 36$).",
+        "That is $11$ integers."
+      ]
+    },
+    {
+      "id": "ct-036",
+      "difficulty": 950,
+      "prompt": "What is $\\log_3 81$?",
+      "answer": "4",
+      "tags": [
+        "logarithms"
+      ],
+      "steps": [
+        "$3^4 = 81$."
+      ]
+    },
+    {
+      "id": "ct-037",
+      "difficulty": 1000,
+      "prompt": "What is $\\log_2 32 - \\log_2 4$?",
+      "answer": "3",
+      "tags": [
+        "logarithms"
+      ],
+      "steps": [
+        "$\\log_2 \\frac{32}{4} = \\log_2 8 = 3$."
+      ]
+    },
+    {
+      "id": "ct-038",
+      "difficulty": 1350,
+      "prompt": "If $\\log_x 64 = \\frac{3}{2}$, what is $x$?",
+      "answer": "16",
+      "tags": [
+        "logarithms"
+      ],
+      "steps": [
+        "$x^{3/2} = 64$, so $x = 64^{2/3} = (\\sqrt[3]{64})^2 = 16$."
+      ]
+    },
+    {
+      "id": "ct-039",
+      "difficulty": 1050,
+      "prompt": "What is $8^{2/3}$?",
+      "answer": "4",
+      "tags": [
+        "exponents"
+      ],
+      "steps": [
+        "$8^{2/3} = (\\sqrt[3]{8})^2 = 2^2 = 4$."
+      ]
+    },
+    {
+      "id": "ct-040",
+      "difficulty": 1150,
+      "prompt": "Solve for $x$: $9^x = 27$. (A fraction like 3/2 is fine.)",
+      "answer": "3/2",
+      "tags": [
+        "exponents"
+      ],
+      "steps": [
+        "Write both as powers of 3: $3^{2x} = 3^3$.",
+        "$2x = 3$, so $x = \\frac32$."
+      ]
+    },
+    {
+      "id": "ct-041",
+      "difficulty": 1150,
+      "prompt": "What is $\\log_{10} 2 + \\log_{10} 50$?",
+      "answer": "2",
+      "tags": [
+        "logarithms"
+      ],
+      "steps": [
+        "$\\log_{10}(2 \\cdot 50) = \\log_{10} 100 = 2$."
+      ]
+    },
+    {
+      "id": "ct-042",
+      "difficulty": 1100,
+      "prompt": "What is $27^{1/3} \\cdot 16^{3/4}$?",
+      "answer": "24",
+      "tags": [
+        "exponents"
+      ],
+      "steps": [
+        "$27^{1/3} = 3$ and $16^{3/4} = (\\sqrt[4]{16})^3 = 8$.",
+        "$3 \\cdot 8 = 24$."
+      ]
+    },
+    {
+      "id": "ct-043",
+      "difficulty": 1200,
+      "prompt": "What is $\\log_4 8$? (A fraction like 3/2 is fine.)",
+      "answer": "3/2",
+      "tags": [
+        "logarithms"
+      ],
+      "steps": [
+        "$4^{3/2} = 8$, or $\\frac{\\log_2 8}{\\log_2 4} = \\frac32$."
+      ]
+    },
+    {
+      "id": "ct-044",
+      "difficulty": 1500,
+      "prompt": "What is $(\\log_2 9)(\\log_3 8)$?",
+      "answer": "6",
+      "tags": [
+        "logarithms"
+      ],
+      "steps": [
+        "$\\log_2 9 = 2\\log_2 3$ and $\\log_3 8 = 3\\log_3 2$.",
+        "Product: $6 \\log_2 3 \\cdot \\log_3 2 = 6$."
+      ]
+    },
+    {
+      "id": "ct-045",
+      "difficulty": 1100,
+      "prompt": "What is $\\gcd(84, 126)$?",
+      "answer": "42",
+      "tags": [
+        "number theory"
+      ],
+      "steps": [
+        "$84 = 2 \\cdot 42$ and $126 = 3 \\cdot 42$, with $\\gcd(2, 3) = 1$."
+      ]
+    },
+    {
+      "id": "ct-046",
+      "difficulty": 1150,
+      "prompt": "What is the least common multiple of $12$, $18$ and $30$?",
+      "answer": "180",
+      "tags": [
+        "number theory"
+      ],
+      "steps": [
+        "$12 = 2^2 \\cdot 3$, $18 = 2 \\cdot 3^2$, $30 = 2 \\cdot 3 \\cdot 5$.",
+        "LCM $= 2^2 \\cdot 3^2 \\cdot 5 = 180$."
+      ]
+    },
+    {
+      "id": "ct-047",
+      "difficulty": 1300,
+      "prompt": "What is the remainder when $3^{20}$ is divided by $5$?",
+      "answer": "1",
+      "tags": [
+        "number theory"
+      ],
+      "steps": [
+        "$3^4 = 81 \\equiv 1 \\pmod 5$.",
+        "$3^{20} = (3^4)^5 \\equiv 1$."
+      ]
+    },
+    {
+      "id": "ct-048",
+      "difficulty": 1350,
+      "prompt": "How many positive divisors does $720$ have?",
+      "answer": "30",
+      "tags": [
+        "number theory"
+      ],
+      "steps": [
+        "$720 = 2^4 \\cdot 3^2 \\cdot 5$.",
+        "$(4+1)(2+1)(1+1) = 30$."
+      ]
+    },
+    {
+      "id": "ct-049",
+      "difficulty": 950,
+      "prompt": "What is the sum of the digits of $2^{10}$?",
+      "answer": "7",
+      "tags": [
+        "number theory"
+      ],
+      "steps": [
+        "$2^{10} = 1024$; $1 + 0 + 2 + 4 = 7$."
+      ]
+    },
+    {
+      "id": "ct-050",
+      "difficulty": 1250,
+      "prompt": "What is the units digit of $3^{2025}$?",
+      "answer": "3",
+      "tags": [
+        "number theory"
+      ],
+      "steps": [
+        "Units digits of powers of 3 cycle $3, 9, 7, 1$.",
+        "$2025 \\equiv 1 \\pmod 4$, so the units digit is $3$."
+      ]
+    },
+    {
+      "id": "ct-051",
+      "difficulty": 1450,
+      "prompt": "What is the smallest positive integer that leaves remainder 2 when divided by 3, remainder 3 when divided by 5, and remainder 2 when divided by 7?",
+      "answer": "23",
+      "tags": [
+        "number theory"
+      ],
+      "steps": [
+        "Remainder 2 mod 3 and mod 7 means $n \\equiv 2 \\pmod{21}$: $2, 23, 44, \\ldots$",
+        "$23 \\equiv 3 \\pmod 5$. ✓"
+      ]
+    },
+    {
+      "id": "ct-052",
+      "difficulty": 1100,
+      "prompt": "How many primes are less than $50$?",
+      "answer": "15",
+      "tags": [
+        "number theory"
+      ],
+      "steps": [
+        "$2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47$."
+      ]
+    },
+    {
+      "id": "ct-053",
+      "difficulty": 1400,
+      "prompt": "How many zeros does $125!$ end with?",
+      "answer": "31",
+      "tags": [
+        "number theory"
+      ],
+      "steps": [
+        "Count factors of 5: $\\lfloor 125/5 \\rfloor + \\lfloor 125/25 \\rfloor + \\lfloor 125/125 \\rfloor = 25 + 5 + 1$."
+      ]
+    },
+    {
+      "id": "ct-054",
+      "difficulty": 1500,
+      "prompt": "What is the largest prime factor of $2^{12} - 1$?",
+      "answer": "13",
+      "tags": [
+        "number theory"
+      ],
+      "steps": [
+        "$2^{12} - 1 = (2^6 - 1)(2^6 + 1) = 63 \\cdot 65 = 3^2 \\cdot 7 \\cdot 5 \\cdot 13$."
+      ]
+    },
+    {
+      "id": "ct-055",
+      "difficulty": 1550,
+      "prompt": "How many integers from $1$ to $100$ share no common factor (other than 1) with $100$?",
+      "answer": "40",
+      "tags": [
+        "number theory"
+      ],
+      "steps": [
+        "Count numbers divisible by neither 2 nor 5: $100 - 50 - 20 + 10 = 40$.",
+        "(This is Euler's $\\varphi(100) = 100 \\cdot \\frac12 \\cdot \\frac45$.)"
+      ]
+    },
+    {
+      "id": "ct-056",
+      "difficulty": 1450,
+      "prompt": "What is the remainder when $1! + 2! + 3! + \\cdots + 100!$ is divided by $12$?",
+      "answer": "9",
+      "tags": [
+        "number theory"
+      ],
+      "steps": [
+        "From $4! = 24$ on, every factorial is divisible by 12.",
+        "$1 + 2 + 6 = 9$."
+      ]
+    },
+    {
+      "id": "ct-057",
+      "difficulty": 1400,
+      "prompt": "What is the sum of all positive divisors of $60$?",
+      "answer": "168",
+      "tags": [
+        "number theory"
+      ],
+      "steps": [
+        "$60 = 2^2 \\cdot 3 \\cdot 5$.",
+        "$(1+2+4)(1+3)(1+5) = 7 \\cdot 4 \\cdot 6 = 168$."
+      ]
+    },
+    {
+      "id": "ct-058",
+      "difficulty": 1650,
+      "prompt": "How many perfect squares divide $2^4 \\cdot 3^6$?",
+      "answer": "12",
+      "tags": [
+        "number theory"
+      ],
+      "steps": [
+        "A square divisor is $2^a 3^b$ with $a, b$ even.",
+        "$a \\in \\{0, 2, 4\\}$ (3 ways), $b \\in \\{0, 2, 4, 6\\}$ (4 ways): $12$."
+      ]
+    },
+    {
+      "id": "ct-059",
+      "difficulty": 1700,
+      "prompt": "What are the last two digits of $7^{100}$? (Answer as a number, e.g. 1 for 01.)",
+      "answer": "1",
+      "tags": [
+        "number theory"
+      ],
+      "steps": [
+        "$7^4 = 2401 \\equiv 1 \\pmod{100}$.",
+        "$7^{100} = (7^4)^{25} \\equiv 1$: the last two digits are $01$."
+      ]
+    },
+    {
+      "id": "ct-060",
+      "difficulty": 1900,
+      "prompt": "How many ordered pairs of positive integers $(a, b)$ have $\\operatorname{lcm}(a, b) = 72$?",
+      "answer": "35",
+      "tags": [
+        "number theory"
+      ],
+      "steps": [
+        "$72 = 2^3 \\cdot 3^2$. For each prime, the larger exponent must equal the exponent in 72.",
+        "For $2^3$: $2 \\cdot 3 + 1 = 7$ exponent pairs; for $3^2$: $2 \\cdot 2 + 1 = 5$. Total $35$."
+      ]
+    },
+    {
+      "id": "ct-061",
+      "difficulty": 1400,
+      "prompt": "How many digits does $2^{10} \\cdot 5^{7}$ have?",
+      "answer": "8",
+      "tags": [
+        "number theory"
+      ],
+      "steps": [
+        "$2^{10} 5^7 = 2^3 \\cdot 10^7 = 8 \\cdot 10^7 = 80{,}000{,}000$."
+      ]
+    },
+    {
+      "id": "ct-062",
+      "difficulty": 1100,
+      "prompt": "Write the binary number $101101_2$ in base 10.",
+      "answer": "45",
+      "tags": [
+        "number theory"
+      ],
+      "steps": [
+        "$32 + 8 + 4 + 1 = 45$."
+      ]
+    },
+    {
+      "id": "ct-063",
+      "difficulty": 900,
+      "prompt": "What is the sum of the first $20$ odd positive integers?",
+      "answer": "400",
+      "tags": [
+        "sequences"
+      ],
+      "steps": [
+        "The sum of the first $n$ odd numbers is $n^2 = 400$."
+      ]
+    },
+    {
+      "id": "ct-064",
+      "difficulty": 1400,
+      "prompt": "What is the remainder when $2^{2025}$ is divided by $7$?",
+      "answer": "1",
+      "tags": [
+        "number theory"
+      ],
+      "steps": [
+        "$2^3 = 8 \\equiv 1 \\pmod 7$.",
+        "$2025 = 3 \\cdot 675$, so $2^{2025} \\equiv 1$."
+      ]
+    },
+    {
+      "id": "ct-065",
+      "difficulty": 1600,
+      "prompt": "How many positive integers $n \\le 1000$ are perfect squares or perfect cubes (or both)?",
+      "answer": "38",
+      "tags": [
+        "number theory"
+      ],
+      "steps": [
+        "Squares: $31$ ($31^2 = 961$). Cubes: $10$. Both (sixth powers): $1, 64, 729$ — 3.",
+        "$31 + 10 - 3 = 38$."
+      ]
+    },
+    {
+      "id": "ct-066",
+      "difficulty": 2000,
+      "prompt": "What is the sum of all positive integers $n$ for which $n^2 - 19n + 99$ is a perfect square?",
+      "answer": "38",
+      "tags": [
+        "number theory"
+      ],
+      "steps": [
+        "Set $n^2 - 19n + 99 = m^2$ and multiply by 4: $(2n - 19)^2 + 35 = 4m^2$.",
+        "So $(2m - 2n + 19)(2m + 2n - 19) = 35$: factor pairs $1 \\cdot 35$ and $5 \\cdot 7$.",
+        "Solutions $n = 1, 9, 10, 18$, which sum to $38$."
+      ]
+    },
+    {
+      "id": "ct-067",
+      "difficulty": 1400,
+      "prompt": "For how many positive integers $n$ is $\\frac{n + 18}{n}$ an integer?",
+      "answer": "6",
+      "tags": [
+        "number theory"
+      ],
+      "steps": [
+        "$\\frac{n+18}{n} = 1 + \\frac{18}{n}$, so $n$ must divide 18.",
+        "18 has $6$ divisors: $1, 2, 3, 6, 9, 18$."
+      ]
+    },
+    {
+      "id": "ct-068",
+      "difficulty": 1850,
+      "prompt": "What is the units digit of $7^{7^7}$?",
+      "answer": "3",
+      "tags": [
+        "number theory"
+      ],
+      "steps": [
+        "Units digits of powers of 7 cycle with period 4: $7, 9, 3, 1$.",
+        "$7^7 \\equiv (-1)^7 = -1 \\equiv 3 \\pmod 4$.",
+        "So the units digit is the 3rd in the cycle: $3$."
+      ]
+    },
+    {
+      "id": "ct-069",
+      "difficulty": 1800,
+      "prompt": "How many ordered pairs of integers $(x, y)$ satisfy $x^2 - y^2 = 15$?",
+      "answer": "8",
+      "tags": [
+        "number theory"
+      ],
+      "steps": [
+        "$(x - y)(x + y) = 15$. Each factorization $15 = d \\cdot e$ (with signs) gives $x = \\frac{d+e}{2}$, $y = \\frac{e-d}{2}$.",
+        "Both factors are odd, so all $4$ positive and $4$ negative factor pairs work: $8$."
+      ]
+    },
+    {
+      "id": "ct-070",
+      "difficulty": 1600,
+      "prompt": "What is the smallest $n$ such that $n!$ is divisible by $1000$?",
+      "answer": "15",
+      "tags": [
+        "number theory"
+      ],
+      "steps": [
+        "$1000 = 2^3 5^3$; factors of 2 are plentiful, so we need three factors of 5.",
+        "$5, 10, 15$: the smallest is $n = 15$."
+      ]
+    },
+    {
+      "id": "ct-071",
+      "difficulty": 1650,
+      "prompt": "How many positive integers less than $1000$ are divisible by $7$ but not by $11$?",
+      "answer": "130",
+      "tags": [
+        "number theory"
+      ],
+      "steps": [
+        "Multiples of 7 below 1000: $142$. Multiples of 77: $12$.",
+        "$142 - 12 = 130$."
+      ]
+    },
+    {
+      "id": "ct-072",
+      "difficulty": 1250,
+      "prompt": "What is the sum of all integers from $-50$ to $52$, inclusive?",
+      "answer": "103",
+      "tags": [
+        "sequences"
+      ],
+      "steps": [
+        "$-50$ to $50$ cancels out, leaving $51 + 52 = 103$."
+      ]
+    },
+    {
+      "id": "ct-073",
+      "difficulty": 1900,
+      "prompt": "How many ordered pairs of positive integers $(a, b)$ satisfy $a^2 - b^2 = 2025$?",
+      "answer": "7",
+      "tags": [
+        "number theory"
+      ],
+      "steps": [
+        "$(a - b)(a + b) = 2025 = 3^4 \\cdot 5^2$, which has $15$ divisors, all odd.",
+        "Each factor pair $d < e$ gives one solution (the pair $45 \\cdot 45$ gives $b = 0$): $7$ pairs."
+      ]
+    },
+    {
+      "id": "ct-074",
+      "difficulty": 1250,
+      "prompt": "How many three-digit palindromes are there?",
+      "answer": "90",
+      "tags": [
+        "number theory"
+      ],
+      "steps": [
+        "A palindrome $\\overline{aba}$: $a$ has 9 choices (1–9), $b$ has 10.",
+        "$9 \\cdot 10 = 90$."
+      ]
+    },
+    {
+      "id": "ct-075",
+      "difficulty": 1600,
+      "prompt": "A positive divisor of $60$ is chosen at random. What is the probability that it is even?",
+      "answer": "2/3",
+      "tags": [
+        "probability",
+        "number theory"
+      ],
+      "steps": [
+        "$60 = 2^2 \\cdot 3 \\cdot 5$ has $12$ divisors; the odd ones are the divisors of $15$: $4$.",
+        "Even: $8/12 = 2/3$."
+      ]
+    },
+    {
+      "id": "ct-076",
+      "difficulty": 1050,
+      "prompt": "How many ways are there to choose $3$ people from a group of $10$?",
+      "answer": "120",
+      "tags": [
+        "counting"
+      ],
+      "steps": [
+        "$\\binom{10}{3} = \\frac{10 \\cdot 9 \\cdot 8}{6} = 120$."
+      ]
+    },
+    {
+      "id": "ct-077",
+      "difficulty": 1250,
+      "prompt": "How many distinct arrangements of the letters in LEVEL are there?",
+      "answer": "30",
+      "tags": [
+        "counting"
+      ],
+      "steps": [
+        "5 letters with L and E each twice: $\\frac{5!}{2!\\,2!} = 30$."
+      ]
+    },
+    {
+      "id": "ct-078",
+      "difficulty": 1200,
+      "prompt": "How many diagonals does a decagon (10 sides) have?",
+      "answer": "35",
+      "tags": [
+        "counting",
+        "geometry"
+      ],
+      "steps": [
+        "$\\frac{n(n-3)}{2} = \\frac{10 \\cdot 7}{2} = 35$."
+      ]
+    },
+    {
+      "id": "ct-079",
+      "difficulty": 1300,
+      "prompt": "How many shortest grid paths go from $(0, 0)$ to $(4, 3)$, moving one unit right or up at a time?",
+      "answer": "35",
+      "tags": [
+        "counting"
+      ],
+      "steps": [
+        "Choose which $3$ of the $7$ steps go up: $\\binom{7}{3} = 35$."
+      ]
+    },
+    {
+      "id": "ct-080",
+      "difficulty": 1250,
+      "prompt": "A fair coin is flipped $4$ times. What is the probability of exactly $2$ heads?",
+      "answer": "3/8",
+      "tags": [
+        "probability"
+      ],
+      "steps": [
+        "$\\binom42 / 2^4 = 6/16 = 3/8$."
+      ]
+    },
+    {
+      "id": "ct-081",
+      "difficulty": 1150,
+      "prompt": "Two fair dice are rolled. What is the probability that the sum is $8$?",
+      "answer": "5/36",
+      "tags": [
+        "probability"
+      ],
+      "steps": [
+        "Pairs: $(2,6), (3,5), (4,4), (5,3), (6,2)$ — 5 of 36."
+      ]
+    },
+    {
+      "id": "ct-082",
+      "difficulty": 1000,
+      "prompt": "Twelve people each shake hands with everyone else exactly once. How many handshakes are there?",
+      "answer": "66",
+      "tags": [
+        "counting"
+      ],
+      "steps": [
+        "$\\binom{12}{2} = 66$."
+      ]
+    },
+    {
+      "id": "ct-083",
+      "difficulty": 1350,
+      "prompt": "In how many ways can $5$ people sit around a round table (rotations count as the same)?",
+      "answer": "24",
+      "tags": [
+        "counting"
+      ],
+      "steps": [
+        "Fix one person's seat and arrange the rest: $4! = 24$."
+      ]
+    },
+    {
+      "id": "ct-084",
+      "difficulty": 1400,
+      "prompt": "How many four-digit numbers have only even digits?",
+      "answer": "500",
+      "tags": [
+        "counting"
+      ],
+      "steps": [
+        "First digit: $2, 4, 6, 8$ (4 choices); others: $0, 2, 4, 6, 8$ (5 each).",
+        "$4 \\cdot 5^3 = 500$."
+      ]
+    },
+    {
+      "id": "ct-085",
+      "difficulty": 1100,
+      "prompt": "How many nonempty subsets does $\\{1, 2, 3, 4, 5, 6, 7, 8\\}$ have?",
+      "answer": "255",
+      "tags": [
+        "counting"
+      ],
+      "steps": [
+        "$2^8 - 1 = 255$."
+      ]
+    },
+    {
+      "id": "ct-086",
+      "difficulty": 1450,
+      "prompt": "How many ordered triples of nonnegative integers $(a, b, c)$ satisfy $a + b + c = 10$?",
+      "answer": "66",
+      "tags": [
+        "counting"
+      ],
+      "steps": [
+        "Stars and bars: $\\binom{10 + 2}{2} = 66$."
+      ]
+    },
+    {
+      "id": "ct-087",
+      "difficulty": 1550,
+      "prompt": "How many ordered quadruples of positive integers $(a, b, c, d)$ satisfy $a + b + c + d = 10$?",
+      "answer": "84",
+      "tags": [
+        "counting"
+      ],
+      "steps": [
+        "Stars and bars with each part $\\ge 1$: $\\binom{9}{3} = 84$."
+      ]
+    },
+    {
+      "id": "ct-088",
+      "difficulty": 1700,
+      "prompt": "A random permutation of $1, 2, 3, 4$ is chosen. What is the probability that no number is in its original position?",
+      "answer": "3/8",
+      "tags": [
+        "probability"
+      ],
+      "steps": [
+        "Derangements of 4: $!4 = 9$.",
+        "$9/24 = 3/8$."
+      ]
+    },
+    {
+      "id": "ct-089",
+      "difficulty": 1550,
+      "prompt": "Two fair dice are rolled. What is the expected value of the product of the two numbers? (A fraction like 49/4 is fine.)",
+      "answer": "49/4",
+      "tags": [
+        "probability"
+      ],
+      "steps": [
+        "The dice are independent, so $E[XY] = E[X]\\,E[Y] = 3.5^2 = \\frac{49}{4}$."
+      ]
+    },
+    {
+      "id": "ct-090",
+      "difficulty": 1350,
+      "prompt": "On average, how many rolls of a fair die does it take to get the first $6$?",
+      "answer": "6",
+      "tags": [
+        "probability"
+      ],
+      "steps": [
+        "Geometric distribution with $p = \\frac16$: expected value $\\frac1p = 6$."
+      ]
+    },
+    {
+      "id": "ct-091",
+      "difficulty": 1350,
+      "prompt": "In how many ways can $6$ different books be arranged on a shelf if two particular books must be next to each other?",
+      "answer": "240",
+      "tags": [
+        "counting"
+      ],
+      "steps": [
+        "Glue the two books together: $5!$ arrangements, times $2$ orders inside the pair.",
+        "$2 \\cdot 120 = 240$."
+      ]
+    },
+    {
+      "id": "ct-092",
+      "difficulty": 1600,
+      "prompt": "How many rectangles (of any size) are there in a $4 \\times 4$ grid of unit squares?",
+      "answer": "100",
+      "tags": [
+        "counting",
+        "geometry"
+      ],
+      "steps": [
+        "Choose 2 of the 5 vertical lines and 2 of the 5 horizontal lines: $\\binom52^2 = 100$."
+      ]
+    },
+    {
+      "id": "ct-093",
+      "difficulty": 1200,
+      "prompt": "How many triangles have all three vertices among the vertices of a regular octagon?",
+      "answer": "56",
+      "tags": [
+        "counting",
+        "geometry"
+      ],
+      "steps": [
+        "$\\binom83 = 56$ (no three vertices are collinear)."
+      ]
+    },
+    {
+      "id": "ct-094",
+      "difficulty": 1450,
+      "prompt": "Two cards are drawn from a standard 52-card deck without replacement. What is the probability that both are aces?",
+      "answer": "1/221",
+      "tags": [
+        "probability"
+      ],
+      "steps": [
+        "$\\frac{4}{52} \\cdot \\frac{3}{51} = \\frac{1}{221}$."
+      ]
+    },
+    {
+      "id": "ct-095",
+      "difficulty": 1800,
+      "prompt": "In how many ways can a $2 \\times 8$ board be tiled with $1 \\times 2$ dominoes?",
+      "answer": "34",
+      "tags": [
+        "counting",
+        "recursion"
+      ],
+      "steps": [
+        "Let $t_n$ count tilings of $2 \\times n$: the left end is one vertical domino or two horizontal ones, so $t_n = t_{n-1} + t_{n-2}$.",
+        "$1, 2, 3, 5, 8, 13, 21, 34$."
+      ]
+    },
+    {
+      "id": "ct-096",
+      "difficulty": 1750,
+      "prompt": "How many binary strings of length $8$ have no two consecutive 1s?",
+      "answer": "55",
+      "tags": [
+        "counting",
+        "recursion"
+      ],
+      "steps": [
+        "These follow the Fibonacci numbers: lengths $1, 2, 3, \\ldots$ give $2, 3, 5, 8, 13, 21, 34, 55$."
+      ]
+    },
+    {
+      "id": "ct-097",
+      "difficulty": 1600,
+      "prompt": "In how many ways can you climb $10$ stairs taking $1$ or $2$ steps at a time?",
+      "answer": "89",
+      "tags": [
+        "counting",
+        "recursion"
+      ],
+      "steps": [
+        "$w_n = w_{n-1} + w_{n-2}$ with $w_1 = 1$, $w_2 = 2$: $1, 2, 3, 5, 8, 13, 21, 34, 55, 89$."
+      ]
+    },
+    {
+      "id": "ct-098",
+      "difficulty": 1800,
+      "prompt": "Five people each write their name on a slip; the slips are shuffled and handed back. In how many ways can nobody get their own slip?",
+      "answer": "44",
+      "tags": [
+        "counting"
+      ],
+      "steps": [
+        "Derangements: $!5 = 5!\\left(1 - 1 + \\frac1{2!} - \\frac1{3!} + \\frac1{4!} - \\frac1{5!}\\right) = 44$."
+      ]
+    },
+    {
+      "id": "ct-099",
+      "difficulty": 1550,
+      "prompt": "How many lattice points (points with integer coordinates) lie on the circle $x^2 + y^2 = 25$?",
+      "answer": "12",
+      "tags": [
+        "number theory",
+        "geometry"
+      ],
+      "steps": [
+        "$(\\pm5, 0), (0, \\pm5)$, and $(\\pm3, \\pm4), (\\pm4, \\pm3)$.",
+        "$4 + 8 = 12$."
+      ]
+    },
+    {
+      "id": "ct-100",
+      "difficulty": 1000,
+      "prompt": "Three fair coins are flipped. What is the probability of at least one head?",
+      "answer": "7/8",
+      "tags": [
+        "probability"
+      ],
+      "steps": [
+        "$1 - P(\\text{no heads}) = 1 - \\frac18 = \\frac78$."
+      ]
+    },
+    {
+      "id": "ct-101",
+      "difficulty": 1500,
+      "prompt": "A committee of $3$ is chosen from $5$ men and $4$ women. How many committees include at least one woman?",
+      "answer": "74",
+      "tags": [
+        "counting"
+      ],
+      "steps": [
+        "All committees minus all-men: $\\binom93 - \\binom53 = 84 - 10 = 74$."
+      ]
+    },
+    {
+      "id": "ct-102",
+      "difficulty": 1350,
+      "prompt": "How many distinct arrangements of the letters in BANANA are there?",
+      "answer": "60",
+      "tags": [
+        "counting"
+      ],
+      "steps": [
+        "$\\frac{6!}{3!\\,2!} = 60$ (three A's, two N's)."
+      ]
+    },
+    {
+      "id": "ct-103",
+      "difficulty": 1550,
+      "prompt": "Two different numbers are chosen at random from $1, 2, \\ldots, 10$. What is the probability that their sum is even?",
+      "answer": "4/9",
+      "tags": [
+        "probability"
+      ],
+      "steps": [
+        "The sum is even when both are even or both are odd: $2\\binom52 = 20$ of $\\binom{10}{2} = 45$ pairs.",
+        "$20/45 = 4/9$."
+      ]
+    },
+    {
+      "id": "ct-104",
+      "difficulty": 1650,
+      "prompt": "How many integers from $1$ to $100$ are divisible by $2$, $3$ or $5$?",
+      "answer": "74",
+      "tags": [
+        "counting"
+      ],
+      "steps": [
+        "Inclusion–exclusion: $50 + 33 + 20 - 16 - 10 - 6 + 3 = 74$."
+      ]
+    },
+    {
+      "id": "ct-105",
+      "difficulty": 1500,
+      "prompt": "In how many ways can $5$ identical balls be put into $3$ different boxes?",
+      "answer": "21",
+      "tags": [
+        "counting"
+      ],
+      "steps": [
+        "Stars and bars: $\\binom{5+2}{2} = 21$."
+      ]
+    },
+    {
+      "id": "ct-106",
+      "difficulty": 1550,
+      "prompt": "Two cards are drawn from a standard 52-card deck without replacement. What is the probability that they are the same suit?",
+      "answer": "4/17",
+      "tags": [
+        "probability"
+      ],
+      "steps": [
+        "Whatever the first card, $12$ of the remaining $51$ match its suit.",
+        "$12/51 = 4/17$."
+      ]
+    },
+    {
+      "id": "ct-107",
+      "difficulty": 1700,
+      "prompt": "How many ways can you make $25$ cents from pennies, nickels and dimes?",
+      "answer": "12",
+      "tags": [
+        "counting"
+      ],
+      "steps": [
+        "0 dimes: 0–5 nickels (6 ways). 1 dime: 0–3 nickels (4). 2 dimes: 0–1 nickels (2).",
+        "$6 + 4 + 2 = 12$."
+      ]
+    },
+    {
+      "id": "ct-108",
+      "difficulty": 1800,
+      "prompt": "In how many ways can $8$ people be split into $4$ unordered pairs?",
+      "answer": "105",
+      "tags": [
+        "counting"
+      ],
+      "steps": [
+        "$7 \\cdot 5 \\cdot 3 \\cdot 1 = 105$: the first person has 7 partners, the next unpaired person 5, and so on."
+      ]
+    },
+    {
+      "id": "ct-109",
+      "difficulty": 1650,
+      "prompt": "How many squares (of any size) are on an $8 \\times 8$ chessboard?",
+      "answer": "204",
+      "tags": [
+        "counting",
+        "geometry"
+      ],
+      "steps": [
+        "$k \\times k$ squares: $(9-k)^2$ of them. $1^2 + 2^2 + \\cdots + 8^2 = 204$."
+      ]
+    },
+    {
+      "id": "ct-110",
+      "difficulty": 1700,
+      "prompt": "Into how many regions do $4$ lines divide the plane if no two are parallel and no three meet at a point?",
+      "answer": "11",
+      "tags": [
+        "counting",
+        "geometry"
+      ],
+      "steps": [
+        "The $k$-th line crosses the previous $k-1$ lines and adds $k$ regions.",
+        "$1 + 1 + 2 + 3 + 4 = 11$."
+      ]
+    },
+    {
+      "id": "ct-111",
+      "difficulty": 1550,
+      "prompt": "A point is chosen at random in a square of side $2$. What is the probability that it is within distance $1$ of the center? (An answer like pi/4 is fine.)",
+      "answer": "pi/4",
+      "tags": [
+        "probability",
+        "geometry"
+      ],
+      "steps": [
+        "The good region is the inscribed circle of radius 1: area $\\pi$.",
+        "$\\pi / 4$."
+      ]
+    },
+    {
+      "id": "ct-112",
+      "difficulty": 1450,
+      "prompt": "A fair die is rolled twice. What is the probability that the second roll is greater than the first?",
+      "answer": "5/12",
+      "tags": [
+        "probability"
+      ],
+      "steps": [
+        "$P(\\text{equal}) = \\frac16$, and \"greater\" and \"less\" are equally likely.",
+        "$\\frac12\\left(1 - \\frac16\\right) = \\frac{5}{12}$."
+      ]
+    },
+    {
+      "id": "ct-113",
+      "difficulty": 1700,
+      "prompt": "A random permutation of $1, 2, \\ldots, 10$ is chosen. What is the expected number of numbers that stay in their original position?",
+      "answer": "1",
+      "tags": [
+        "probability"
+      ],
+      "steps": [
+        "Linearity of expectation: each number stays put with probability $\\frac{1}{10}$.",
+        "$10 \\cdot \\frac{1}{10} = 1$."
+      ]
+    },
+    {
+      "id": "ct-114",
+      "difficulty": 1050,
+      "prompt": "A circle has circumference $10\\pi$. What is its area? (An answer like 25pi is fine.)",
+      "answer": "25pi",
+      "tags": [
+        "geometry"
+      ],
+      "steps": [
+        "$2\\pi r = 10\\pi$, so $r = 5$ and the area is $25\\pi$."
+      ]
+    },
+    {
+      "id": "ct-115",
+      "difficulty": 1050,
+      "prompt": "A right triangle has legs $9$ and $40$. What is its hypotenuse?",
+      "answer": "41",
+      "tags": [
+        "geometry"
+      ],
+      "steps": [
+        "$\\sqrt{81 + 1600} = \\sqrt{1681} = 41$."
+      ]
+    },
+    {
+      "id": "ct-116",
+      "difficulty": 950,
+      "prompt": "What is each interior angle of a regular hexagon, in degrees?",
+      "answer": "120",
+      "tags": [
+        "geometry"
+      ],
+      "steps": [
+        "$\\frac{(6-2) \\cdot 180}{6} = 120$."
+      ]
+    },
+    {
+      "id": "ct-117",
+      "difficulty": 1050,
+      "prompt": "What is the sum of the interior angles of a decagon, in degrees?",
+      "answer": "1440",
+      "tags": [
+        "geometry"
+      ],
+      "steps": [
+        "$(10 - 2) \\cdot 180 = 1440$."
+      ]
+    },
+    {
+      "id": "ct-118",
+      "difficulty": 1250,
+      "prompt": "What is the area of an equilateral triangle with side $6$? (An answer like 9sqrt(3) is fine.)",
+      "answer": "9sqrt(3)",
+      "tags": [
+        "geometry"
+      ],
+      "steps": [
+        "Area $= \\frac{\\sqrt3}{4} s^2 = \\frac{\\sqrt3}{4} \\cdot 36 = 9\\sqrt3$."
+      ]
+    },
+    {
+      "id": "ct-119",
+      "difficulty": 1300,
+      "prompt": "What is the length of the space diagonal of a cube with side $4$? (An answer like 4sqrt(3) is fine.)",
+      "answer": "4sqrt(3)",
+      "tags": [
+        "geometry"
+      ],
+      "steps": [
+        "$\\sqrt{4^2 + 4^2 + 4^2} = 4\\sqrt3$."
+      ]
+    },
+    {
+      "id": "ct-120",
+      "difficulty": 1200,
+      "prompt": "What is the area of the triangle with vertices $(0, 0)$, $(4, 0)$ and $(1, 5)$?",
+      "answer": "10",
+      "tags": [
+        "geometry"
+      ],
+      "steps": [
+        "Base $4$ along the x-axis, height $5$: $\\frac12 \\cdot 4 \\cdot 5 = 10$."
+      ]
+    },
+    {
+      "id": "ct-121",
+      "difficulty": 1450,
+      "prompt": "What is the distance from the point $(3, 4)$ to the line $3x + 4y = 0$?",
+      "answer": "5",
+      "tags": [
+        "geometry"
+      ],
+      "steps": [
+        "$\\frac{|3 \\cdot 3 + 4 \\cdot 4|}{\\sqrt{3^2 + 4^2}} = \\frac{25}{5} = 5$."
+      ]
+    },
+    {
+      "id": "ct-122",
+      "difficulty": 1400,
+      "prompt": "What is the radius of the circle $x^2 + y^2 - 6x + 8y = 0$?",
+      "answer": "5",
+      "tags": [
+        "geometry"
+      ],
+      "steps": [
+        "Complete the squares: $(x-3)^2 + (y+4)^2 = 25$.",
+        "Radius $5$."
+      ]
+    },
+    {
+      "id": "ct-123",
+      "difficulty": 1100,
+      "prompt": "What is the volume of a sphere of radius $3$? (An answer like 36pi is fine.)",
+      "answer": "36pi",
+      "tags": [
+        "geometry"
+      ],
+      "steps": [
+        "$\\frac43 \\pi r^3 = \\frac43 \\pi \\cdot 27 = 36\\pi$."
+      ]
+    },
+    {
+      "id": "ct-124",
+      "difficulty": 1450,
+      "prompt": "What is the radius of the circle inscribed in a $5$–$12$–$13$ right triangle?",
+      "answer": "2",
+      "tags": [
+        "geometry"
+      ],
+      "steps": [
+        "For a right triangle $r = \\frac{a + b - c}{2} = \\frac{5 + 12 - 13}{2} = 2$.",
+        "(Or $r = \\text{Area}/s = 30/15$.)"
+      ]
+    },
+    {
+      "id": "ct-125",
+      "difficulty": 1400,
+      "prompt": "What is the radius of the circle passing through the vertices of a $5$–$12$–$13$ right triangle? (A fraction like 13/2 is fine.)",
+      "answer": "13/2",
+      "tags": [
+        "geometry"
+      ],
+      "steps": [
+        "The hypotenuse of a right triangle is a diameter of its circumcircle.",
+        "Radius $= \\frac{13}{2}$."
+      ]
+    },
+    {
+      "id": "ct-126",
+      "difficulty": 1500,
+      "prompt": "A rectangle has perimeter $20$ and area $21$. How long is its diagonal? (An answer like sqrt(58) is fine.)",
+      "answer": "sqrt(58)",
+      "tags": [
+        "geometry"
+      ],
+      "steps": [
+        "Sides $a + b = 10$, $ab = 21$.",
+        "Diagonal$^2 = a^2 + b^2 = (a+b)^2 - 2ab = 100 - 42 = 58$."
+      ]
+    },
+    {
+      "id": "ct-127",
+      "difficulty": 1350,
+      "prompt": "Chords $AB$ and $CD$ of a circle cross at $P$. If $AP = 3$, $PB = 8$ and $CP = 4$, what is $PD$?",
+      "answer": "6",
+      "tags": [
+        "geometry"
+      ],
+      "steps": [
+        "Intersecting chords: $AP \\cdot PB = CP \\cdot PD$.",
+        "$24 = 4 \\cdot PD$, so $PD = 6$."
+      ]
+    },
+    {
+      "id": "ct-128",
+      "difficulty": 1250,
+      "prompt": "What is the area of a square inscribed in a circle of radius $5$?",
+      "answer": "50",
+      "tags": [
+        "geometry"
+      ],
+      "steps": [
+        "The diagonal of the square is a diameter, $10$.",
+        "Area $= \\frac{d^2}{2} = 50$."
+      ]
+    },
+    {
+      "id": "ct-129",
+      "difficulty": 1600,
+      "prompt": "What is the area of a triangle with sides $7$, $8$ and $9$? (An answer like 12sqrt(5) is fine.)",
+      "answer": "12sqrt(5)",
+      "tags": [
+        "geometry"
+      ],
+      "steps": [
+        "Heron: $s = 12$, area $= \\sqrt{12 \\cdot 5 \\cdot 4 \\cdot 3} = \\sqrt{720} = 12\\sqrt5$."
+      ]
+    },
+    {
+      "id": "ct-130",
+      "difficulty": 1250,
+      "prompt": "What is the smaller angle between the hour and minute hands of a clock at 3:30, in degrees?",
+      "answer": "75",
+      "tags": [
+        "geometry"
+      ],
+      "steps": [
+        "Minute hand: $180°$. Hour hand: $90° + 15° = 105°$ (it moves $0.5°$ per minute).",
+        "Difference: $75°$."
+      ]
+    },
+    {
+      "id": "ct-131",
+      "difficulty": 1150,
+      "prompt": "What is the volume of a cone with radius $3$ and height $4$? (An answer like 12pi is fine.)",
+      "answer": "12pi",
+      "tags": [
+        "geometry"
+      ],
+      "steps": [
+        "$\\frac13 \\pi r^2 h = \\frac13 \\pi \\cdot 9 \\cdot 4 = 12\\pi$."
+      ]
+    },
+    {
+      "id": "ct-132",
+      "difficulty": 1300,
+      "prompt": "A regular polygon has interior angles of $156°$. How many sides does it have?",
+      "answer": "15",
+      "tags": [
+        "geometry"
+      ],
+      "steps": [
+        "Each exterior angle is $180° - 156° = 24°$.",
+        "$360° / 24° = 15$ sides."
+      ]
+    },
+    {
+      "id": "ct-133",
+      "difficulty": 1000,
+      "prompt": "The angles of a triangle are in the ratio $2 : 3 : 4$. What is the largest angle, in degrees?",
+      "answer": "80",
+      "tags": [
+        "geometry"
+      ],
+      "steps": [
+        "$2k + 3k + 4k = 180$, so $k = 20$.",
+        "Largest: $4k = 80$."
+      ]
+    },
+    {
+      "id": "ct-134",
+      "difficulty": 1450,
+      "prompt": "What is the area enclosed by $|x| + |y| = 4$?",
+      "answer": "32",
+      "tags": [
+        "geometry"
+      ],
+      "steps": [
+        "It is a square (diamond) with diagonals of length $8$.",
+        "Area $= \\frac{8 \\cdot 8}{2} = 32$."
+      ]
+    },
+    {
+      "id": "ct-135",
+      "difficulty": 1350,
+      "prompt": "What is the area of the triangle formed by the lines $y = x$, $y = -x$ and $y = 6$?",
+      "answer": "36",
+      "tags": [
+        "geometry"
+      ],
+      "steps": [
+        "Vertices $(0,0)$, $(6,6)$, $(-6,6)$: base $12$, height $6$.",
+        "Area $= 36$."
+      ]
+    },
+    {
+      "id": "ct-136",
+      "difficulty": 1500,
+      "prompt": "A tangent is drawn from the point $(7, 0)$ to the circle $x^2 + y^2 = 24$. How long is the tangent segment?",
+      "answer": "5",
+      "tags": [
+        "geometry"
+      ],
+      "steps": [
+        "Tangent length$^2$ = (distance to center)$^2$ − radius$^2$ $= 49 - 24 = 25$.",
+        "Length $5$."
+      ]
+    },
+    {
+      "id": "ct-137",
+      "difficulty": 1150,
+      "prompt": "What is the largest possible area of a rectangle with perimeter $40$?",
+      "answer": "100",
+      "tags": [
+        "geometry"
+      ],
+      "steps": [
+        "For a fixed perimeter the square is best: side $10$, area $100$."
+      ]
+    },
+    {
+      "id": "ct-138",
+      "difficulty": 1300,
+      "prompt": "Two similar triangles have areas in the ratio $9 : 16$. What is the ratio of their perimeters? (A fraction like 3/4 is fine.)",
+      "answer": "3/4",
+      "tags": [
+        "geometry"
+      ],
+      "steps": [
+        "Areas scale with the square of lengths, so lengths scale by $\\sqrt{9/16} = 3/4$."
+      ]
+    },
+    {
+      "id": "ct-139",
+      "difficulty": 1250,
+      "prompt": "What is the distance between the points $(1, 2, 3)$ and $(4, 6, 15)$?",
+      "answer": "13",
+      "tags": [
+        "geometry"
+      ],
+      "steps": [
+        "$\\sqrt{3^2 + 4^2 + 12^2} = \\sqrt{169} = 13$."
+      ]
+    },
+    {
+      "id": "ct-140",
+      "difficulty": 1150,
+      "prompt": "An inscribed angle intercepts an arc of $100°$. How large is the angle, in degrees?",
+      "answer": "50",
+      "tags": [
+        "geometry"
+      ],
+      "steps": [
+        "An inscribed angle is half its intercepted arc: $50°$."
+      ]
+    },
+    {
+      "id": "ct-141",
+      "difficulty": 1550,
+      "prompt": "A regular hexagon has area $54\\sqrt{3}$. What is its side length?",
+      "answer": "6",
+      "tags": [
+        "geometry"
+      ],
+      "steps": [
+        "A regular hexagon is 6 equilateral triangles: area $= \\frac{3\\sqrt3}{2} s^2$.",
+        "$\\frac{3\\sqrt3}{2} s^2 = 54\\sqrt3$ gives $s^2 = 36$, so $s = 6$."
+      ]
+    },
+    {
+      "id": "ct-142",
+      "difficulty": 1350,
+      "prompt": "What is the area of the quadrilateral with vertices $(0, 0)$, $(5, 0)$, $(5, 3)$ and $(0, 7)$?",
+      "answer": "25",
+      "tags": [
+        "geometry"
+      ],
+      "steps": [
+        "It is a trapezoid with parallel vertical sides $7$ and $3$, a distance $5$ apart.",
+        "Area $= \\frac{7 + 3}{2} \\cdot 5 = 25$."
+      ]
+    },
+    {
+      "id": "ct-143",
+      "difficulty": 1350,
+      "prompt": "A convex polyhedron has $12$ vertices and $30$ edges. How many faces does it have?",
+      "answer": "20",
+      "tags": [
+        "geometry"
+      ],
+      "steps": [
+        "Euler's formula: $V - E + F = 2$.",
+        "$12 - 30 + F = 2$, so $F = 20$."
+      ]
+    },
+    {
+      "id": "ct-144",
+      "difficulty": 1400,
+      "prompt": "How many edges does a regular icosahedron (20 triangular faces) have?",
+      "answer": "30",
+      "tags": [
+        "geometry"
+      ],
+      "steps": [
+        "Each of the 20 triangles has 3 edges, and each edge is shared by 2 faces.",
+        "$\\frac{20 \\cdot 3}{2} = 30$."
+      ]
+    },
+    {
+      "id": "ct-145",
+      "difficulty": 900,
+      "prompt": "What is $\\sin^2 37° + \\cos^2 37°$?",
+      "answer": "1",
+      "tags": [
+        "trigonometry"
+      ],
+      "steps": [
+        "$\\sin^2\\theta + \\cos^2\\theta = 1$ for every angle."
+      ]
+    },
+    {
+      "id": "ct-146",
+      "difficulty": 1000,
+      "prompt": "What is $\\sin 30° \\cdot \\cos 60°$?",
+      "answer": "1/4",
+      "tags": [
+        "trigonometry"
+      ],
+      "steps": [
+        "$\\frac12 \\cdot \\frac12 = \\frac14$."
+      ]
+    },
+    {
+      "id": "ct-147",
+      "difficulty": 1150,
+      "prompt": "If $\\sin\\theta = \\frac35$ and $\\theta$ is acute, what is $\\tan\\theta$?",
+      "answer": "3/4",
+      "tags": [
+        "trigonometry"
+      ],
+      "steps": [
+        "$\\cos\\theta = \\frac45$ (a 3–4–5 triangle).",
+        "$\\tan\\theta = \\frac{3/5}{4/5} = \\frac34$."
+      ]
+    },
+    {
+      "id": "ct-148",
+      "difficulty": 1350,
+      "prompt": "If $\\cos\\theta = \\frac13$, what is $\\cos 2\\theta$? (A fraction like -7/9 is fine.)",
+      "answer": "-7/9",
+      "tags": [
+        "trigonometry"
+      ],
+      "steps": [
+        "$\\cos 2\\theta = 2\\cos^2\\theta - 1 = \\frac29 - 1 = -\\frac79$."
+      ]
+    },
+    {
+      "id": "ct-149",
+      "difficulty": 1500,
+      "prompt": "What is $\\sin 15° \\cos 15°$?",
+      "answer": "1/4",
+      "tags": [
+        "trigonometry"
+      ],
+      "steps": [
+        "$\\sin\\theta\\cos\\theta = \\frac12 \\sin 2\\theta$.",
+        "$\\frac12 \\sin 30° = \\frac14$."
+      ]
+    },
+    {
+      "id": "ct-150",
+      "difficulty": 1550,
+      "prompt": "What is the exact value of $\\sin 75°$? (An answer like (sqrt(6)+sqrt(2))/4 is fine.)",
+      "answer": "(sqrt(6)+sqrt(2))/4",
+      "tags": [
+        "trigonometry"
+      ],
+      "steps": [
+        "$\\sin(45° + 30°) = \\sin45°\\cos30° + \\cos45°\\sin30°$.",
+        "$= \\frac{\\sqrt2}{2}\\cdot\\frac{\\sqrt3}{2} + \\frac{\\sqrt2}{2}\\cdot\\frac12 = \\frac{\\sqrt6 + \\sqrt2}{4}$."
+      ]
+    },
+    {
+      "id": "ct-151",
+      "difficulty": 1450,
+      "prompt": "What is the maximum value of $3\\sin x + 4\\cos x$?",
+      "answer": "5",
+      "tags": [
+        "trigonometry"
+      ],
+      "steps": [
+        "$a\\sin x + b\\cos x$ has maximum $\\sqrt{a^2 + b^2} = 5$."
+      ]
+    },
+    {
+      "id": "ct-152",
+      "difficulty": 1200,
+      "prompt": "How many solutions does $\\sin x = \\frac12$ have for $0 \\le x < 2\\pi$?",
+      "answer": "2",
+      "tags": [
+        "trigonometry"
+      ],
+      "steps": [
+        "$x = \\frac{\\pi}{6}$ and $x = \\frac{5\\pi}{6}$."
+      ]
+    },
+    {
+      "id": "ct-153",
+      "difficulty": 1950,
+      "prompt": "What is $\\tan 20° \\tan 40° \\tan 80°$? (An answer like sqrt(3) is fine.)",
+      "answer": "sqrt(3)",
+      "tags": [
+        "trigonometry"
+      ],
+      "steps": [
+        "Identity: $\\tan\\theta \\tan(60° - \\theta)\\tan(60° + \\theta) = \\tan 3\\theta$.",
+        "With $\\theta = 20°$: $\\tan 60° = \\sqrt3$."
+      ]
+    },
+    {
+      "id": "ct-154",
+      "difficulty": 2000,
+      "prompt": "What is $\\cos 36° - \\cos 72°$?",
+      "answer": "1/2",
+      "tags": [
+        "trigonometry"
+      ],
+      "steps": [
+        "Let $a = \\cos 36°$, $b = \\cos 72°$. Using $\\cos 2\\theta = 2\\cos^2\\theta - 1$: $b = 2a^2 - 1$ and $-a = \\cos 144° = 2b^2 - 1$.",
+        "Subtract: $a + b = 2(a^2 - b^2)$, so (as $a + b \\ne 0$) $a - b = \\frac12$."
+      ]
+    },
+    {
+      "id": "ct-155",
+      "difficulty": 1950,
+      "prompt": "What is $\\sin 10° \\sin 50° \\sin 70°$?",
+      "answer": "1/8",
+      "tags": [
+        "trigonometry"
+      ],
+      "steps": [
+        "Identity: $\\sin\\theta \\sin(60° - \\theta)\\sin(60° + \\theta) = \\frac14 \\sin 3\\theta$.",
+        "With $\\theta = 10°$: $\\frac14 \\sin 30° = \\frac18$."
+      ]
+    },
+    {
+      "id": "ct-156",
+      "difficulty": 1250,
+      "prompt": "What is the period of $f(x) = \\sin 3x$? (An answer like 2pi/3 is fine.)",
+      "answer": "2pi/3",
+      "tags": [
+        "trigonometry"
+      ],
+      "steps": [
+        "$\\sin(kx)$ has period $\\frac{2\\pi}{k}$."
+      ]
+    },
+    {
+      "id": "ct-157",
+      "difficulty": 1550,
+      "prompt": "In a triangle, $a = 7$, $b = 8$ and the angle between them is $60°$. What is the third side $c$? (An answer like sqrt(57) is fine.)",
+      "answer": "sqrt(57)",
+      "tags": [
+        "trigonometry"
+      ],
+      "steps": [
+        "Law of cosines: $c^2 = 49 + 64 - 2 \\cdot 7 \\cdot 8 \\cos 60° = 113 - 56 = 57$."
+      ]
+    },
+    {
+      "id": "ct-158",
+      "difficulty": 1850,
+      "prompt": "What is $\\sin^2 1° + \\sin^2 2° + \\cdots + \\sin^2 89°$? (A fraction like 89/2 is fine.)",
+      "answer": "89/2",
+      "tags": [
+        "trigonometry"
+      ],
+      "steps": [
+        "Pair $\\sin^2 k° + \\sin^2 (90 - k)° = \\sin^2 k° + \\cos^2 k° = 1$ for $k = 1, \\ldots, 44$.",
+        "That gives $44$, plus $\\sin^2 45° = \\frac12$: $\\frac{89}{2}$."
+      ]
+    },
+    {
+      "id": "ct-159",
+      "difficulty": 1000,
+      "prompt": "What is $|3 + 4i|$?",
+      "answer": "5",
+      "tags": [
+        "complex numbers"
+      ],
+      "steps": [
+        "$\\sqrt{3^2 + 4^2} = 5$."
+      ]
+    },
+    {
+      "id": "ct-160",
+      "difficulty": 1050,
+      "prompt": "What is $(2 + i)(2 - i)$?",
+      "answer": "5",
+      "tags": [
+        "complex numbers"
+      ],
+      "steps": [
+        "$4 - i^2 = 4 + 1 = 5$."
+      ]
+    },
+    {
+      "id": "ct-161",
+      "difficulty": 1450,
+      "prompt": "Let $i^2 = -1$. What is $i + i^2 + i^3 + \\cdots + i^{100}$?",
+      "answer": "0",
+      "tags": [
+        "complex numbers"
+      ],
+      "steps": [
+        "Every 4 consecutive powers sum to $i - 1 - i + 1 = 0$, and $100$ is a multiple of 4."
+      ]
+    },
+    {
+      "id": "ct-162",
+      "difficulty": 1550,
+      "prompt": "What is the imaginary part of $(1 + i)^6$?",
+      "answer": "-8",
+      "tags": [
+        "complex numbers"
+      ],
+      "steps": [
+        "$(1 + i)^2 = 2i$, so $(1+i)^6 = (2i)^3 = -8i$."
+      ]
+    },
+    {
+      "id": "ct-163",
+      "difficulty": 1550,
+      "prompt": "What is the product of the two non-real cube roots of $1$?",
+      "answer": "1",
+      "tags": [
+        "complex numbers"
+      ],
+      "steps": [
+        "They are $\\omega$ and $\\omega^2$ with $\\omega^3 = 1$.",
+        "$\\omega \\cdot \\omega^2 = \\omega^3 = 1$."
+      ]
+    },
+    {
+      "id": "ct-164",
+      "difficulty": 1300,
+      "prompt": "What is $\\left|\\frac{1}{1 + i}\\right|$? (An answer like sqrt(2)/2 is fine.)",
+      "answer": "sqrt(2)/2",
+      "tags": [
+        "complex numbers"
+      ],
+      "steps": [
+        "$\\left|\\frac{1}{1+i}\\right| = \\frac{1}{|1+i|} = \\frac{1}{\\sqrt2} = \\frac{\\sqrt2}{2}$."
+      ]
+    },
+    {
+      "id": "ct-165",
+      "difficulty": 1500,
+      "prompt": "What is the sum of the five 5th roots of unity?",
+      "answer": "0",
+      "tags": [
+        "complex numbers"
+      ],
+      "steps": [
+        "They are the roots of $z^5 - 1 = 0$; by Vieta their sum is minus the $z^4$ coefficient, $0$."
+      ]
+    },
+    {
+      "id": "ct-166",
+      "difficulty": 1150,
+      "prompt": "What is the derivative of $x^3$ at $x = 2$?",
+      "answer": "12",
+      "tags": [
+        "calculus"
+      ],
+      "steps": [
+        "$\\frac{d}{dx} x^3 = 3x^2$, which is $12$ at $x = 2$."
+      ]
+    },
+    {
+      "id": "ct-167",
+      "difficulty": 1250,
+      "prompt": "Evaluate $\\displaystyle\\int_0^2 3x^2 \\, dx$.",
+      "answer": "8",
+      "tags": [
+        "calculus"
+      ],
+      "steps": [
+        "$\\left[x^3\\right]_0^2 = 8$."
+      ]
+    },
+    {
+      "id": "ct-168",
+      "difficulty": 1150,
+      "prompt": "Evaluate $\\displaystyle\\lim_{x \\to 2} \\frac{x^2 - 4}{x - 2}$.",
+      "answer": "4",
+      "tags": [
+        "calculus"
+      ],
+      "steps": [
+        "$\\frac{(x-2)(x+2)}{x-2} = x + 2 \\to 4$."
+      ]
+    },
+    {
+      "id": "ct-169",
+      "difficulty": 1350,
+      "prompt": "What is the derivative of $\\sin x \\cos x$ at $x = 0$?",
+      "answer": "1",
+      "tags": [
+        "calculus"
+      ],
+      "steps": [
+        "$\\sin x\\cos x = \\frac12 \\sin 2x$, whose derivative is $\\cos 2x$.",
+        "At $x = 0$: $1$."
+      ]
+    },
+    {
+      "id": "ct-170",
+      "difficulty": 1300,
+      "prompt": "Evaluate $\\displaystyle\\int_0^\\pi \\sin x \\, dx$.",
+      "answer": "2",
+      "tags": [
+        "calculus"
+      ],
+      "steps": [
+        "$\\left[-\\cos x\\right]_0^\\pi = 1 - (-1) = 2$."
+      ]
+    },
+    {
+      "id": "ct-171",
+      "difficulty": 1550,
+      "prompt": "Evaluate $\\displaystyle\\lim_{n \\to \\infty} \\left(1 + \\frac{1}{n}\\right)^{2n}$. (An answer like e^2 is fine.)",
+      "answer": "e^2",
+      "tags": [
+        "calculus"
+      ],
+      "steps": [
+        "$\\left(1 + \\frac1n\\right)^{2n} = \\left[\\left(1 + \\frac1n\\right)^n\\right]^2 \\to e^2$."
+      ]
+    },
+    {
+      "id": "ct-172",
+      "difficulty": 1250,
+      "prompt": "What is the slope of the tangent line to $y = \\ln x$ at $x = 2$? (A fraction like 1/2 is fine.)",
+      "answer": "1/2",
+      "tags": [
+        "calculus"
+      ],
+      "steps": [
+        "$\\frac{d}{dx}\\ln x = \\frac1x$, which is $\\frac12$ at $x = 2$."
+      ]
+    },
+    {
+      "id": "ct-173",
+      "difficulty": 1250,
+      "prompt": "Evaluate $\\displaystyle\\int_1^e \\frac{1}{x} \\, dx$.",
+      "answer": "1",
+      "tags": [
+        "calculus"
+      ],
+      "steps": [
+        "$\\left[\\ln x\\right]_1^e = 1 - 0 = 1$."
+      ]
+    },
+    {
+      "id": "ct-174",
+      "difficulty": 1650,
+      "prompt": "What is the maximum value of $f(x) = x e^{-x}$ for $x \\ge 0$? (An answer like 1/e is fine.)",
+      "answer": "1/e",
+      "tags": [
+        "calculus"
+      ],
+      "steps": [
+        "$f'(x) = (1 - x)e^{-x} = 0$ at $x = 1$.",
+        "$f(1) = e^{-1} = \\frac1e$."
+      ]
+    },
+    {
+      "id": "ct-175",
+      "difficulty": 1550,
+      "prompt": "Evaluate $\\displaystyle\\lim_{x \\to 0} \\frac{1 - \\cos x}{x^2}$. (A fraction like 1/2 is fine.)",
+      "answer": "1/2",
+      "tags": [
+        "calculus"
+      ],
+      "steps": [
+        "$1 - \\cos x \\approx \\frac{x^2}{2}$ for small $x$ (or apply L'Hôpital twice)."
+      ]
+    },
+    {
+      "id": "ct-176",
+      "difficulty": 1300,
+      "prompt": "Evaluate $\\displaystyle\\int_0^1 x(1 - x) \\, dx$. (A fraction like 1/6 is fine.)",
+      "answer": "1/6",
+      "tags": [
+        "calculus"
+      ],
+      "steps": [
+        "$\\int_0^1 (x - x^2)\\,dx = \\frac12 - \\frac13 = \\frac16$."
+      ]
+    },
+    {
+      "id": "ct-177",
+      "difficulty": 1450,
+      "prompt": "Evaluate $\\displaystyle\\int_0^1 e^{2x} \\, dx$. (An answer like (e^2-1)/2 is fine.)",
+      "answer": "(e^2-1)/2",
+      "tags": [
+        "calculus"
+      ],
+      "steps": [
+        "$\\left[\\frac12 e^{2x}\\right]_0^1 = \\frac{e^2 - 1}{2}$."
+      ]
+    },
+    {
+      "id": "ct-178",
+      "difficulty": 1450,
+      "prompt": "What is the derivative of $e^{x^2}$ at $x = 1$? (An answer like 2e is fine.)",
+      "answer": "2e",
+      "tags": [
+        "calculus"
+      ],
+      "steps": [
+        "Chain rule: $\\frac{d}{dx} e^{x^2} = 2x e^{x^2}$.",
+        "At $x = 1$: $2e$."
+      ]
+    },
+    {
+      "id": "ct-179",
+      "difficulty": 1100,
+      "prompt": "Evaluate $\\displaystyle\\lim_{x \\to \\infty} \\frac{3x^2 + 1}{x^2 - 5}$.",
+      "answer": "3",
+      "tags": [
+        "calculus"
+      ],
+      "steps": [
+        "Divide top and bottom by $x^2$: $\\frac{3 + 1/x^2}{1 - 5/x^2} \\to 3$."
+      ]
+    },
+    {
+      "id": "ct-180",
+      "difficulty": 1300,
+      "prompt": "Evaluate $\\displaystyle\\int_{-1}^{1} |x| \\, dx$.",
+      "answer": "1",
+      "tags": [
+        "calculus"
+      ],
+      "steps": [
+        "Two triangles of area $\\frac12$ each."
+      ]
+    },
+    {
+      "id": "ct-181",
+      "difficulty": 1000,
+      "prompt": "What is $1 + \\frac12 + \\frac14 + \\frac18 + \\cdots$?",
+      "answer": "2",
+      "tags": [
+        "series"
+      ],
+      "steps": [
+        "Geometric series: $\\frac{1}{1 - 1/2} = 2$."
+      ]
+    },
+    {
+      "id": "ct-182",
+      "difficulty": 1800,
+      "prompt": "Evaluate $\\displaystyle\\sum_{n=1}^{\\infty} \\frac{n}{2^n}$.",
+      "answer": "2",
+      "tags": [
+        "series"
+      ],
+      "steps": [
+        "$\\sum n r^n = \\frac{r}{(1 - r)^2}$ for $|r| < 1$.",
+        "With $r = \\frac12$: $\\frac{1/2}{1/4} = 2$."
+      ]
+    },
+    {
+      "id": "ct-183",
+      "difficulty": 1650,
+      "prompt": "Evaluate $\\displaystyle\\sum_{n=1}^{\\infty} \\frac{1}{n^2}$. (An answer like pi^2/6 is fine.)",
+      "answer": "pi^2/6",
+      "tags": [
+        "series"
+      ],
+      "steps": [
+        "This is the Basel problem (Euler): $\\frac{\\pi^2}{6}$."
+      ]
+    },
+    {
+      "id": "ct-184",
+      "difficulty": 1450,
+      "prompt": "Evaluate $\\displaystyle\\int_0^\\infty e^{-2x} \\, dx$. (A fraction like 1/2 is fine.)",
+      "answer": "1/2",
+      "tags": [
+        "calculus"
+      ],
+      "steps": [
+        "$\\left[-\\frac12 e^{-2x}\\right]_0^\\infty = 0 + \\frac12$."
+      ]
+    },
+    {
+      "id": "ct-185",
+      "difficulty": 1400,
+      "prompt": "How many local extrema (maxima or minima) does $f(x) = x^3 - 3x$ have?",
+      "answer": "2",
+      "tags": [
+        "calculus"
+      ],
+      "steps": [
+        "$f'(x) = 3x^2 - 3 = 0$ at $x = \\pm1$, and $f'$ changes sign at both.",
+        "A local max at $x = -1$ and a local min at $x = 1$."
+      ]
+    },
+    {
+      "id": "ct-186",
+      "difficulty": 1450,
+      "prompt": "Evaluate $\\displaystyle\\int_0^{\\pi/4} \\sec^2 x \\, dx$.",
+      "answer": "1",
+      "tags": [
+        "calculus"
+      ],
+      "steps": [
+        "$\\left[\\tan x\\right]_0^{\\pi/4} = 1 - 0$."
+      ]
+    },
+    {
+      "id": "ct-187",
+      "difficulty": 1700,
+      "prompt": "Evaluate $\\displaystyle\\lim_{x \\to 0} \\frac{e^x - 1 - x}{x^2}$. (A fraction like 1/2 is fine.)",
+      "answer": "1/2",
+      "tags": [
+        "calculus"
+      ],
+      "steps": [
+        "Taylor: $e^x = 1 + x + \\frac{x^2}{2} + \\cdots$, so the ratio $\\to \\frac12$."
+      ]
+    },
+    {
+      "id": "ct-188",
+      "difficulty": 1400,
+      "prompt": "Evaluate $\\displaystyle\\int_0^1 \\frac{1}{1 + x} \\, dx$. (An answer like ln(2) is fine.)",
+      "answer": "ln(2)",
+      "tags": [
+        "calculus"
+      ],
+      "steps": [
+        "$\\left[\\ln(1 + x)\\right]_0^1 = \\ln 2$."
+      ]
+    },
+    {
+      "id": "ct-189",
+      "difficulty": 1500,
+      "prompt": "What is the area between the curves $y = x$ and $y = x^2$? (A fraction like 1/6 is fine.)",
+      "answer": "1/6",
+      "tags": [
+        "calculus"
+      ],
+      "steps": [
+        "They meet at $x = 0$ and $x = 1$, with $x \\ge x^2$ in between.",
+        "$\\int_0^1 (x - x^2)\\,dx = \\frac12 - \\frac13 = \\frac16$."
+      ]
+    },
+    {
+      "id": "ct-190",
+      "difficulty": 1200,
+      "prompt": "What is the second derivative of $x^4$ at $x = 1$?",
+      "answer": "12",
+      "tags": [
+        "calculus"
+      ],
+      "steps": [
+        "$\\frac{d^2}{dx^2} x^4 = 12x^2$, which is $12$ at $x = 1$."
+      ]
+    },
+    {
+      "id": "ct-191",
+      "difficulty": 1650,
+      "prompt": "Evaluate $\\displaystyle\\int_0^2 x e^{x^2} \\, dx$. (An answer like (e^4-1)/2 is fine.)",
+      "answer": "(e^4-1)/2",
+      "tags": [
+        "calculus"
+      ],
+      "steps": [
+        "Substitute $u = x^2$, $du = 2x\\,dx$: $\\frac12 \\int_0^4 e^u\\,du = \\frac{e^4 - 1}{2}$."
+      ]
+    },
+    {
+      "id": "ct-192",
+      "difficulty": 1450,
+      "prompt": "Evaluate $\\displaystyle\\lim_{x \\to 0} \\frac{\\sin 3x}{\\sin 5x}$. (A fraction like 3/5 is fine.)",
+      "answer": "3/5",
+      "tags": [
+        "calculus"
+      ],
+      "steps": [
+        "$\\sin kx \\approx kx$ near 0, so the ratio $\\to \\frac{3x}{5x} = \\frac35$."
+      ]
+    },
+    {
+      "id": "ct-193",
+      "difficulty": 1500,
+      "prompt": "Evaluate $\\displaystyle\\sum_{n=1}^{\\infty} \\frac{1}{n(n+1)}$.",
+      "answer": "1",
+      "tags": [
+        "series"
+      ],
+      "steps": [
+        "$\\frac{1}{n(n+1)} = \\frac1n - \\frac{1}{n+1}$ telescopes to $1$."
+      ]
+    },
+    {
+      "id": "ct-194",
+      "difficulty": 1100,
+      "prompt": "What is $\\det \\begin{pmatrix} 2 & 3 \\\\ 1 & 4 \\end{pmatrix}$?",
+      "answer": "5",
+      "tags": [
+        "matrices"
+      ],
+      "steps": [
+        "$2 \\cdot 4 - 3 \\cdot 1 = 5$."
+      ]
+    },
+    {
+      "id": "ct-195",
+      "difficulty": 1250,
+      "prompt": "What is $\\det \\begin{pmatrix} 2 & 7 & 1 \\\\ 0 & 3 & 5 \\\\ 0 & 0 & 4 \\end{pmatrix}$?",
+      "answer": "24",
+      "tags": [
+        "matrices"
+      ],
+      "steps": [
+        "The matrix is upper triangular: the determinant is the product of the diagonal, $2 \\cdot 3 \\cdot 4$."
+      ]
+    },
+    {
+      "id": "ct-196",
+      "difficulty": 1350,
+      "prompt": "A $2 \\times 2$ matrix $A$ has $\\det A = 3$. What is $\\det(A^{-1})$? (A fraction like 1/3 is fine.)",
+      "answer": "1/3",
+      "tags": [
+        "matrices"
+      ],
+      "steps": [
+        "$\\det(A^{-1}) = \\frac{1}{\\det A}$."
+      ]
+    },
+    {
+      "id": "ct-197",
+      "difficulty": 1400,
+      "prompt": "A $2 \\times 2$ matrix $A$ has $\\det A = 5$. What is $\\det(2A)$?",
+      "answer": "20",
+      "tags": [
+        "matrices"
+      ],
+      "steps": [
+        "Scaling an $n \\times n$ matrix by $c$ scales the determinant by $c^n$: $2^2 \\cdot 5$."
+      ]
+    },
+    {
+      "id": "ct-198",
+      "difficulty": 1350,
+      "prompt": "What is the rank of $\\begin{pmatrix} 1 & 2 \\\\ 2 & 4 \\end{pmatrix}$?",
+      "answer": "1",
+      "tags": [
+        "matrices"
+      ],
+      "steps": [
+        "The second row is twice the first, so only one row is independent."
+      ]
+    },
+    {
+      "id": "ct-199",
+      "difficulty": 1550,
+      "prompt": "What is the largest eigenvalue of $\\begin{pmatrix} 4 & 1 \\\\ 2 & 3 \\end{pmatrix}$?",
+      "answer": "5",
+      "tags": [
+        "matrices"
+      ],
+      "steps": [
+        "Trace $7$ and determinant $10$, so the eigenvalues solve $\\lambda^2 - 7\\lambda + 10 = 0$.",
+        "$\\lambda = 2$ or $5$."
+      ]
+    },
+    {
+      "id": "ct-200",
+      "difficulty": 1050,
+      "prompt": "What is the dot product of $(1, 2, 3)$ and $(4, -5, 6)$?",
+      "answer": "12",
+      "tags": [
+        "vectors"
+      ],
+      "steps": [
+        "$4 - 10 + 18 = 12$."
+      ]
+    },
+    {
+      "id": "ct-201",
+      "difficulty": 1000,
+      "prompt": "What is the length of the vector $(1, 2, 2)$?",
+      "answer": "3",
+      "tags": [
+        "vectors"
+      ],
+      "steps": [
+        "$\\sqrt{1 + 4 + 4} = 3$."
+      ]
+    },
+    {
+      "id": "ct-202",
+      "difficulty": 1200,
+      "prompt": "What is the angle between the vectors $(1, 0)$ and $(1, 1)$, in degrees?",
+      "answer": "45",
+      "tags": [
+        "vectors"
+      ],
+      "steps": [
+        "$\\cos\\theta = \\frac{1}{1 \\cdot \\sqrt2}$, so $\\theta = 45°$."
+      ]
+    },
+    {
+      "id": "ct-203",
+      "difficulty": 1350,
+      "prompt": "What is the area of the parallelogram spanned by $(3, 1)$ and $(1, 2)$?",
+      "answer": "5",
+      "tags": [
+        "vectors",
+        "matrices"
+      ],
+      "steps": [
+        "Area $= |\\det| = |3 \\cdot 2 - 1 \\cdot 1| = 5$."
+      ]
+    },
+    {
+      "id": "ct-204",
+      "difficulty": 1600,
+      "prompt": "Let $A = \\begin{pmatrix} 0 & 1 \\\\ -1 & 0 \\end{pmatrix}$. What is the trace of $A^{4}$?",
+      "answer": "2",
+      "tags": [
+        "matrices"
+      ],
+      "steps": [
+        "$A^2 = -I$, so $A^4 = I$.",
+        "$\\operatorname{tr} I = 2$."
+      ]
+    },
+    {
+      "id": "ct-205",
+      "difficulty": 1450,
+      "prompt": "Let $A = \\begin{pmatrix} 1 & 1 \\\\ 0 & 1 \\end{pmatrix}$. What is the top-right entry of $A^{10}$?",
+      "answer": "10",
+      "tags": [
+        "matrices"
+      ],
+      "steps": [
+        "$A^n = \\begin{pmatrix} 1 & n \\\\ 0 & 1 \\end{pmatrix}$ (each multiplication adds 1 to the corner)."
+      ]
+    },
+    {
+      "id": "ct-206",
+      "difficulty": 1550,
+      "prompt": "What is $\\det \\begin{pmatrix} 1 & 1 & 1 \\\\ 1 & 2 & 3 \\\\ 1 & 4 & 9 \\end{pmatrix}$?",
+      "answer": "2",
+      "tags": [
+        "matrices"
+      ],
+      "steps": [
+        "Vandermonde with nodes $1, 2, 3$: $(2-1)(3-1)(3-2) = 2$."
+      ]
+    },
+    {
+      "id": "ct-207",
+      "difficulty": 950,
+      "prompt": "What is the mean of $2, 4, 4, 4, 5, 5, 7, 9$?",
+      "answer": "5",
+      "tags": [
+        "statistics"
+      ],
+      "steps": [
+        "Sum $40$ over $8$ numbers: $5$."
+      ]
+    },
+    {
+      "id": "ct-208",
+      "difficulty": 1350,
+      "prompt": "What is the (population) standard deviation of $2, 4, 4, 4, 5, 5, 7, 9$?",
+      "answer": "2",
+      "tags": [
+        "statistics"
+      ],
+      "steps": [
+        "Mean $5$; squared deviations $9, 1, 1, 1, 0, 0, 4, 16$ sum to $32$.",
+        "Variance $32/8 = 4$, so the standard deviation is $2$."
+      ]
+    },
+    {
+      "id": "ct-209",
+      "difficulty": 1100,
+      "prompt": "What is the median of $3, 1, 4, 1, 5, 9, 2, 6$? (A fraction like 7/2 is fine.)",
+      "answer": "7/2",
+      "tags": [
+        "statistics"
+      ],
+      "steps": [
+        "Sorted: $1, 1, 2, 3, 4, 5, 6, 9$. The middle two are $3$ and $4$.",
+        "Median $= \\frac{7}{2}$."
+      ]
+    },
+    {
+      "id": "ct-210",
+      "difficulty": 1150,
+      "prompt": "Five numbers have mean $12$. After one is removed, the other four have mean $10$. What number was removed?",
+      "answer": "20",
+      "tags": [
+        "statistics"
+      ],
+      "steps": [
+        "Total before: $60$. Total after: $40$.",
+        "Removed: $20$."
+      ]
+    },
+    {
+      "id": "ct-211",
+      "difficulty": 1650,
+      "prompt": "What is the variance of a single roll of a fair six-sided die? (A fraction like 35/12 is fine.)",
+      "answer": "35/12",
+      "tags": [
+        "probability",
+        "statistics"
+      ],
+      "steps": [
+        "$E[X^2] = \\frac{91}{6}$ and $E[X] = \\frac72$.",
+        "$\\frac{91}{6} - \\frac{49}{4} = \\frac{35}{12}$."
+      ]
+    },
+    {
+      "id": "ct-212",
+      "difficulty": 1850,
+      "prompt": "Two fair dice are rolled. What is the expected value of the larger of the two numbers? (A fraction like 161/36 is fine.)",
+      "answer": "161/36",
+      "tags": [
+        "probability"
+      ],
+      "steps": [
+        "$P(\\max = m) = \\frac{2m - 1}{36}$.",
+        "$E = \\sum_{m=1}^{6} m \\cdot \\frac{2m-1}{36} = \\frac{161}{36}$."
+      ]
+    },
+    {
+      "id": "ct-213",
+      "difficulty": 1000,
+      "prompt": "What is the $20$th term of the arithmetic sequence $3, 7, 11, 15, \\ldots$?",
+      "answer": "79",
+      "tags": [
+        "sequences"
+      ],
+      "steps": [
+        "$a_n = 3 + 4(n - 1)$, so $a_{20} = 3 + 76 = 79$."
+      ]
+    },
+    {
+      "id": "ct-214",
+      "difficulty": 900,
+      "prompt": "What is $1 + 2 + 3 + \\cdots + 100$?",
+      "answer": "5050",
+      "tags": [
+        "sequences"
+      ],
+      "steps": [
+        "$\\frac{100 \\cdot 101}{2} = 5050$."
+      ]
+    },
+    {
+      "id": "ct-215",
+      "difficulty": 1300,
+      "prompt": "What is $1 + 3 + 9 + 27 + \\cdots + 3^6$?",
+      "answer": "1093",
+      "tags": [
+        "sequences"
+      ],
+      "steps": [
+        "Geometric series: $\\frac{3^7 - 1}{3 - 1} = \\frac{2186}{2} = 1093$."
+      ]
+    },
+    {
+      "id": "ct-216",
+      "difficulty": 1450,
+      "prompt": "A sequence has $a_1 = 1$ and $a_{n+1} = 2a_n + 1$. What is $a_{10}$?",
+      "answer": "1023",
+      "tags": [
+        "sequences",
+        "recursion"
+      ],
+      "steps": [
+        "$a_n + 1$ doubles each step: $a_n + 1 = 2^n$.",
+        "$a_{10} = 2^{10} - 1 = 1023$."
+      ]
+    },
+    {
+      "id": "ct-217",
+      "difficulty": 1400,
+      "prompt": "What is $1^2 + 2^2 + 3^2 + \\cdots + 20^2$?",
+      "answer": "2870",
+      "tags": [
+        "sequences"
+      ],
+      "steps": [
+        "$\\frac{n(n+1)(2n+1)}{6} = \\frac{20 \\cdot 21 \\cdot 41}{6} = 2870$."
+      ]
+    },
+    {
+      "id": "ct-218",
+      "difficulty": 1000,
+      "prompt": "With $F_1 = F_2 = 1$ and $F_{n} = F_{n-1} + F_{n-2}$, what is the Fibonacci number $F_{10}$?",
+      "answer": "55",
+      "tags": [
+        "sequences"
+      ],
+      "steps": [
+        "$1, 1, 2, 3, 5, 8, 13, 21, 34, 55$."
+      ]
+    },
+    {
+      "id": "ct-219",
+      "difficulty": 1450,
+      "prompt": "What is the sum of all two-digit multiples of $7$?",
+      "answer": "728",
+      "tags": [
+        "sequences"
+      ],
+      "steps": [
+        "They are $14, 21, \\ldots, 98$: $13$ terms.",
+        "Sum $= \\frac{13(14 + 98)}{2} = 728$."
+      ]
+    },
+    {
+      "id": "ct-220",
+      "difficulty": 1150,
+      "prompt": "How many terms are in the sequence $5, 8, 11, \\ldots, 200$?",
+      "answer": "66",
+      "tags": [
+        "sequences"
+      ],
+      "steps": [
+        "$\\frac{200 - 5}{3} + 1 = 65 + 1 = 66$."
+      ]
+    },
+    {
+      "id": "ct-221",
+      "difficulty": 1400,
+      "prompt": "What is the minimum value of $x + \\frac{4}{x}$ for $x > 0$?",
+      "answer": "4",
+      "tags": [
+        "inequalities"
+      ],
+      "steps": [
+        "AM–GM: $x + \\frac4x \\ge 2\\sqrt{x \\cdot \\frac4x} = 4$, with equality at $x = 2$."
+      ]
+    },
+    {
+      "id": "ct-222",
+      "difficulty": 1150,
+      "prompt": "If $x + y = 10$, what is the largest possible value of $xy$?",
+      "answer": "25",
+      "tags": [
+        "inequalities"
+      ],
+      "steps": [
+        "$xy = x(10 - x)$ is largest at $x = 5$: $25$."
+      ]
+    },
+    {
+      "id": "ct-223",
+      "difficulty": 1350,
+      "prompt": "What is the minimum of $x^2 + y^2$ if $x + y = 4$?",
+      "answer": "8",
+      "tags": [
+        "inequalities"
+      ],
+      "steps": [
+        "By symmetry (or QM–AM) the minimum is at $x = y = 2$: $4 + 4 = 8$."
+      ]
+    },
+    {
+      "id": "ct-224",
+      "difficulty": 1300,
+      "prompt": "What is the minimum value of $(x - 1)^2 + (x - 5)^2$?",
+      "answer": "8",
+      "tags": [
+        "algebra"
+      ],
+      "steps": [
+        "The minimum is at the average, $x = 3$: $4 + 4 = 8$."
+      ]
+    },
+    {
+      "id": "ct-225",
+      "difficulty": 1700,
+      "prompt": "What is the remainder when $2^{100}$ is divided by $101$?",
+      "answer": "1",
+      "tags": [
+        "number theory"
+      ],
+      "steps": [
+        "$101$ is prime, so by Fermat's little theorem $2^{100} \\equiv 1 \\pmod{101}$."
+      ]
+    },
+    {
+      "id": "ct-226",
+      "difficulty": 2050,
+      "prompt": "What is the largest $k$ such that $2^k$ divides $3^{1024} - 1$?",
+      "answer": "12",
+      "tags": [
+        "number theory"
+      ],
+      "steps": [
+        "Factor repeatedly: $3^{1024} - 1 = (3 - 1)(3 + 1)(3^2 + 1)(3^4 + 1)\\cdots(3^{512} + 1)$.",
+        "$3 - 1$ gives $2^1$, $3 + 1$ gives $2^2$, and each of the 9 factors $3^{2^j} + 1$ ($j \\ge 1$) is $2 \\pmod 4$: one factor of 2 each.",
+        "$1 + 2 + 9 = 12$."
+      ]
+    },
+    {
+      "id": "ct-227",
+      "difficulty": 1650,
+      "prompt": "How many ordered pairs of positive integers $(x, y)$ satisfy $3x + 5y = 100$?",
+      "answer": "6",
+      "tags": [
+        "number theory"
+      ],
+      "steps": [
+        "$100 - 5y$ must be a positive multiple of 3, so $y \\equiv 2 \\pmod 3$.",
+        "$y = 2, 5, 8, 11, 14, 17$: six solutions."
+      ]
+    },
+    {
+      "id": "ct-228",
+      "difficulty": 1700,
+      "prompt": "If $x^2 + x + 1 = 0$, what is $x^{2025}$?",
+      "answer": "1",
+      "tags": [
+        "complex numbers",
+        "algebra"
+      ],
+      "steps": [
+        "Multiply by $x - 1$: $x^3 - 1 = 0$, so $x^3 = 1$.",
+        "$2025 = 3 \\cdot 675$, so $x^{2025} = 1$."
+      ]
+    },
+    {
+      "id": "ct-229",
+      "difficulty": 1600,
+      "prompt": "What is $1 \\cdot 2 + 2 \\cdot 3 + 3 \\cdot 4 + \\cdots + 10 \\cdot 11$?",
+      "answer": "440",
+      "tags": [
+        "sequences"
+      ],
+      "steps": [
+        "$\\sum_{k=1}^{n} k(k+1) = \\frac{n(n+1)(n+2)}{3} = \\frac{10 \\cdot 11 \\cdot 12}{3} = 440$."
+      ]
+    },
+    {
+      "id": "ct-230",
+      "difficulty": 1600,
+      "prompt": "What is $\\sqrt{2025 \\cdot 2027 + 1}$?",
+      "answer": "2026",
+      "tags": [
+        "algebra"
+      ],
+      "steps": [
+        "$(n - 1)(n + 1) + 1 = n^2$ with $n = 2026$."
+      ]
+    },
+    {
+      "id": "ct-231",
+      "difficulty": 1450,
+      "prompt": "$2^{2026} - 2^{2025} - 2^{2024} = 2^k$. What is $k$?",
+      "answer": "2024",
+      "tags": [
+        "exponents"
+      ],
+      "steps": [
+        "Factor out $2^{2024}$: $2^{2024}(4 - 2 - 1) = 2^{2024}$."
+      ]
+    },
+    {
+      "id": "ct-232",
+      "difficulty": 1850,
+      "prompt": "Three different numbers are chosen at random from $1, 2, \\ldots, 10$. What is the probability that no two of them are consecutive?",
+      "answer": "7/15",
+      "tags": [
+        "probability",
+        "counting"
+      ],
+      "steps": [
+        "Choosing 3 non-consecutive numbers from 10 is the same as choosing any 3 from 8 (subtract 0, 1, 2 from the sorted picks): $\\binom83 = 56$.",
+        "$56 / \\binom{10}{3} = 56/120 = 7/15$."
+      ]
+    },
+    {
+      "id": "ct-233",
+      "difficulty": 1800,
+      "prompt": "How many right triangles have all three vertices among the vertices of a regular octagon?",
+      "answer": "24",
+      "tags": [
+        "counting",
+        "geometry"
+      ],
+      "steps": [
+        "A triangle inscribed in a circle is right exactly when one side is a diameter.",
+        "The octagon has 4 diameters, each with 6 choices of third vertex: $24$."
+      ]
+    },
+    {
+      "id": "ct-234",
+      "difficulty": 1650,
+      "prompt": "The interior angles of a convex polygon add up to $2340°$. How many diagonals does it have?",
+      "answer": "90",
+      "tags": [
+        "geometry"
+      ],
+      "steps": [
+        "$(n - 2) \\cdot 180 = 2340$ gives $n = 15$.",
+        "Diagonals: $\\frac{15 \\cdot 12}{2} = 90$."
+      ]
+    },
+    {
+      "id": "ct-235",
+      "difficulty": 1650,
+      "prompt": "An equilateral triangle is inscribed in a circle of radius $2$. What is its area? (An answer like 3sqrt(3) is fine.)",
+      "answer": "3sqrt(3)",
+      "tags": [
+        "geometry"
+      ],
+      "steps": [
+        "The side is $r\\sqrt3 = 2\\sqrt3$.",
+        "Area $= \\frac{\\sqrt3}{4}(2\\sqrt3)^2 = 3\\sqrt3$."
+      ]
+    },
+    {
+      "id": "ct-236",
+      "difficulty": 1450,
+      "prompt": "A $3 \\times 3 \\times 3$ cube is painted on the outside and cut into 27 unit cubes. How many unit cubes have exactly two painted faces?",
+      "answer": "12",
+      "tags": [
+        "geometry",
+        "counting"
+      ],
+      "steps": [
+        "Exactly two painted faces means the middle of an edge.",
+        "A cube has 12 edges, each with one middle cube: $12$."
+      ]
+    },
+    {
+      "id": "ct-237",
+      "difficulty": 1900,
+      "prompt": "A fair coin is flipped until two heads in a row appear. What is the expected number of flips?",
+      "answer": "6",
+      "tags": [
+        "probability"
+      ],
+      "steps": [
+        "Let $E$ be the expected count from the start and $E_H$ after one head.",
+        "$E = 1 + \\frac12 E_H + \\frac12 E$ and $E_H = 1 + \\frac12 \\cdot 0 + \\frac12 E$.",
+        "Solving: $E = 6$."
+      ]
+    },
+    {
+      "id": "ct-238",
+      "difficulty": 1650,
+      "prompt": "For how many positive integers $n \\le 100$ is $n^2 + n$ divisible by $6$?",
+      "answer": "66",
+      "tags": [
+        "number theory"
+      ],
+      "steps": [
+        "$n(n+1)$ is always even, so we need it divisible by 3: $n \\equiv 0$ or $2 \\pmod 3$.",
+        "That excludes the 34 numbers $\\equiv 1 \\pmod 3$: $100 - 34 = 66$."
+      ]
+    },
+    {
+      "id": "ct-239",
+      "difficulty": 1750,
+      "prompt": "How many four-digit numbers have strictly increasing digits (like 1357)?",
+      "answer": "126",
+      "tags": [
+        "counting"
+      ],
+      "steps": [
+        "Increasing digits can't include 0 (it would have to lead), and any 4 of the digits 1–9 can be arranged in increasing order in exactly one way.",
+        "$\\binom94 = 126$."
+      ]
+    },
+    {
+      "id": "ct-240",
+      "difficulty": 1850,
+      "prompt": "How many ordered triples of positive integers $(a, b, c)$ satisfy $abc = 72$?",
+      "answer": "60",
+      "tags": [
+        "number theory",
+        "counting"
+      ],
+      "steps": [
+        "$72 = 2^3 3^2$. Split the exponent 3 among three numbers: $\\binom{5}{2} = 10$ ways; the exponent 2: $\\binom42 = 6$ ways.",
+        "$10 \\cdot 6 = 60$."
+      ]
+    },
+    {
+      "id": "ct-241",
+      "difficulty": 1800,
+      "prompt": "What is the smallest positive integer with exactly $12$ positive divisors?",
+      "answer": "60",
+      "tags": [
+        "number theory"
+      ],
+      "steps": [
+        "$12 = 12 = 6 \\cdot 2 = 4 \\cdot 3 = 3 \\cdot 2 \\cdot 2$ gives the candidates $2^{11}$, $2^5 3$, $2^3 3^2$, $2^2 \\cdot 3 \\cdot 5$.",
+        "Smallest: $2^2 \\cdot 3 \\cdot 5 = 60$."
+      ]
+    },
+    {
+      "id": "ct-242",
+      "difficulty": 1600,
+      "prompt": "What is the sum of all positive integers $n$ such that $n$ divides $n^2 + 10$?",
+      "answer": "18",
+      "tags": [
+        "number theory"
+      ],
+      "steps": [
+        "$n \\mid n^2$, so $n \\mid n^2 + 10$ exactly when $n \\mid 10$.",
+        "$1 + 2 + 5 + 10 = 18$."
+      ]
+    },
+    {
+      "id": "ct-243",
+      "difficulty": 1700,
+      "prompt": "Let $f(x) = ax^7 + bx^3 + cx - 5$. If $f(-7) = 7$, what is $f(7)$?",
+      "answer": "-17",
+      "tags": [
+        "functions",
+        "polynomials"
+      ],
+      "steps": [
+        "$g(x) = ax^7 + bx^3 + cx$ is odd, and $g(-7) = 7 + 5 = 12$.",
+        "So $g(7) = -12$ and $f(7) = -12 - 5 = -17$."
+      ]
+    },
+    {
+      "id": "ct-244",
+      "difficulty": 1950,
+      "prompt": "How many real solutions does $\\frac{x}{10} = \\sin x$ have?",
+      "answer": "7",
+      "tags": [
+        "trigonometry"
+      ],
+      "steps": [
+        "Solutions need $|x| \\le 10 < \\frac{7\\pi}{2}$. For $x > 0$ the line meets $\\sin x$ once in $(0, \\pi)$ and twice in $(2\\pi, 3\\pi)$.",
+        "By symmetry there are $3$ more for $x < 0$, plus $x = 0$: $7$."
+      ]
+    },
+    {
+      "id": "ct-245",
+      "difficulty": 1750,
+      "prompt": "Evaluate $\\displaystyle\\sum_{k=1}^{99} \\frac{1}{\\sqrt{k} + \\sqrt{k+1}}$.",
+      "answer": "9",
+      "tags": [
+        "algebra",
+        "radicals"
+      ],
+      "steps": [
+        "Rationalize: $\\frac{1}{\\sqrt k + \\sqrt{k+1}} = \\sqrt{k+1} - \\sqrt k$.",
+        "The sum telescopes to $\\sqrt{100} - \\sqrt1 = 9$."
+      ]
+    },
+    {
+      "id": "ct-246",
+      "difficulty": 1600,
+      "prompt": "If $\\log_a b = 2$ and $\\log_b c = 3$, what is $\\log_c a$? (A fraction like 1/6 is fine.)",
+      "answer": "1/6",
+      "tags": [
+        "logarithms"
+      ],
+      "steps": [
+        "$c = b^3 = a^6$.",
+        "So $a = c^{1/6}$ and $\\log_c a = \\frac16$."
+      ]
+    },
+    {
+      "id": "ct-247",
+      "difficulty": 1700,
+      "prompt": "Evaluate $\\displaystyle\\int_0^1 x \\ln x \\, dx$. (A fraction like -1/4 is fine.)",
+      "answer": "-1/4",
+      "tags": [
+        "calculus"
+      ],
+      "steps": [
+        "By parts: $\\int x\\ln x\\,dx = \\frac{x^2}{2}\\ln x - \\frac{x^2}{4}$.",
+        "From 0 to 1: $0 - \\frac14 - 0 = -\\frac14$."
+      ]
+    },
+    {
+      "id": "ct-248",
+      "difficulty": 1900,
+      "prompt": "Evaluate $\\displaystyle\\int_0^{\\pi/2} \\ln(\\tan x) \\, dx$.",
+      "answer": "0",
+      "tags": [
+        "calculus"
+      ],
+      "steps": [
+        "Substitute $x \\to \\frac\\pi2 - x$: $\\tan$ becomes $\\cot$, so the integral equals its own negative.",
+        "Hence it is $0$."
+      ]
+    },
+    {
+      "id": "ct-249",
+      "difficulty": 1900,
+      "prompt": "Evaluate $\\displaystyle\\int_0^{\\pi/2} \\frac{\\sin x}{\\sin x + \\cos x} \\, dx$. (An answer like pi/4 is fine.)",
+      "answer": "pi/4",
+      "tags": [
+        "calculus"
+      ],
+      "steps": [
+        "Call it $I$. Substituting $x \\to \\frac\\pi2 - x$ gives the same integral with $\\cos x$ on top.",
+        "Adding the two: $2I = \\int_0^{\\pi/2} 1\\,dx = \\frac\\pi2$, so $I = \\frac\\pi4$."
+      ]
+    },
+    {
+      "id": "ct-250",
+      "difficulty": 1750,
+      "prompt": "Evaluate $\\displaystyle\\lim_{n \\to \\infty} n\\left(\\sqrt{n^2 + 1} - n\\right)$. (A fraction like 1/2 is fine.)",
+      "answer": "1/2",
+      "tags": [
+        "calculus"
+      ],
+      "steps": [
+        "Multiply by the conjugate: $n\\left(\\sqrt{n^2+1} - n\\right) = \\frac{n}{\\sqrt{n^2+1} + n}$.",
+        "This tends to $\\frac{n}{2n} = \\frac12$."
+      ]
+    },
+    {
+      "id": "ct-251",
+      "difficulty": 1950,
+      "prompt": "Evaluate $\\displaystyle\\sum_{n=0}^{\\infty} \\frac{n^2}{2^n}$.",
+      "answer": "6",
+      "tags": [
+        "series"
+      ],
+      "steps": [
+        "$\\sum n^2 r^n = \\frac{r(1 + r)}{(1 - r)^3}$ for $|r| < 1$.",
+        "With $r = \\frac12$: $\\frac{\\frac12 \\cdot \\frac32}{\\frac18} = 6$."
+      ]
+    },
+    {
+      "id": "ct-252",
+      "difficulty": 2000,
+      "prompt": "What is the radius of convergence of $\\displaystyle\\sum_{n=1}^{\\infty} \\frac{n!}{n^n} x^n$? (An answer like e is fine.)",
+      "answer": {
+        "kind": "numeric",
+        "value": 2.718281828459045,
+        "display": "e"
+      },
+      "tags": [
+        "series",
+        "calculus"
+      ],
+      "steps": [
+        "Ratio test: $\\frac{a_{n+1}}{a_n} = \\frac{(n+1)!\\,n^n}{(n+1)^{n+1} n!} = \\left(\\frac{n}{n+1}\\right)^n \\to \\frac1e$.",
+        "So the radius is $e$."
+      ]
+    },
+    {
+      "id": "ct-253",
+      "difficulty": 1750,
+      "prompt": "What is $\\det \\begin{pmatrix} 2 & 1 & 1 \\\\ 1 & 2 & 1 \\\\ 1 & 1 & 2 \\end{pmatrix}$?",
+      "answer": "4",
+      "tags": [
+        "matrices"
+      ],
+      "steps": [
+        "The matrix is $I + J$ ($J$ = all ones). $J$ has eigenvalues $3, 0, 0$, so $I + J$ has $4, 1, 1$.",
+        "Determinant: $4 \\cdot 1 \\cdot 1 = 4$."
+      ]
+    },
+    {
+      "id": "ct-254",
+      "difficulty": 1850,
+      "prompt": "A $3 \\times 3$ matrix $A$ has eigenvalues $1$, $2$ and $3$. What is $\\det(A^2 + I)$?",
+      "answer": "100",
+      "tags": [
+        "matrices"
+      ],
+      "steps": [
+        "$A^2 + I$ has eigenvalues $\\lambda^2 + 1$: $2, 5, 10$.",
+        "Determinant: $2 \\cdot 5 \\cdot 10 = 100$."
+      ]
+    },
+    {
+      "id": "ct-255",
+      "difficulty": 1850,
+      "prompt": "A $5 \\times 5$ matrix $P$ satisfies $P^2 = P$ and has rank $3$. What is the trace of $P$?",
+      "answer": "3",
+      "tags": [
+        "matrices"
+      ],
+      "steps": [
+        "$P^2 = P$ means every eigenvalue is $0$ or $1$; the rank counts the eigenvalue-1 directions.",
+        "Trace $=$ sum of eigenvalues $= 3$."
+      ]
+    },
+    {
+      "id": "ct-256",
+      "difficulty": 1800,
+      "prompt": "How many integers from $1$ to $1000$ have digits that add up to $10$?",
+      "answer": "63",
+      "tags": [
+        "counting",
+        "number theory"
+      ],
+      "steps": [
+        "Count $(a, b, c)$ with digits $0$–$9$ and $a + b + c = 10$: $\\binom{12}{2} = 66$ by stars and bars.",
+        "Remove the 3 that use a \"digit\" of 10: $63$. (1000 has digit sum 1.)"
+      ]
+    },
+    {
+      "id": "ct-257",
+      "difficulty": 1400,
+      "prompt": "What is the area of a triangle with sides $10$, $10$ and $12$?",
+      "answer": "48",
+      "tags": [
+        "geometry"
+      ],
+      "steps": [
+        "Isosceles: the altitude to the base 12 splits it into two 6–8–10 right triangles.",
+        "Area $= \\frac12 \\cdot 12 \\cdot 8 = 48$."
+      ]
+    },
+    {
+      "id": "ct-258",
+      "difficulty": 1800,
+      "prompt": "A circle is inscribed in a rhombus whose diagonals are $30$ and $40$. What is the radius of the circle?",
+      "answer": "12",
+      "tags": [
+        "geometry"
+      ],
+      "steps": [
+        "The side is $\\sqrt{15^2 + 20^2} = 25$ and the area is $\\frac{30 \\cdot 40}{2} = 600$.",
+        "Area $= \\text{perimeter} \\cdot \\frac r2$: $600 = 100 \\cdot \\frac r2$, so $r = 12$."
+      ]
+    },
+    {
+      "id": "ct-259",
+      "difficulty": 1750,
+      "prompt": "Two circles have radii $5$ and $3$ and centers $10$ apart. How long is a common external tangent segment? (An answer like 4sqrt(6) is fine.)",
+      "answer": "4sqrt(6)",
+      "tags": [
+        "geometry"
+      ],
+      "steps": [
+        "External tangent length $= \\sqrt{d^2 - (r_1 - r_2)^2} = \\sqrt{100 - 4} = \\sqrt{96}$.",
+        "$\\sqrt{96} = 4\\sqrt6$."
+      ]
+    },
+    {
+      "id": "ct-260",
+      "difficulty": 1750,
+      "prompt": "Two circles have radii $5$ and $3$ and centers $10$ apart. How long is a common internal tangent segment (one that crosses between them)?",
+      "answer": "6",
+      "tags": [
+        "geometry"
+      ],
+      "steps": [
+        "Internal tangent length $= \\sqrt{d^2 - (r_1 + r_2)^2} = \\sqrt{100 - 64} = 6$."
+      ]
+    },
+    {
+      "id": "ct-261",
+      "difficulty": 1550,
+      "prompt": "A right triangle has legs $6$ and $8$. How long is the altitude to the hypotenuse? (A fraction like 24/5 is fine.)",
+      "answer": "24/5",
+      "tags": [
+        "geometry"
+      ],
+      "steps": [
+        "The hypotenuse is $10$ and the area is $24$.",
+        "Altitude $= \\frac{2 \\cdot 24}{10} = \\frac{24}{5}$."
+      ]
+    },
+    {
+      "id": "ct-262",
+      "difficulty": 1550,
+      "prompt": "In triangle $ABC$, $AB = 6$, $AC = 9$ and $BC = 10$. The bisector of angle $A$ meets $BC$ at $D$. What is $BD$?",
+      "answer": "4",
+      "tags": [
+        "geometry"
+      ],
+      "steps": [
+        "Angle bisector theorem: $\\frac{BD}{DC} = \\frac{AB}{AC} = \\frac69$.",
+        "$BD = 10 \\cdot \\frac{6}{15} = 4$."
+      ]
+    },
+    {
+      "id": "ct-263",
+      "difficulty": 1750,
+      "prompt": "How many non-congruent triangles with integer side lengths have perimeter $12$?",
+      "answer": "3",
+      "tags": [
+        "geometry",
+        "counting"
+      ],
+      "steps": [
+        "Sides $a \\le b \\le c$ with $a + b > c$ and $a + b + c = 12$ force $c \\le 5$.",
+        "Only $(2, 5, 5)$, $(3, 4, 5)$ and $(4, 4, 4)$."
+      ]
+    },
+    {
+      "id": "ct-264",
+      "difficulty": 1500,
+      "prompt": "How many zeros does $1000!$ end with?",
+      "answer": "249",
+      "tags": [
+        "number theory"
+      ],
+      "steps": [
+        "Count factors of 5: $200 + 40 + 8 + 1 = 249$."
+      ]
+    },
+    {
+      "id": "ct-265",
+      "difficulty": 2000,
+      "prompt": "Two points are chosen independently and uniformly at random on a segment of length $1$, cutting it into three pieces. What is the probability that the three pieces can form a triangle? (A fraction like 1/4 is fine.)",
+      "answer": "1/4",
+      "tags": [
+        "probability",
+        "geometry"
+      ],
+      "steps": [
+        "The pieces form a triangle exactly when every piece is shorter than $\\frac12$.",
+        "In the unit square of choices, that region is two triangles of total area $\\frac14$."
+      ]
+    },
+    {
+      "id": "ct-266",
+      "difficulty": 2050,
+      "prompt": "What is the remainder when $1^{2025} + 2^{2025} + 3^{2025} + \\cdots + 2024^{2025}$ is divided by $2025$?",
+      "answer": "0",
+      "tags": [
+        "number theory"
+      ],
+      "steps": [
+        "Pair $k$ with $2025 - k$: the exponent is odd, so $k^{2025} + (2025 - k)^{2025} \\equiv k^{2025} - k^{2025} = 0 \\pmod{2025}$.",
+        "The 2024 terms pair up completely, so the remainder is $0$."
+      ]
+    },
+    {
+      "id": "ct-267",
+      "difficulty": 1950,
+      "prompt": "Let $r$, $s$, $t$ be the roots of $x^3 - 6x^2 + 5x - 1 = 0$. What is $\\frac{1}{r} + \\frac{1}{s} + \\frac{1}{t}$?",
+      "answer": "5",
+      "tags": [
+        "algebra",
+        "polynomials"
+      ],
+      "steps": [
+        "$\\frac1r + \\frac1s + \\frac1t = \\frac{rs + st + tr}{rst}$.",
+        "By Vieta this is $\\frac{5}{1} = 5$."
+      ]
+    },
+    {
+      "id": "ct-268",
+      "difficulty": 2050,
+      "prompt": "Let $r$, $s$, $t$ be the roots of $x^3 - 3x + 1 = 0$. What is $r^3 + s^3 + t^3$?",
+      "answer": "-3",
+      "tags": [
+        "algebra",
+        "polynomials"
+      ],
+      "steps": [
+        "Each root satisfies $r^3 = 3r - 1$.",
+        "So $\\sum r^3 = 3\\sum r - 3 = 3 \\cdot 0 - 3 = -3$."
+      ]
+    },
+    {
+      "id": "ct-269",
+      "difficulty": 1900,
+      "prompt": "How many subsets of $\\{1, 2, 3, \\ldots, 10\\}$ have an even sum? (The empty set counts, with sum 0.)",
+      "answer": "512",
+      "tags": [
+        "counting"
+      ],
+      "steps": [
+        "Toggling the element $1$ in or out flips the parity of the sum, pairing even-sum subsets with odd-sum ones.",
+        "So exactly half of the $2^{10}$ subsets have an even sum: $512$."
+      ]
+    }
+  ]
+}

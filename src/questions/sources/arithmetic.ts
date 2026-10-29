@@ -1,5 +1,6 @@
 import type { ArithmeticConfig } from '../../config/gameConfig';
 import type { Rng } from '../../util/rng';
+import { pickNear } from '../near';
 import type { Question, QuestionSource } from '../types';
 
 type Op = '+' | '-' | '*' | '/';
@@ -125,11 +126,51 @@ export function generateArithmetic(cfg: ArithmeticConfig, rng: Rng): Question {
   };
 }
 
-export function createArithmeticSource(getConfig: () => ArithmeticConfig): QuestionSource {
+/**
+ * Arithmetic difficulty ladder for adaptive mode: the bottom of the rating scale. The target
+ * audience is high school and up, so this is deliberately coarse — just enough to calibrate a
+ * starting player quickly before the medium generator and algebra tricks take over.
+ */
+const BASE: ArithmeticConfig = {
+  allowAdd: true,
+  allowSubtract: true,
+  allowMultiply: true,
+  allowDivide: true,
+  minOperand: 1,
+  maxOperand: 9,
+  minTerms: 2,
+  maxTerms: 2,
+  allowParens: false,
+  integerOnly: true,
+  maxAbsResult: 100,
+};
+
+export const ARITHMETIC_LEVELS: { rating: number; config: ArithmeticConfig }[] = [
+  // 1 + 1 territory: single-digit addition.
+  { rating: 100, config: { ...BASE, allowSubtract: false, allowMultiply: false, allowDivide: false } },
+  // Addition and subtraction within 20.
+  { rating: 250, config: { ...BASE, allowMultiply: false, allowDivide: false, maxOperand: 20 } },
+  // Times tables and division facts.
+  { rating: 400, config: { ...BASE, allowAdd: false, allowSubtract: false, minOperand: 2, maxOperand: 10 } },
+  // Mixed operations, 2–3 numbers, parentheses.
+  { rating: 550, config: { ...BASE, minOperand: 2, maxOperand: 12, maxTerms: 3, allowParens: true, maxAbsResult: 200 } },
+  // Bigger numbers, three terms.
+  { rating: 700, config: { ...BASE, minOperand: 2, maxOperand: 20, minTerms: 3, maxTerms: 3, allowParens: true, maxAbsResult: 500 } },
+  // Three to four terms, up to 25.
+  { rating: 850, config: { ...BASE, minOperand: 2, maxOperand: 25, minTerms: 3, maxTerms: 4, allowParens: true, maxAbsResult: 1000 } },
+];
+
+function atLevel(level: { rating: number; config: ArithmeticConfig }, rng: Rng): Question {
+  return { ...generateArithmetic(level.config, rng), difficulty: level.rating };
+}
+
+export function createArithmeticSource(): QuestionSource {
   return {
     id: 'arithmetic',
     name: 'Arithmetic (generated)',
-    description: 'Random arithmetic expressions; tune them in the Arithmetic section.',
-    next: (rng) => generateArithmetic(getConfig(), rng),
+    description: 'Random arithmetic expressions, from 1 + 1 up to four-term mixed operations (ratings 100–850).',
+    skill: 'math',
+    next: (rng) => atLevel(rng.pick(ARITHMETIC_LEVELS), rng),
+    nextNear: (rng, target, spread) => atLevel(pickNear(rng, ARITHMETIC_LEVELS, (l) => l.rating, target, spread)!, rng),
   };
 }

@@ -1,11 +1,11 @@
 import { describe, expect, it } from 'vitest';
-import { DEFAULT_CONFIG } from '../config/gameConfig';
 import { createRng } from '../util/rng';
 import { checkAnswer, parseNumber } from './answerCheck';
+import contestFile from './data/contest.json';
 import hardMathFile from './data/hard-math.json';
 import { importDelimited, parseDelimited } from './import/csv';
 import { importJson } from './import/json';
-import { generateArithmetic } from './sources/arithmetic';
+import { ARITHMETIC_LEVELS, generateArithmetic } from './sources/arithmetic';
 import { createDeckSource } from './sources/deck';
 import type { AnswerSpec } from './types';
 
@@ -45,10 +45,10 @@ describe('checkAnswer', () => {
 });
 
 describe('generateArithmetic', () => {
-  it('produces integer answers whose steps match, within the configured limits', () => {
+  it('produces integer answers whose steps match, within the configured limits (every difficulty level)', () => {
     const rng = createRng(1234);
-    const cfg = DEFAULT_CONFIG.arithmetic;
-    for (let i = 0; i < 500; i++) {
+    for (let i = 0; i < 600; i++) {
+      const { config: cfg } = ARITHMETIC_LEVELS[i % ARITHMETIC_LEVELS.length];
       const q = generateArithmetic(cfg, rng);
       if (q.answer.kind !== 'numeric') throw new Error('expected numeric');
       expect(Number.isInteger(q.answer.value)).toBe(true);
@@ -68,7 +68,7 @@ describe('generateArithmetic', () => {
 
   it('respects allowParens = false and a single operator', () => {
     const rng = createRng(7);
-    const cfg = { ...DEFAULT_CONFIG.arithmetic, allowParens: false, allowAdd: false, allowSubtract: false, allowDivide: false };
+    const cfg = { ...ARITHMETIC_LEVELS[3].config, allowParens: false, allowAdd: false, allowSubtract: false, allowDivide: false };
     for (let i = 0; i < 100; i++) {
       const q = generateArithmetic(cfg, rng);
       expect(q.prompt).not.toContain('\\left(');
@@ -86,6 +86,8 @@ describe('hard-math dataset', () => {
     for (const q of result.questions) {
       expect(q.answer.kind, q.id).toBe('numeric');
       expect(q.steps?.length, q.id).toBeGreaterThan(0);
+      expect(q.difficulty, `${q.id} has a difficulty rating`).toBeGreaterThanOrEqual(900);
+      expect(q.difficulty, q.id).toBeLessThanOrEqual(2200);
     }
   });
 
@@ -99,6 +101,46 @@ describe('hard-math dataset', () => {
     expect(checkAnswer(byId.get('hm-001')!.answer, '4')).toBe('correct');
     expect(checkAnswer(byId.get('hm-030')!.answer, '0.785398163')).toBe('correct');
     expect(checkAnswer(byId.get('hm-013')!.answer, '0.99')).toBe('correct');
+  });
+});
+
+describe('contest deck', () => {
+  const result = importJson(JSON.stringify(contestFile), 'contest');
+  const hardMath = importJson(JSON.stringify(hardMathFile), 'hard-math').questions;
+
+  it('imports every card as a rated numeric question with steps', () => {
+    expect(result.warnings).toEqual([]);
+    expect(result.questions.length).toBe(contestFile.questions.length);
+    expect(result.questions.length).toBeGreaterThanOrEqual(250);
+    for (const q of result.questions) {
+      expect(q.answer.kind, q.id).toBe('numeric');
+      expect(q.steps?.length, q.id).toBeGreaterThan(0);
+      expect(q.difficulty, q.id).toBeGreaterThanOrEqual(800);
+      expect(q.difficulty, q.id).toBeLessThanOrEqual(2200);
+    }
+  });
+
+  it('accepts its own displayed answer (the game can parse every answer string)', () => {
+    for (const q of result.questions) {
+      if (q.answer.kind !== 'numeric') continue;
+      expect(checkAnswer(q.answer, q.answer.display), `${q.id}: ${q.answer.display}`).toBe('correct');
+    }
+  });
+
+  it('has unique ids and prompts, and no prompt repeated from the hard-math deck', () => {
+    const ids = result.questions.map((q) => q.id);
+    expect(new Set(ids).size).toBe(ids.length);
+    const prompts = result.questions.map((q) => q.prompt);
+    expect(new Set(prompts).size).toBe(prompts.length);
+    const hardPrompts = new Set(hardMath.map((q) => q.prompt));
+    expect(prompts.filter((p) => hardPrompts.has(p))).toEqual([]);
+  });
+
+  it('spans the rating scale, with plenty of AMC-level questions', () => {
+    const ratings = result.questions.map((q) => q.difficulty!);
+    expect(ratings.filter((r) => r < 1200).length).toBeGreaterThan(20);
+    expect(ratings.filter((r) => r >= 1200 && r < 1600).length).toBeGreaterThan(60);
+    expect(ratings.filter((r) => r >= 1750).length).toBeGreaterThan(40);
   });
 });
 
@@ -164,7 +206,7 @@ describe('importJson', () => {
 describe('deck source', () => {
   it('cycles through every card before repeating', () => {
     const deck = { id: 'd', name: 'D', questions: [1, 2, 3, 4].map((n) => ({ id: String(n), prompt: String(n), answer: { kind: 'text', accepted: ['x'] } satisfies AnswerSpec })) };
-    const source = createDeckSource(deck, '');
+    const source = createDeckSource(deck, '', 'math');
     const rng = createRng(3);
     const firstRound = new Set(Array.from({ length: 4 }, () => source.next(rng).id));
     expect(firstRound.size).toBe(4);

@@ -1,6 +1,7 @@
 import { CONFIG_GROUPS, getPath, type FieldDef, type GroupDef } from '../config/configSchema';
 import { DEFAULT_CONFIG, cloneConfig, type GameConfig } from '../config/gameConfig';
 import { deletePreset, listPresets, parseConfigJson, saveCurrentConfig, savePreset } from '../config/presets';
+import { successChance } from '../questions/rating';
 import type { QuestionRegistry } from '../questions/registry';
 import { downloadText, h } from './dom';
 
@@ -17,26 +18,34 @@ export function createConfigScreen(opts: ConfigScreenOptions): HTMLDivElement {
   const body = h('div.config-body');
   const presetBar = h('div.preset-bar');
   const status = h('div.config-status');
-  const openGroups = new Set<string>(['Player', 'Spells', 'Question types']);
+  const openGroups = new Set<string>(['Player', 'Spells', 'Question types', 'Adaptive difficulty']);
 
   const changed = () => {
     saveCurrentConfig(draft);
     renderStatus();
   };
 
+  /** Overall chance of a correct answer once the rating has settled (from the tier weights and offsets). */
+  function expectedSuccess(): number | undefined {
+    const tiers = draft.questionTypes.filter((t) => t.weight > 0);
+    const total = tiers.reduce((sum, t) => sum + t.weight, 0);
+    if (!total) return undefined;
+    return tiers.reduce((sum, t) => sum + (t.weight / total) * successChance(0, t.ratingOffset), 0);
+  }
+
   function renderStatus(): void {
     const problems: string[] = [];
     if (draft.spells.length === 0) problems.push('Add at least one spell.');
-    draft.questionTypes.forEach((type) => {
-      if (type.weight > 0 && !opts.registry.isUsable(type)) {
-        problems.push(`Question type "${type.label}" has no question sources, so it will never be picked.`);
-      }
-    });
-    if (!draft.questionTypes.some((t) => t.weight > 0 && opts.registry.isUsable(t))) {
-      problems.push('No question type can be picked: give at least one type a weight above 0 and a source.');
+    if (!draft.questionTypes.some((t) => t.weight > 0)) problems.push('Give at least one question type a weight above 0.');
+    if (opts.registry.usableSources(draft.questionSources).length === 0) {
+      problems.push('No question sources are enabled: pick some under Question sources.');
     }
     if (draft.player.startMana > draft.player.maxMana) problems.push('Starting mana is above max mana (it will be capped).');
-    status.replaceChildren(...problems.map((p) => h('div.warning', {}, p)));
+    const success = expectedSuccess();
+    status.replaceChildren(
+      ...problems.map((p) => h('div.warning', {}, p)),
+      success === undefined ? '' : h('div.muted', {}, `Expected success rate once your rating settles: ~${Math.round(success * 100)}% of questions answered correctly.`),
+    );
   }
 
   function fieldInput(target: Record<string, any>, field: FieldDef, onChange = changed): HTMLElement {
@@ -93,33 +102,51 @@ export function createConfigScreen(opts: ConfigScreenOptions): HTMLDivElement {
     );
   }
 
-  function sourcesEditor(typeIndex: number): HTMLElement {
-    const slot = draft.questionTypes[typeIndex];
+  /** The global question sources: which content is in play, and its weight among similar-difficulty questions. */
+  function sourcesEditor(): HTMLElement {
     const known = opts.registry.list();
     const rows = known.map((info) => {
-      const entry = slot.sources.find((s) => s.sourceId === info.id);
+      const entry = draft.questionSources.find((s) => s.sourceId === info.id);
       const check = h('input', { type: 'checkbox', checked: !!entry });
       const weight = h('input.weight', { type: 'number', min: '0', step: '0.5', value: String(entry?.weight ?? 1), disabled: !entry });
       const update = () => {
-        slot.sources = slot.sources.filter((s) => s.sourceId !== info.id);
-        if (check.checked) slot.sources.push({ sourceId: info.id, weight: Math.max(0, Number.parseFloat(weight.value) || 0) });
+        draft.questionSources = draft.questionSources.filter((s) => s.sourceId !== info.id);
+        if (check.checked) draft.questionSources.push({ sourceId: info.id, weight: Math.max(0, Number.parseFloat(weight.value) || 0) });
         weight.disabled = !check.checked;
         changed();
       };
       check.addEventListener('change', update);
       weight.addEventListener('change', update);
+      const skill = info.skill === 'math' ? '' : ' · own rating';
       return h(
         'div.source-row',
         {},
-        h('label', { title: info.description }, check, ` ${info.name}`, info.size !== undefined ? h('span.muted', {}, ` (${info.size})`) : null),
+        h(
+          'label',
+          { title: info.description },
+          check,
+          ` ${info.name}`,
+          h('span.muted', {}, `${info.size !== undefined ? ` (${info.size})` : ''}${skill}`),
+        ),
         h('span.muted', {}, 'weight'),
         weight,
       );
     });
-    const missing = slot.sources
+    const missing = draft.questionSources
       .filter((s) => !opts.registry.has(s.sourceId))
       .map((s) => h('div.warning', {}, `Missing source "${s.sourceId}" (deleted deck?) — it will be skipped.`));
-    return h('div.sources', {}, h('div.field-label', {}, 'Question sources'), ...rows, ...missing);
+    return h(
+      'div.sources',
+      {},
+      h(
+        'div.muted',
+        {},
+        'Each question is picked from these sources by difficulty (your rating + the question type’s offset). ' +
+          'Built-in math content shares one Math rating; each imported deck has its own rating.',
+      ),
+      ...rows,
+      ...missing,
+    );
   }
 
   function renderGroup(group: GroupDef): HTMLElement {
@@ -128,6 +155,10 @@ export function createConfigScreen(opts: ConfigScreenOptions): HTMLDivElement {
       if (details.open) openGroups.add(group.title);
       else openGroups.delete(group.title);
     });
+    if (group.kind === 'sources') {
+      details.append(sourcesEditor());
+      return details;
+    }
     if (group.kind === 'object') {
       const target = getPath(draft, group.path);
       details.append(h('div.field-grid', {}, ...group.fields.map((f) => fieldInput(target, f))));
@@ -140,7 +171,7 @@ export function createConfigScreen(opts: ConfigScreenOptions): HTMLDivElement {
       const title =
         group.path === 'spells'
           ? `${group.itemTitle} ${index + 1} (key ${index + 1})`
-          : `${item.label} · ${Math.round((100 * Math.max(0, item.weight)) / totalWeight)}% of questions`;
+          : `${item.label} · ${Math.round((100 * Math.max(0, item.weight)) / totalWeight)}% of questions · ~${Math.round(100 * successChance(0, item.ratingOffset))}% success`;
       // Weight changes update every type's percentage, so re-render the list.
       const onFieldChange = group.path === 'questionTypes' ? () => { changed(); render(); } : changed;
       const remove = h('button.small.danger', { textContent: 'Remove' });
@@ -155,7 +186,6 @@ export function createConfigScreen(opts: ConfigScreenOptions): HTMLDivElement {
           {},
           h('div.list-item-header', {}, h('strong', {}, title), remove),
           h('div.field-grid', {}, ...group.fields.map((f) => fieldInput(item, f, onFieldChange))),
-          group.path === 'questionTypes' ? sourcesEditor(index) : null,
         ),
       );
     });

@@ -29,20 +29,42 @@ export interface SlotSource {
 }
 
 /**
- * A difficulty tier of questions. Each new question first picks a type by `weight`, then draws
- * a question from that type's sources.
+ * A difficulty tier of questions, relative to the player's current rating. Each new question
+ * first picks a type by `weight`, then the question nearest (player rating + `ratingOffset`).
  */
 export interface QuestionTypeConfig {
   label: string;
   /** Relative chance of picking this type (weights are normalized across types). */
   weight: number;
-  sources: SlotSource[];
+  /** Target question rating relative to the player's: −382 = 90% success, −147 = 70%, 0 = 50%. */
+  ratingOffset: number;
   manaReward: number;
   stunSeconds: number;
   /** Load the next question right away after a correct answer (otherwise the window closes). */
   autoNextOnCorrect: boolean;
   /** Seconds to answer before the question counts as failed (0 = no limit). Runs while the window is closed. */
   timeLimit: number;
+}
+
+/** Elo-style adaptive difficulty (see src/questions/rating.ts). Ratings reset every match. */
+export interface AdaptiveConfig {
+  /** Every skill starts each match at this rating (100 ≈ 1 + 1, 2000 ≈ AMC). */
+  startRating: number;
+  /** Rating step for the first answers, and the floor it settles to as answers accumulate. */
+  kMax: number;
+  kMin: number;
+  /** After this many answers (counted from the first miss) the step is halfway from kMax to kMin. */
+  kDecayAnswers: number;
+  /** Questions are pitched right at the rating until the player has missed this many, then tiers fan out. */
+  calibrationMisses: number;
+  /** 0 = only right/wrong counts; higher = answers faster/slower than the player's usual pace count more/less. */
+  timeWeight: number;
+  /** Score for a skip or timeout, on the scale where wrong = 0 and correct = 1. */
+  skipScore: number;
+  /** Seconds used to judge speed when a question type has no time limit. */
+  referenceTime: number;
+  /** How closely a question's rating must match its target (rating points, ~1 standard deviation). */
+  spread: number;
 }
 
 export interface ArithmeticConfig {
@@ -115,6 +137,8 @@ export interface CasterConfig {
 }
 
 export interface GameConfig {
+  /** Saved-config format version (see migrateSavedConfig). */
+  version: number;
   player: {
     maxHp: number;
     speed: number;
@@ -128,7 +152,9 @@ export interface GameConfig {
   };
   spells: SpellConfig[];
   questionTypes: QuestionTypeConfig[];
-  arithmetic: ArithmeticConfig;
+  /** Which question sources are in play (and how often, among questions of similar difficulty). */
+  questionSources: SlotSource[];
+  adaptive: AdaptiveConfig;
   medium: MediumConfig;
   algebraTricks: AlgebraTricksConfig;
   stun: {
@@ -169,10 +195,14 @@ export interface GameConfig {
   };
 }
 
+/** Bump when saved configs need migrating (see migrateSavedConfig). */
+export const CONFIG_VERSION = 2;
+
 export const ARENA_WIDTH = 1280;
 export const ARENA_HEIGHT = 720;
 
 export const DEFAULT_CONFIG: GameConfig = {
+  version: CONFIG_VERSION,
   player: {
     maxHp: 100,
     speed: 180,
@@ -188,11 +218,13 @@ export const DEFAULT_CONFIG: GameConfig = {
     { name: 'Fireball', kind: 'projectile', manaCost: 3, damage: 55, projectileSpeed: 450, cooldown: 0.6, radius: 10, color: '#ff7b3a', explosionRadius: 150, beamLength: 0 },
     { name: 'Laser', kind: 'laser', manaCost: 3, damage: 30, projectileSpeed: 0, cooldown: 0.8, radius: 12, color: '#b6ff3a', explosionRadius: 0, beamLength: 900 },
   ],
+  // Tiers target a 90% / 70% / 50% chance of success; the weights make ~85% of questions
+  // answered correctly overall once the rating has settled (0.80·90% + 0.15·70% + 0.05·50% = 85%).
   questionTypes: [
     {
       label: 'Easy',
-      weight: 7,
-      sources: [{ sourceId: 'arithmetic', weight: 1 }],
+      weight: 80,
+      ratingOffset: -382, // 90% success
       manaReward: 6,
       stunSeconds: 8,
       autoNextOnCorrect: false,
@@ -200,44 +232,40 @@ export const DEFAULT_CONFIG: GameConfig = {
     },
     {
       label: 'Medium',
-      weight: 2,
-      sources: [{ sourceId: 'medium', weight: 1 }],
+      weight: 15,
+      ratingOffset: -147, // 70% success
       manaReward: 12,
       stunSeconds: 8,
       autoNextOnCorrect: false,
-      timeLimit: 30,
+      timeLimit: 45,
     },
     {
       label: 'Hard',
-      weight: 1,
-      sources: [{ sourceId: 'deck:hard-math', weight: 1 }],
+      weight: 5,
+      ratingOffset: 0, // 50% success
       manaReward: 100,
-      stunSeconds: 8,
-      autoNextOnCorrect: false,
-      timeLimit: 30,
-    },
-    {
-      label: 'Solve for x',
-      weight: 3,
-      sources: [{ sourceId: 'algebra_tricks', weight: 1 }],
-      manaReward: 20,
       stunSeconds: 8,
       autoNextOnCorrect: false,
       timeLimit: 60,
     },
   ],
-  arithmetic: {
-    allowAdd: true,
-    allowSubtract: true,
-    allowMultiply: true,
-    allowDivide: true,
-    minOperand: 2,
-    maxOperand: 12,
-    minTerms: 2,
-    maxTerms: 3,
-    allowParens: true,
-    integerOnly: true,
-    maxAbsResult: 200,
+  questionSources: [
+    { sourceId: 'arithmetic', weight: 1 },
+    { sourceId: 'medium', weight: 1 },
+    { sourceId: 'algebra_tricks', weight: 1 },
+    { sourceId: 'deck:hard-math', weight: 1 },
+    { sourceId: 'deck:contest', weight: 1 },
+  ],
+  adaptive: {
+    startRating: 300,
+    kMax: 300,
+    kMin: 40,
+    kDecayAnswers: 8,
+    calibrationMisses: 2,
+    timeWeight: 0.5,
+    skipScore: 0.35,
+    referenceTime: 30,
+    spread: 100,
   },
   medium: {
     linearEquations: true,
@@ -300,6 +328,7 @@ export function cloneConfig(config: GameConfig): GameConfig {
  * keep working after new tunables are added.
  */
 export function mergeWithDefaults(partial: unknown, defaults: unknown = DEFAULT_CONFIG): any {
+  if (defaults === DEFAULT_CONFIG) partial = migrateSavedConfig(partial);
   if (Array.isArray(defaults)) {
     if (!Array.isArray(partial)) return structuredClone(defaults);
     // Arrays of objects (spells, question types): fill each element from the default with the same
@@ -319,4 +348,23 @@ export function mergeWithDefaults(partial: unknown, defaults: unknown = DEFAULT_
     return out;
   }
   return typeof partial === typeof defaults ? partial : defaults;
+}
+
+/**
+ * Upgrade configs saved by older versions. Before adaptive difficulty, question types each had
+ * their own `sources` (and there was a "Solve for x" type); those tiers don't map onto rating
+ * offsets, so they're replaced with the new defaults.
+ */
+function migrateSavedConfig(raw: unknown): unknown {
+  if (!raw || typeof raw !== 'object') return raw;
+  const cfg = { ...(raw as Record<string, unknown>) };
+  const types = cfg.questionTypes;
+  if (Array.isArray(types) && types.some((t) => t && typeof t === 'object' && 'sources' in t)) delete cfg.questionTypes;
+  const version = typeof cfg.version === 'number' ? cfg.version : 1;
+  // Version 2 added the built-in Contest Mix deck: switch it on in configs saved before it existed.
+  if (version < 2 && Array.isArray(cfg.questionSources) && !cfg.questionSources.some((s) => s?.sourceId === 'deck:contest')) {
+    cfg.questionSources = [...cfg.questionSources, { sourceId: 'deck:contest', weight: 1 }];
+  }
+  cfg.version = CONFIG_VERSION;
+  return cfg;
 }

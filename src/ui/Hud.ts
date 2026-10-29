@@ -16,6 +16,8 @@ export class Hud {
   private round = h('div.hud-round');
   private spells: HTMLDivElement[];
   private questionHint: HTMLDivElement;
+  /** The player's current skill rating and its last change. */
+  private ratingLine = h('div.slot-rating');
   /** Time left on an unanswered question while its window is closed. */
   private questionTimer = h('span.question-timer');
   private cache = new Map<string, string>();
@@ -36,6 +38,7 @@ export class Hud {
       'div.hud-slots',
       {},
       h('div.slot-hint', {}, h('span.key', {}, 'Space'), ' Question', this.questionTimer),
+      this.ratingLine,
       ...cfg.questionTypes
         .filter((t) => t.weight > 0)
         .map((t) =>
@@ -105,6 +108,15 @@ export class Hud {
 
     const locked = !world.canAnswer(playerId);
     this.set('questionLocked', String(locked), () => this.questionHint.classList.toggle('locked', locked));
+  }
+
+  /** Show a skill rating, e.g. "Math rating 845 ▲33". */
+  showRating(skillName: string, rating: number, delta: number): void {
+    const change = Math.round(delta);
+    this.ratingLine.replaceChildren(
+      `${skillName} rating ${Math.round(rating)}`,
+      change ? h(`span.${change > 0 ? 'up' : 'down'}` as 'span', {}, ` ${change > 0 ? '▲' : '▼'}${Math.abs(change)}`) : '',
+    );
   }
 
   /** Brief "+N" pop next to the mana bar. */

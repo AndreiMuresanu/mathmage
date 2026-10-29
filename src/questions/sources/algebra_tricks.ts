@@ -1,5 +1,6 @@
 import type { AlgebraTricksConfig } from '../../config/gameConfig';
 import type { Rng } from '../../util/rng';
+import { pickNear } from '../near';
 import type { AnswerSpec, Question, QuestionSource } from '../types';
 import { coefX, factorPair, fracTex, fracText, gcd, nonZero, paren, plusConst, shift, sqrtTex, sum } from './format';
 
@@ -2627,10 +2628,60 @@ export const TRICK_TEMPLATES: Record<keyof AlgebraTricksConfig, Template[]> = {
 };
 
 /** A question plus its verification data, from the enabled families (all families if none are). */
+/**
+ * Elo-style rating of each template (see rating.ts), in the same order as TRICK_TEMPLATES:
+ * ~1250 = a one-line trick a strong algebra student spots, ~1900 = AMC-style insight.
+ */
+export const TRICK_RATINGS: Record<keyof AlgebraTricksConfig, number[]> = {
+  // squareIrrational, squareMinimum, addSubtract, circle, squareExtremes
+  completeSquare: [1550, 1450, 1650, 1550, 1700],
+  // biquadratic, exponentialQuadratic, repeatedChunk, sqrtQuadratic, reciprocalQuadratic, logQuadratic,
+  // palindromic, fractionalPowers, reciprocalPair, fourConsecutive, logReciprocal
+  substitution: [1450, 1550, 1500, 1550, 1650, 1700, 1900, 1650, 1750, 1900, 1800],
+  // radicalExtraneous, radicalConjugate, conjugateTelescope, rationalize
+  radicals: [1550, 1750, 1850, 1500],
+  // groupingCubic, noDividing, rationalRoot, specialProducts, cubeForms, factorTheorem
+  factoring: [1500, 1350, 1600, 1550, 1650, 1600],
+  // fractionRejected, fractionTwoTerms, fractionCancel, coverUp, telescoping
+  fractions: [1500, 1450, 1550, 1650, 1800],
+  // absLinear, absTwo, absBothSides, absQuadratic, absInequality
+  absoluteValue: [1250, 1500, 1450, 1650, 1600],
+  // sameBase, logEquation, lnBothSides, logBases, factorPowers, quadraticExponent, nestedLog, logPower
+  exponentsLogs: [1300, 1450, 1500, 1650, 1600, 1650, 1700, 1550],
+  // vietaSystem, sumOfSquaresZero, guessAndProve, reciprocalSums, ratioTrick, exponentRewrite, vietaRoots,
+  // plugInValues, selfSimilar
+  structural: [1650, 1700, 1800, 1750, 1800, 1750, 1800, 1850, 1900],
+  // trigQuadratic, auxiliaryAngle, doubleAngle
+  trig: [1700, 1850, 1750],
+  // mobius, shiftedReciprocal, collectFactor, rootOfRatio, logRatio, expChunk, hyperbolic, rootDenominator,
+  // formulas, exponentialModel, inverseQuadratic, parametricSystem, moreFormulas, squaredRatio, trigInverse,
+  // fitConstants, initialConditions
+  rearranging: [1450, 1400, 1450, 1400, 1550, 1550, 1700, 1500, 1350, 1550, 1650, 1700, 1400, 1450, 1600, 1700, 1750],
+};
+
+type Family = keyof AlgebraTricksConfig;
+
+function enabledFamilies(cfg: AlgebraTricksConfig): Family[] {
+  const all = Object.keys(TRICK_TEMPLATES) as Family[];
+  const enabled = all.filter((k) => cfg[k]);
+  return enabled.length ? enabled : all;
+}
+
+function buildRated(family: Family, index: number, rng: Rng): Built {
+  const built = TRICK_TEMPLATES[family][index](rng);
+  return { ...built, question: { ...built.question, difficulty: TRICK_RATINGS[family][index] } };
+}
+
 export function buildTrick(cfg: AlgebraTricksConfig, rng: Rng): Built {
-  const families = (Object.keys(TRICK_TEMPLATES) as (keyof AlgebraTricksConfig)[]).filter((k) => cfg[k]);
-  const family = rng.pick(families.length ? families : (Object.keys(TRICK_TEMPLATES) as (keyof AlgebraTricksConfig)[]));
-  return rng.pick(TRICK_TEMPLATES[family])(rng);
+  const family = rng.pick(enabledFamilies(cfg));
+  return buildRated(family, rng.int(0, TRICK_TEMPLATES[family].length - 1), rng);
+}
+
+/** Build a trick question from a template rated near `target`. */
+export function buildTrickNear(cfg: AlgebraTricksConfig, rng: Rng, target: number, spread: number): Built {
+  const choices = enabledFamilies(cfg).flatMap((family) => TRICK_TEMPLATES[family].map((_, index) => ({ family, index })));
+  const choice = pickNear(rng, choices, (c) => TRICK_RATINGS[c.family][c.index], target, spread)!;
+  return buildRated(choice.family, choice.index, rng);
 }
 
 export function generateTrick(cfg: AlgebraTricksConfig, rng: Rng): Question {
@@ -2641,7 +2692,9 @@ export function createAlgebraTricksSource(getConfig: () => AlgebraTricksConfig):
   return {
     id: 'algebra_tricks',
     name: 'Algebra tricks (generated)',
-    description: 'Equations that each need one trick: substitution, completing the square, conjugates, fake roots, rearranging. Pick families in the Algebra tricks section.',
+    description: 'Equations that each need one trick: substitution, completing the square, conjugates, fake roots, rearranging (ratings 1250–1900). Pick families in the Algebra tricks section.',
+    skill: 'math',
     next: (rng) => generateTrick(getConfig(), rng),
+    nextNear: (rng, target, spread) => buildTrickNear(getConfig(), rng, target, spread).question,
   };
 }

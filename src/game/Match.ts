@@ -1,4 +1,5 @@
 import type { GameConfig } from '../config/gameConfig';
+import { DEFAULT_DIFFICULTY, SkillRatings, type AnswerResult } from '../questions/rating';
 import type { QuestionRegistry } from '../questions/registry';
 import type { PlayerIntent, SimEvent } from '../sim/types';
 import { World } from '../sim/world';
@@ -36,17 +37,35 @@ export class Match {
   private callbacks: MatchCallbacks;
   private gameOverShown = false;
   private _paused = false;
+  /** The player's skill ratings; they start fresh every match and recalibrate from answers. */
+  readonly ratings: SkillRatings;
+  private registry: QuestionRegistry;
 
   constructor(cfg: GameConfig, registry: QuestionRegistry, root: HTMLElement, callbacks: MatchCallbacks) {
     this.world = new World(cfg);
     this.callbacks = callbacks;
+    this.registry = registry;
+    this.ratings = new SkillRatings(cfg.adaptive);
     registry.setConfig(() => cfg);
     const questionRng = createRng();
     this.hud = new Hud(cfg);
     this.questions = new QuestionWindow({
       types: cfg.questionTypes,
-      draw: () => registry.drawQuestion(cfg.questionTypes, questionRng),
-      onResult: (typeIndex, question, correct, given, outcome) => {
+      draw: () => registry.drawQuestion(cfg.questionTypes, cfg.questionSources, this.ratings, questionRng, cfg.adaptive.spread),
+      onResult: (drawn, correct, given, outcome, elapsed) => {
+        const { typeIndex, question } = drawn;
+        // Rating update (only while the player can still answer, i.e. the answer actually counts).
+        if (this.world.canAnswer(LOCAL_PLAYER)) {
+          const result: AnswerResult = outcome === 'answered' ? (correct ? 'correct' : 'wrong') : outcome;
+          const change = this.ratings.record(
+            drawn.skill,
+            question.difficulty ?? DEFAULT_DIFFICULTY,
+            result,
+            elapsed,
+            cfg.questionTypes[typeIndex].timeLimit,
+          );
+          this.hud.showRating(registry.skillName(change.skill), change.after, change.after - change.before);
+        }
         const stunMultiplier = outcome === 'skipped' ? cfg.stun.skipStunMultiplier : 1;
         this.world.answerQuestion(LOCAL_PLAYER, typeIndex, correct, stunMultiplier);
         if (!correct) {
@@ -76,6 +95,8 @@ export class Match {
     // The stun panel sits above the pause overlay so the solution stays readable while paused.
     this.layer.append(this.hud.el, this.questions.el, this.pauseOverlay, this.stun.el);
     root.append(this.layer);
+    const start = this.ratings.get('math');
+    this.hud.showRating('Math', start.rating, 0);
   }
 
   /** Keyboard action from the scene (never called while the answer field is focused). */
@@ -150,10 +171,14 @@ export class Match {
     this.questions.close();
     this.stun.update(0);
     this.layer.append(
-      createGameOverScreen(this.world, {
-        playAgain: () => this.callbacks.playAgain(),
-        menu: () => this.callbacks.exitToMenu(),
-      }),
+      createGameOverScreen(
+        this.world,
+        {
+          playAgain: () => this.callbacks.playAgain(),
+          menu: () => this.callbacks.exitToMenu(),
+        },
+        this.ratings.all().map(([skill, r]) => ({ name: this.registry.skillName(skill), ...r })),
+      ),
     );
   }
 

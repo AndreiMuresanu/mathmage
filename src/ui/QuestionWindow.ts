@@ -1,6 +1,6 @@
 import type { QuestionTypeConfig } from '../config/gameConfig';
 import { checkAnswer } from '../questions/answerCheck';
-import type { Question } from '../questions/types';
+import type { DrawnQuestion } from '../questions/registry';
 import { h } from './dom';
 import { renderRich } from './markup';
 
@@ -10,17 +10,17 @@ const TEST_ANSWER = 'andrei';
 /** How a question ended: answered (right or wrong), ran out of time, or skipped by the player. */
 export type ResultOutcome = 'answered' | 'timeout' | 'skipped';
 
-export interface DrawnQuestion {
-  typeIndex: number;
-  question: Question;
-}
+export type { DrawnQuestion };
 
 export interface QuestionWindowDeps {
   types: QuestionTypeConfig[];
-  /** Draw a fresh question: a weighted-random type, then a question of that type. */
+  /** Draw a fresh question: a weighted-random tier, then a question rated near the player's target. */
   draw(): DrawnQuestion | undefined;
-  /** Called after an answer is judged (or time runs out); `given` is what the player typed. */
-  onResult(typeIndex: number, question: Question, correct: boolean, given: string, outcome: ResultOutcome): void;
+  /**
+   * Called after an answer is judged (or time runs out / the player skips). `given` is what the
+   * player typed; `elapsed` is seconds since the question was drawn (the same clock as the limit).
+   */
+  onResult(drawn: DrawnQuestion, correct: boolean, given: string, outcome: ResultOutcome, elapsed: number): void;
   /** The game should stop reading keys while the answer field has focus. */
   onFocusChange(focused: boolean): void;
   /** Esc pressed while typing (the game pauses). */
@@ -37,6 +37,8 @@ export class QuestionWindow {
   private deps: QuestionWindowDeps;
   private title = h('div.qwin-title');
   private reward = h('div.qwin-reward');
+  /** The question's difficulty rating (helps tune the adaptive system). */
+  private rating = h('div.qwin-rating');
   private timer = h('div.qwin-timer');
   private timerFill = h('div.qwin-timer-fill');
   private timerBar = h('div.qwin-timer-bar', {}, this.timerFill);
@@ -56,6 +58,8 @@ export class QuestionWindow {
   /** Seconds left on the current question (Infinity = no limit). */
   private timeLeft = Infinity;
   private timeTotal = Infinity;
+  /** Seconds since the current question was drawn (counts even without a time limit). */
+  private elapsed = 0;
   private open = false;
 
   constructor(deps: QuestionWindowDeps) {
@@ -63,7 +67,7 @@ export class QuestionWindow {
     this.el = h(
       'div.qwin.panel.translucent.hidden',
       {},
-      h('div.qwin-header', {}, this.title, this.timer, this.reward),
+      h('div.qwin-header', {}, this.title, this.rating, this.timer, this.reward),
       this.timerBar,
       this.prompt,
       this.message,
@@ -132,7 +136,9 @@ export class QuestionWindow {
   /** Advance the question clock (call every unpaused frame, window open or not). */
   tick(dt: number): void {
     const drawn = this.current;
-    if (!drawn || !Number.isFinite(this.timeLeft)) return;
+    if (!drawn) return;
+    this.elapsed += dt;
+    if (!Number.isFinite(this.timeLeft)) return;
     this.timeLeft -= dt;
     if (this.timeLeft <= 0) {
       this.giveUp('timeout');
@@ -154,11 +160,12 @@ export class QuestionWindow {
     this.timeLeft = Infinity;
     const given = this.open ? this.input.value : '';
     this.close();
-    this.deps.onResult(drawn.typeIndex, drawn.question, false, given, outcome);
+    this.deps.onResult(drawn, false, given, outcome, this.elapsed);
   }
 
   private drawNext(): void {
     this.current = this.deps.draw();
+    this.elapsed = 0;
     const limit = this.current ? this.deps.types[this.current.typeIndex].timeLimit : 0;
     this.timeTotal = this.timeLeft = limit > 0 ? limit : Infinity;
   }
@@ -184,9 +191,11 @@ export class QuestionWindow {
     this.title.textContent = type ? type.label : 'Question';
     this.title.dataset.tier = String(drawn?.typeIndex ?? 0);
     this.reward.textContent = type ? `+${type.manaReward} mana` : '';
+    const difficulty = drawn?.question.difficulty;
+    this.rating.textContent = difficulty === undefined ? '' : `rating ${Math.round(difficulty)}`;
     this.prompt.innerHTML = drawn
       ? renderRich(drawn.question.prompt)
-      : '<em>No question sources available. Pick some in Configure match → Question types.</em>';
+      : '<em>No question sources available. Pick some in Configure match → Question sources.</em>';
     this.input.value = '';
     this.input.disabled = !drawn;
     this.skipButton.disabled = !drawn;
@@ -219,7 +228,7 @@ export class QuestionWindow {
     const correct = result === 'correct';
     this.current = undefined;
     this.timeLeft = Infinity;
-    this.deps.onResult(typeIndex, question, correct, this.input.value, 'answered');
+    this.deps.onResult(drawn, correct, this.input.value, 'answered', this.elapsed);
     if (correct && this.deps.types[typeIndex].autoNextOnCorrect && this.open) {
       this.drawNext();
       this.render();

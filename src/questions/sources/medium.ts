@@ -241,17 +241,47 @@ const GENERATORS: Record<keyof MediumConfig, Generator> = {
   quadraticRoots: quadraticRoots,
 };
 
+/**
+ * Elo-style rating of a medium question, from the variant encoded in its id (see rating.ts:
+ * ~900 ≈ percentages and fractions, ~1150 ≈ factoring a quadratic).
+ */
+export function mediumDifficulty(id: string): number {
+  const [, kind, rest = ''] = id.split(':');
+  switch (kind) {
+    case 'lin': return 900; // ax + b = c
+    case 'lin2': return 1050; // x on both sides
+    case 'pct': return 850; // p% of n
+    case 'pctof': return 1000; // reverse percentage
+    case 'sq': return 900;
+    case 'sqrt': return 900;
+    case 'pow2': return 800;
+    case 'pow3': return 750;
+    case 'cbrt': return 950;
+    case 'frac': return rest.includes('times') ? 850 : 1000;
+    case 'mul': return Number(rest.split('x')[1]) < 10 ? 800 : 1000; // 3-digit × 1-digit vs 2-digit × 2-digit
+    case 'ops1': return 700;
+    case 'ops2': return 850;
+    case 'ops3': return 900; // the (−b)² sign trap
+    case 'mean': return 850;
+    case 'meanmiss': return 950;
+    case 'quad': return 1150;
+    default: return 950;
+  }
+}
+
 export function generateMedium(cfg: MediumConfig, rng: Rng): Question {
   const enabled = (Object.keys(GENERATORS) as (keyof MediumConfig)[]).filter((k) => cfg[k]);
   const kind = enabled.length ? rng.pick(enabled) : 'linearEquations';
-  return GENERATORS[kind](rng);
+  const question = GENERATORS[kind](rng);
+  return { ...question, difficulty: mediumDifficulty(question.id) };
 }
 
 export function createMediumSource(getConfig: () => MediumConfig): QuestionSource {
   return {
     id: 'medium',
     name: 'Medium (generated)',
-    description: 'Equations, percentages, powers, fractions and more; pick the kinds in the Medium section.',
+    description: 'Equations, percentages, powers, fractions and more (ratings 700–1150); pick the kinds in the Medium section.',
+    skill: 'math',
     next: (rng) => generateMedium(getConfig(), rng),
   };
 }

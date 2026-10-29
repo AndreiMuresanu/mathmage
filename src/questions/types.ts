@@ -21,6 +21,7 @@ export interface Question {
   solution?: string;
   steps?: string[];
   tags?: string[];
+  /** Elo-style rating (see questions/rating.ts): ~100 = 1 + 1, ~2000 = AMC-level. */
   difficulty?: number;
 }
 
@@ -29,7 +30,17 @@ export interface QuestionSource {
   name: string;
   /** Short description for the config screen. */
   description: string;
+  /**
+   * Which player rating answers count toward: "math" for all built-in math content, or the
+   * deck's own skill for imported flashcards (being good at Spanish says nothing about math).
+   */
+  skill: string;
   next(rng: Rng): Question;
+  /**
+   * A question whose `difficulty` is close to `target` (within roughly `spread` rating points).
+   * Sources without this are sampled: several `next()` questions, keeping the closest.
+   */
+  nextNear?(rng: Rng, target: number, spread: number): Question;
 }
 
 export interface Deck {

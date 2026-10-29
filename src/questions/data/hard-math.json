@@ -3,6 +3,7 @@
   "questions": [
     {
       "id": "hm-001",
+      "difficulty": 1250,
       "prompt": "If $x + y = 5$ and $x^2 - y^2 = 15$, what is the value of $x$?",
       "answer": "4",
       "tags": ["algebra"],
@@ -10,6 +11,7 @@
     },
     {
       "id": "hm-002",
+      "difficulty": 2000,
       "prompt": "The four-digit integer 2018 is composed of four distinct digits whose sum is 11. Including 2018, how many positive four-digit integers are composed of four distinct digits whose sum is 11?",
       "answer": "114",
       "tags": ["counting"],
@@ -22,6 +24,7 @@
     },
     {
       "id": "hm-003",
+      "difficulty": 1300,
       "prompt": "In a certain sequence, $a_0 = 20$ and $a_n = \\sqrt{a_{n-1} + 1}^{\\,2}$ for any positive integer $n$. What is the value of $a_{500}$?",
       "answer": "520",
       "tags": ["sequences"],
@@ -29,6 +32,7 @@
     },
     {
       "id": "hm-004",
+      "difficulty": 1650,
       "prompt": "If $x$ is a positive real number satisfying $x^x = 3$, what is $x^{x^{x+1}}$?",
       "answer": "27",
       "tags": ["exponents"],
@@ -36,6 +40,7 @@
     },
     {
       "id": "hm-005",
+      "difficulty": 1150,
       "prompt": "If $a + b = 7$ and $ab = 10$, what is $a^2 + b^2$?",
       "answer": "29",
       "tags": ["algebra"],
@@ -43,6 +48,7 @@
     },
     {
       "id": "hm-006",
+      "difficulty": 1250,
       "prompt": "If $x + \\frac{1}{x} = 4$, what is $x^2 + \\frac{1}{x^2}$?",
       "answer": "14",
       "tags": ["algebra"],
@@ -50,6 +56,7 @@
     },
     {
       "id": "hm-007",
+      "difficulty": 1450,
       "prompt": "If $x + \\frac{1}{x} = 3$, what is $x^3 + \\frac{1}{x^3}$?",
       "answer": "18",
       "tags": ["algebra"],
@@ -57,6 +64,7 @@
     },
     {
       "id": "hm-008",
+      "difficulty": 1650,
       "prompt": "What is the sum of the squares of the roots of $x^3 - 6x^2 + 11x - 6 = 0$?",
       "answer": "14",
       "tags": ["polynomials"],
@@ -64,6 +72,7 @@
     },
     {
       "id": "hm-009",
+      "difficulty": 1600,
       "prompt": "If $2^a = 3$ and $3^b = 16$, what is $ab$?",
       "answer": "4",
       "tags": ["exponents"],
@@ -71,6 +80,7 @@
     },
     {
       "id": "hm-010",
+      "difficulty": 1600,
       "prompt": "Evaluate $\\log_2 3 \\cdot \\log_3 4 \\cdot \\log_4 5 \\cdots \\log_{63} 64$.",
       "answer": "6",
       "tags": ["logarithms"],
@@ -78,6 +88,7 @@
     },
     {
       "id": "hm-011",
+      "difficulty": 1150,
       "prompt": "Let $f(x) = 3x + 2$. If $f(g(x)) = 6x + 11$ for all $x$, what is $g(5)$?",
       "answer": "13",
       "tags": ["functions"],
@@ -85,6 +96,7 @@
     },
     {
       "id": "hm-012",
+      "difficulty": 1500,
       "prompt": "Evaluate $\\sqrt{12 + \\sqrt{12 + \\sqrt{12 + \\cdots}}}$.",
       "answer": "4",
       "tags": ["algebra"],
@@ -92,6 +104,7 @@
     },
     {
       "id": "hm-013",
+      "difficulty": 1550,
       "prompt": "Evaluate $\\frac{1}{1 \\cdot 2} + \\frac{1}{2 \\cdot 3} + \\cdots + \\frac{1}{99 \\cdot 100}$.",
       "answer": "99/100",
       "tags": ["series"],
@@ -99,6 +112,7 @@
     },
     {
       "id": "hm-014",
+      "difficulty": 1350,
       "prompt": "Evaluate $\\dfrac{2^{2024} + 2^{2022}}{2^{2023} - 2^{2021}}$.",
       "answer": "10/3",
       "tags": ["exponents"],
@@ -106,6 +120,7 @@
     },
     {
       "id": "hm-015",
+      "difficulty": 1450,
       "prompt": "What is the remainder when $2^{100}$ is divided by 7?",
       "answer": "2",
       "tags": ["number theory"],
@@ -113,6 +128,7 @@
     },
     {
       "id": "hm-016",
+      "difficulty": 1350,
       "prompt": "What is the last digit of $7^{2026}$?",
       "answer": "9",
       "tags": ["number theory"],
@@ -120,6 +136,7 @@
     },
     {
       "id": "hm-017",
+      "difficulty": 1300,
       "prompt": "How many positive divisors does 360 have?",
       "answer": "24",
       "tags": ["number theory"],
@@ -127,6 +144,7 @@
     },
     {
       "id": "hm-018",
+      "difficulty": 1800,
       "prompt": "What is $\\gcd(2^{12} - 1,\\ 2^{18} - 1)$?",
       "answer": "63",
       "tags": ["number theory"],
@@ -134,6 +152,7 @@
     },
     {
       "id": "hm-019",
+      "difficulty": 1400,
       "prompt": "How many zeros does $100!$ end with?",
       "answer": "24",
       "tags": ["number theory"],
@@ -141,6 +160,7 @@
     },
     {
       "id": "hm-020",
+      "difficulty": 1500,
       "prompt": "In how many distinct ways can the letters of MISSISSIPPI be arranged?",
       "answer": "34650",
       "tags": ["counting"],
@@ -148,6 +168,7 @@
     },
     {
       "id": "hm-021",
+      "difficulty": 1050,
       "prompt": "Two fair six-sided dice are rolled. What is the probability that the sum is 7?",
       "answer": "1/6",
       "tags": ["probability"],
@@ -155,6 +176,7 @@
     },
     {
       "id": "hm-022",
+      "difficulty": 1900,
       "prompt": "How many subsets of $\\{1, 2, \\ldots, 10\\}$ (including the empty set) contain no two consecutive integers?",
       "answer": "144",
       "tags": ["counting"],
@@ -162,6 +184,7 @@
     },
     {
       "id": "hm-023",
+      "difficulty": 1350,
       "prompt": "How many diagonals does a convex 12-gon have?",
       "answer": "54",
       "tags": ["counting", "geometry"],
@@ -169,6 +192,7 @@
     },
     {
       "id": "hm-024",
+      "difficulty": 1350,
       "prompt": "How many integers from 1 to 1000 are divisible by 3 or 5?",
       "answer": "467",
       "tags": ["counting"],
@@ -176,6 +200,7 @@
     },
     {
       "id": "hm-025",
+      "difficulty": 1450,
       "prompt": "What is the sum of the digits of $10^{20} - 20$?",
       "answer": "170",
       "tags": ["number theory"],
@@ -183,6 +208,7 @@
     },
     {
       "id": "hm-026",
+      "difficulty": 1000,
       "prompt": "A right triangle has legs of length 20 and 21. What is the length of its hypotenuse?",
       "answer": "29",
       "tags": ["geometry"],
@@ -190,6 +216,7 @@
     },
     {
       "id": "hm-027",
+      "difficulty": 1450,
       "prompt": "What is the area of a triangle with side lengths 13, 14, and 15?",
       "answer": "84",
       "tags": ["geometry"],
@@ -197,6 +224,7 @@
     },
     {
       "id": "hm-028",
+      "difficulty": 1400,
       "prompt": "What is the radius of the circle inscribed in a triangle with sides 3, 4, and 5?",
       "answer": "1",
       "tags": ["geometry"],
@@ -204,6 +232,7 @@
     },
     {
       "id": "hm-029",
+      "difficulty": 1350,
       "prompt": "What is the area of a regular hexagon with side length 2? (Exact form like 6sqrt(3) is fine.)",
       "answer": "6sqrt(3)",
       "tags": ["geometry"],
@@ -211,6 +240,7 @@
     },
     {
       "id": "hm-030",
+      "difficulty": 1650,
       "prompt": "Evaluate $\\displaystyle\\int_0^{\\pi/2} \\sin^2 x \\, dx$.",
       "answer": "pi/4",
       "tags": ["calculus"],
@@ -218,6 +248,7 @@
     },
     {
       "id": "hm-031",
+      "difficulty": 1600,
       "prompt": "Evaluate $\\displaystyle\\int_0^1 x e^x \\, dx$.",
       "answer": "1",
       "tags": ["calculus"],
@@ -225,6 +256,7 @@
     },
     {
       "id": "hm-032",
+      "difficulty": 1600,
       "prompt": "Evaluate $\\displaystyle\\int_1^e \\ln x \\, dx$.",
       "answer": "1",
       "tags": ["calculus"],
@@ -232,6 +264,7 @@
     },
     {
       "id": "hm-033",
+      "difficulty": 1800,
       "prompt": "Evaluate $\\displaystyle\\int_0^\\infty x^3 e^{-x} \\, dx$.",
       "answer": "6",
       "tags": ["calculus"],
@@ -239,6 +272,7 @@
     },
     {
       "id": "hm-034",
+      "difficulty": 1550,
       "prompt": "Evaluate $\\displaystyle\\int_0^1 \\frac{4}{1 + x^2} \\, dx$.",
       "answer": "pi",
       "tags": ["calculus"],
@@ -246,6 +280,7 @@
     },
     {
       "id": "hm-035",
+      "difficulty": 1500,
       "prompt": "Evaluate $\\displaystyle\\int_{-2}^{2} \\left(x^3 \\cos x + 1\\right) dx$.",
       "answer": "4",
       "tags": ["calculus"],
@@ -253,6 +288,7 @@
     },
     {
       "id": "hm-036",
+      "difficulty": 1650,
       "prompt": "Evaluate $\\displaystyle\\int_0^\\pi x \\sin x \\, dx$.",
       "answer": "pi",
       "tags": ["calculus"],
@@ -260,6 +296,7 @@
     },
     {
       "id": "hm-037",
+      "difficulty": 1400,
       "prompt": "Evaluate $\\displaystyle\\lim_{x \\to 0} \\frac{\\sin 5x}{x}$.",
       "answer": "5",
       "tags": ["calculus"],
@@ -267,6 +304,7 @@
     },
     {
       "id": "hm-038",
+      "difficulty": 1750,
       "prompt": "What is the derivative of $x^x$ at $x = 1$?",
       "answer": "1",
       "tags": ["calculus"],
@@ -274,6 +312,7 @@
     },
     {
       "id": "hm-039",
+      "difficulty": 1500,
       "prompt": "Let $A = \\begin{pmatrix} 3 & 1 \\\\ 4 & 2 \\end{pmatrix}$. What is $\\det(A^5)$?",
       "answer": "32",
       "tags": ["matrices"],
@@ -281,6 +320,7 @@
     },
     {
       "id": "hm-040",
+      "difficulty": 1550,
       "prompt": "$A$ is a $3 \\times 3$ matrix with $\\det A = 2$. What is $\\det(3A)$?",
       "answer": "54",
       "tags": ["matrices"],
@@ -288,6 +328,7 @@
     },
     {
       "id": "hm-041",
+      "difficulty": 1350,
       "prompt": "What is the trace of $\\begin{pmatrix} 1 & 2 \\\\ 3 & 4 \\end{pmatrix}^2$?",
       "answer": "29",
       "tags": ["matrices"],
@@ -295,6 +336,7 @@
     },
     {
       "id": "hm-042",
+      "difficulty": 1600,
       "prompt": "What is the largest eigenvalue of $\\begin{pmatrix} 2 & 1 \\\\ 1 & 2 \\end{pmatrix}$?",
       "answer": "3",
       "tags": ["matrices"],
@@ -302,6 +344,7 @@
     },
     {
       "id": "hm-043",
+      "difficulty": 1450,
       "prompt": "Evaluate $\\det \\begin{pmatrix} 1 & 2 & 3 \\\\ 4 & 5 & 6 \\\\ 7 & 8 & 10 \\end{pmatrix}$.",
       "answer": "-3",
       "tags": ["matrices"],
@@ -309,6 +352,7 @@
     },
     {
       "id": "hm-044",
+      "difficulty": 1450,
       "prompt": "Let $A = \\begin{pmatrix} 2 & 1 \\\\ 5 & 3 \\end{pmatrix}$. What is the top-right entry of $A^{-1}$?",
       "answer": "-1",
       "tags": ["matrices"],
@@ -316,6 +360,7 @@
     },
     {
       "id": "hm-045",
+      "difficulty": 1150,
       "prompt": "What is the sum of all positive divisors of 28?",
       "answer": "56",
       "tags": ["number theory"],
@@ -323,6 +368,7 @@
     },
     {
       "id": "hm-046",
+      "difficulty": 1300,
       "prompt": "Evaluate $1^3 + 2^3 + \\cdots + 10^3$.",
       "answer": "3025",
       "tags": ["series"],
@@ -330,6 +376,7 @@
     },
     {
       "id": "hm-047",
+      "difficulty": 1250,
       "prompt": "Let $i^2 = -1$. What is $i^{2026}$?",
       "answer": "-1",
       "tags": ["complex numbers"],
@@ -337,6 +384,7 @@
     },
     {
       "id": "hm-048",
+      "difficulty": 1450,
       "prompt": "Let $i^2 = -1$. What is $(1 + i)^8$?",
       "answer": "16",
       "tags": ["complex numbers"],

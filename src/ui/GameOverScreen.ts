@@ -1,7 +1,19 @@
 import type { World } from '../sim/world';
 import { h } from './dom';
 
-export function createGameOverScreen(world: World, actions: { playAgain(): void; menu(): void }): HTMLDivElement {
+export interface RatingSummary {
+  name: string;
+  start: number;
+  rating: number;
+  peak: number;
+  answers: number;
+}
+
+export function createGameOverScreen(
+  world: World,
+  actions: { playAgain(): void; menu(): void },
+  ratings: RatingSummary[] = [],
+): HTMLDivElement {
   const s = world.stats;
   const minutes = Math.floor(s.timeSurvived / 60);
   const seconds = Math.floor(s.timeSurvived % 60).toString().padStart(2, '0');
@@ -31,6 +43,16 @@ export function createGameOverScreen(world: World, actions: { playAgain(): void;
         stat('Enemies defeated', String(s.kills)),
         stat('Time survived', `${minutes}:${seconds}`),
         stat('Mana spent', String(Math.round(s.manaSpent))),
+      ),
+      ratings.length ? h('h3', {}, 'Skill rating') : null,
+      ...ratings.map((r) =>
+        h(
+          'div.rating-summary',
+          {},
+          h('strong', {}, r.name),
+          ` ${Math.round(r.start)} → ${Math.round(r.rating)}`,
+          h('span.muted', {}, ` (peak ${Math.round(r.peak)}, ${r.answers} answers)`),
+        ),
       ),
       h('h3', {}, 'Questions'),
       h(

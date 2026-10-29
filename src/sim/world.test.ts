@@ -354,6 +354,17 @@ describe('lasers', () => {
   });
 });
 
+describe('config migration', () => {
+  it('adds the Contest Mix deck to configs saved before it existed, but not after', () => {
+    const old = mergeWithDefaults({ questionSources: [{ sourceId: 'arithmetic', weight: 2 }] }) as GameConfig;
+    expect(old.questionSources).toEqual([{ sourceId: 'arithmetic', weight: 2 }, { sourceId: 'deck:contest', weight: 1 }]);
+    expect(old.version).toBe(DEFAULT_CONFIG.version);
+    // A current config where the player turned the deck off keeps it off.
+    const current = mergeWithDefaults({ version: DEFAULT_CONFIG.version, questionSources: [{ sourceId: 'arithmetic', weight: 2 }] }) as GameConfig;
+    expect(current.questionSources).toEqual([{ sourceId: 'arithmetic', weight: 2 }]);
+  });
+});
+
 describe('mergeWithDefaults', () => {
   it('fills missing fields from defaults and keeps saved values', () => {
     const merged = mergeWithDefaults({ player: { maxHp: 7 }, spells: [{ name: 'Only' }] }) as GameConfig;

@@ -4,12 +4,6 @@ function escapeHtml(text: string): string {
   return text.replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]!);
 }
 
-function renderPlain(text: string): string {
-  return escapeHtml(text)
-    .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
-    .replace(/\n/g, '<br>');
-}
-
 const MATH = /(\$\$[\s\S]+?\$\$|\$[^$\n]+?\$)/g;
 
 /**
@@ -24,12 +18,19 @@ export function preloadMathFonts(): void {
 
 /** Render question text: $inline$ and $$display$$ LaTeX via KaTeX, **bold**, and line breaks. */
 export function renderRich(text: string): string {
-  return text
-    .split(MATH)
+  const parts = text.split(MATH);
+  const isMath = (part: string) => part.length > 2 && part.startsWith('$') && part.endsWith('$');
+  // **bold** may contain inline math, so markers are paired across the whole text (only if balanced).
+  const markers = parts.filter((p) => !isMath(p)).reduce((n, p) => n + p.split('**').length - 1, 0);
+  let bold = false;
+  return parts
     .map((part) => {
       const display = part.startsWith('$$') && part.endsWith('$$') && part.length > 4;
-      const inline = !display && part.length > 2 && part.startsWith('$') && part.endsWith('$');
-      if (!display && !inline) return renderPlain(part);
+      if (!isMath(part)) {
+        const html = escapeHtml(part).replace(/\n/g, '<br>');
+        if (markers % 2 !== 0) return html;
+        return html.split('**').map((chunk, i) => (i === 0 ? '' : (bold = !bold) ? '<strong>' : '</strong>') + chunk).join('');
+      }
       const tex = display ? part.slice(2, -2) : part.slice(1, -1);
       return katex.renderToString(tex, { displayMode: display, throwOnError: false });
     })
