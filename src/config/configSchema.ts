@@ -3,6 +3,8 @@
  * so a new tunable only needs a field in GameConfig/DEFAULT_CONFIG plus one line here.
  */
 
+import { MAPS } from '../sim/maps';
+
 export type FieldType = 'number' | 'boolean' | 'text' | 'color' | 'select';
 
 export interface FieldDef {
@@ -20,7 +22,7 @@ export interface FieldDef {
 export interface ObjectGroupDef {
   kind: 'object';
   title: string;
-  /** Dot path to the object inside GameConfig, e.g. "enemies.chaser". */
+  /** Dot path to the object inside GameConfig, e.g. "enemies.chaser" ('' = top level). */
   path: string;
   fields: FieldDef[];
 }
@@ -49,6 +51,20 @@ const bool = (key: string, label: string, help?: string): FieldDef => ({ key, la
 
 
 export const CONFIG_GROUPS: GroupDef[] = [
+  {
+    kind: 'object',
+    title: 'Map',
+    path: '',
+    fields: [
+      {
+        key: 'map',
+        label: 'Arena',
+        type: 'select',
+        options: MAPS.map((m): [string, string] => [m.id, m.name]),
+        help: 'Walls block movement and spells (fireballs still explode on them); enemies come in through the gaps.',
+      },
+    ],
+  },
   {
     kind: 'object',
     title: 'Player',
@@ -230,5 +246,6 @@ export const CONFIG_GROUPS: GroupDef[] = [
 ];
 
 export function getPath(obj: unknown, path: string): any {
+  if (path === '') return obj; // top-level fields, e.g. the map
   return path.split('.').reduce<any>((o, key) => (o == null ? o : o[key]), obj);
 }

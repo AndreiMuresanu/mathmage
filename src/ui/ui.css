@@ -618,6 +618,47 @@ code {
   margin: 1.4em 0;
 }
 
+.map-picker {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.5em;
+  margin-top: 1em;
+}
+
+.map-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.3em;
+  padding: 0.4em;
+  opacity: 0.65;
+}
+
+.map-card.selected {
+  border-color: var(--accent);
+  opacity: 1;
+}
+
+.map-preview {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.map-floor {
+  fill: #141428;
+}
+
+.map-wall {
+  fill: #2a2a50;
+  stroke: var(--accent);
+  stroke-width: 6;
+}
+
+.map-player {
+  fill: #b48cff;
+}
+
 .controls-help {
   display: flex;
   flex-direction: column;

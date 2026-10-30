@@ -75,6 +75,7 @@ src/
   sim/                   Pure game simulation (no Phaser, no DOM)
     world.ts             World.step(): players, enemies, spells, projectiles, explosions,
                          lasers, heal orbs, waves, damage, stuns
+    maps.ts              Arena layouts (walls, player start, enemy entry gaps) + wall geometry
     waves.ts             Wave composition and per-wave scaling / round time limits
     types.ts             State types, PlayerIntent (input), SimEvent (output)
     world.test.ts        Simulation unit tests

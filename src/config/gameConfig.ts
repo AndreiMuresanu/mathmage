@@ -158,6 +158,8 @@ export interface GameConfig {
   questionTypes: QuestionTypeConfig[];
   /** Which question sources are in play (and how often, among questions of similar difficulty). */
   questionSources: SlotSource[];
+  /** Arena layout id (see sim/maps.ts): 'empty', 'boxy' or 'buttons'. */
+  map: string;
   adaptive: AdaptiveConfig;
   medium: MediumConfig;
   algebraTricks: AlgebraTricksConfig;
@@ -261,6 +263,7 @@ export const DEFAULT_CONFIG: GameConfig = {
       timeLimit: 60,
     },
   ],
+  map: 'empty',
   questionSources: [
     { sourceId: 'arithmetic', weight: 1 },
     { sourceId: 'medium', weight: 1 },

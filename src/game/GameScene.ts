@@ -6,6 +6,8 @@ import { BLOCK_SIZE, CIRCLE_RADIUS, colorToInt, ensureTextures } from './texture
 const PLAYER_COLOR = 0xb48cff;
 const ENEMY_COLORS: Record<EnemyKind, number> = { chaser: 0xff5c5c, caster: 0xe05cff };
 const HIT_FLASH_MS = 70;
+const WALL_FILL = 0x2a2a50;
+const WALL_EDGE = 0x00ffcc;
 /** Glowing red of heal orbs: a bright core with a softer glow. */
 const HEAL_COLOR = 0xff4545;
 const HEAL_GLOW_COLOR = 0xff3030;
@@ -108,6 +110,12 @@ export class GameScene extends Phaser.Scene {
   create(): void {
     ensureTextures(this);
     this.add.image(0, 0, 'arena').setOrigin(0);
+    // Walls: solid blocks with the same neon edge as the arena border, under everything else.
+    const walls = this.add.graphics().setDepth(1);
+    for (const w of this.match.world.map.walls) {
+      walls.fillStyle(WALL_FILL, 1).fillRect(w.x, w.y, w.w, w.h);
+      walls.lineStyle(2, WALL_EDGE, 0.7).strokeRect(w.x + 1, w.y + 1, w.w - 2, w.h - 2);
+    }
 
     const kb = this.input.keyboard!;
     // No capture: the answer field must still receive these letters when focused.

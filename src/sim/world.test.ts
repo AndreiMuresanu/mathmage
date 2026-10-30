@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { cloneConfig, DEFAULT_CONFIG, mergeWithDefaults, type GameConfig } from '../config/gameConfig';
 import type { PlayerIntent } from './types';
 import { enemyCount, hpScale } from './waves';
+import { circleRectPush, getMap, MAPS } from './maps';
 import { World } from './world';
 
 const idle: PlayerIntent = { move: { x: 0, y: 0 }, aim: 0, casting: false };
@@ -469,5 +470,93 @@ describe('mergeWithDefaults', () => {
     expect(merged.spells[0].name).toBe('Only');
     expect(merged.spells[0].damage).toBe(DEFAULT_CONFIG.spells[0].damage);
     expect(merged.waves).toEqual(DEFAULT_CONFIG.waves);
+  });
+});
+
+describe('maps and walls', () => {
+  const mapWorld = (map: string, edit: (c: GameConfig) => void = () => {}) =>
+    new World(config((c) => { c.map = map; c.player.startMana = 100; c.player.maxHp = 1e9; edit(c); }), 1);
+  const still = (id: number, x: number, y: number) =>
+    ({ id, kind: 'chaser' as const, x, y, radius: 14, hp: 100, maxHp: 100, speed: 0, damage: 0, attackTimer: 1e9, strafe: 1 as const });
+
+  it('falls back to the empty map, and every map starts the player clear of walls', () => {
+    expect(getMap('nonsense').id).toBe('empty');
+    for (const map of MAPS) {
+      const p = mapWorld(map.id).players[0];
+      for (const w of map.walls) expect(circleRectPush(p, w), `${map.id}`).toBeUndefined();
+    }
+  });
+
+  it('walls stop the player, who slides along them when moving diagonally', () => {
+    const world = mapWorld('boxy');
+    const p = world.players[0];
+    p.x = 1200;
+    p.y = 300;
+    run(world, 1, { ...idle, move: { x: 1, y: 0 } });
+    expect(p.x).toBeCloseTo(1260 - p.radius, 3); // right wall starts at x = 1260
+    run(world, 0.3, { ...idle, move: { x: 1, y: 1 } });
+    expect(p.x).toBeCloseTo(1260 - p.radius, 3);
+    expect(p.y).toBeGreaterThan(330);
+  });
+
+  it('a spell that hits a wall stops there', () => {
+    const world = mapWorld('boxy');
+    world.step(1 / 60, { local: { ...idle, aim: 0, casting: true } });
+    let furthest = 0;
+    for (let t = 0; t < 3; t += 1 / 60) {
+      world.step(1 / 60, { local: idle });
+      for (const pr of world.projectiles) furthest = Math.max(furthest, pr.x);
+    }
+    expect(world.projectiles).toHaveLength(0);
+    expect(furthest).toBeLessThan(1260);
+    expect(furthest).toBeGreaterThan(1200);
+  });
+
+  it('a fireball that hits a wall explodes, damaging enemies near the impact', () => {
+    const world = mapWorld('boxy', (c) => { c.spells[0].explosionRadius = 150; c.spells[0].damage = 30; });
+    world.enemies.push(still(1, 1180, 420)); // beside the flight path, near where it hits the wall
+    world.step(1 / 60, { local: { ...idle, aim: 0, casting: true } });
+    const events = [];
+    for (let t = 0; t < 2; t += 1 / 60) {
+      world.step(1 / 60, { local: idle });
+      events.push(...world.drainEvents());
+    }
+    const blast = events.find((e) => e.type === 'explosion');
+    expect(blast).toMatchObject({ type: 'explosion' });
+    expect(blast && 'x' in blast ? blast.x : 0).toBeGreaterThan(1230);
+    expect(world.enemies[0].hp).toBe(70);
+  });
+
+  it('a laser stops at the first wall it reaches', () => {
+    const world = mapWorld('buttons', (c) => {
+      c.spells = [{ name: 'Laser', kind: 'laser', manaCost: 1, damage: 30, projectileSpeed: 0, cooldown: 0.8, radius: 6, color: '#0f0', explosionRadius: 0, beamLength: 500 }];
+    });
+    const p = world.players[0];
+    p.x = 700;
+    p.y = 360; // level with the middle row of pillars; the next one spans x 872-928
+    world.enemies.push(still(1, 800, 360), still(2, 1000, 360));
+    world.step(1 / 60, { local: { ...idle, aim: 0, casting: true } });
+    expect(world.enemies.map((e) => e.hp)).toEqual([70, 100]);
+    const beam = world.drainEvents().find((e) => e.type === 'beam');
+    expect(beam && 'x2' in beam ? beam.x2 : 0).toBeCloseTo(872, 3);
+  });
+
+  it('enemies come in only through the gaps in the edge walls', () => {
+    const world = mapWorld('boxy');
+    for (let i = 0; i < 60; i++) (world as unknown as { spawnEnemy(kind: string): void }).spawnEnemy('chaser');
+    for (const e of world.enemies) {
+      expect(e.x).toBeGreaterThan(560);
+      expect(e.x).toBeLessThan(720);
+      expect(e.y < 60 || e.y > 660, `y = ${e.y}`).toBe(true);
+    }
+  });
+
+  it('a chaser stuck behind a pillar works its way around to the player', () => {
+    const world = mapWorld('buttons');
+    const p = world.players[0]; // (640, 440), just above the bottom-middle pillar (y 492-548)
+    world.enemies.push({ ...still(1, 640, 600), speed: 100 });
+    run(world, 6);
+    const e = world.enemies[0];
+    expect(Math.hypot(p.x - e.x, p.y - e.y)).toBeLessThan(p.radius + e.radius + 3);
   });
 });

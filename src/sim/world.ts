@@ -11,6 +11,7 @@ import type {
   SimEvent,
   WaveState,
 } from './types';
+import { circleRectPush, getMap, segmentRectHit, type MapDef } from './maps';
 import { buildWaveQueue, damageScale, hpScale, roundTimeLimit } from './waves';
 
 const SPAWN_MARGIN = 30;
@@ -35,6 +36,8 @@ export class World {
   readonly rng: Rng;
   readonly width = ARENA_WIDTH;
   readonly height = ARENA_HEIGHT;
+  /** Layout: walls, where the player starts, where enemies come in. */
+  readonly map: MapDef;
   players: PlayerState[];
   enemies: EnemyState[] = [];
   projectiles: ProjectileState[] = [];
@@ -52,10 +55,11 @@ export class World {
   constructor(cfg: GameConfig, seed?: number, playerIds: string[] = ['local']) {
     this.cfg = cfg;
     this.rng = createRng(seed);
+    this.map = getMap(cfg.map);
     this.players = playerIds.map((id, i) => ({
       id,
-      x: this.width / 2 + i * 60,
-      y: this.height / 2,
+      x: this.map.playerSpawn.x + i * 60,
+      y: this.map.playerSpawn.y,
       radius: cfg.player.radius,
       hp: cfg.player.maxHp,
       maxHp: cfg.player.maxHp,
@@ -218,8 +222,10 @@ export class World {
   private fireLaser(p: PlayerState, spell: SpellConfig, dx: number, dy: number): void {
     const x1 = p.x + dx * p.radius;
     const y1 = p.y + dy * p.radius;
-    const x2 = x1 + dx * spell.beamLength;
-    const y2 = y1 + dy * spell.beamLength;
+    // The beam stops at the first wall it reaches.
+    const reach = this.map.walls.reduce((t, w) => Math.min(t, segmentRectHit(x1, y1, x1 + dx * spell.beamLength, y1 + dy * spell.beamLength, w) ?? 1), 1);
+    const x2 = x1 + dx * spell.beamLength * reach;
+    const y2 = y1 + dy * spell.beamLength * reach;
     const halfWidth = spell.radius;
     this.events.push({ type: 'beam', x1, y1, x2, y2, width: halfWidth * 2, color: spell.color });
     const damage = spell.damage * this.cfg.player.damageDealtMult;
@@ -267,12 +273,23 @@ export class World {
     const base = this.cfg.enemies[kind];
     const round = this.wave.round;
     const hp = base.hp * hpScale(this.cfg, round);
-    // Pick a point on a random edge, just inside the arena.
-    const edge = this.rng.int(0, 3);
-    const along = this.rng.next();
-    const x = edge === 0 ? SPAWN_MARGIN : edge === 1 ? this.width - SPAWN_MARGIN : along * this.width;
-    const y = edge === 2 ? SPAWN_MARGIN : edge === 3 ? this.height - SPAWN_MARGIN : along * this.height;
-    this.enemies.push({
+    let x: number;
+    let y: number;
+    const gaps = this.map.spawnGaps;
+    if (gaps?.length) {
+      // Come in through a random gap in the edge walls.
+      const gap = this.rng.pick(gaps);
+      const t = this.rng.next();
+      x = gap.x1 + (gap.x2 - gap.x1) * t;
+      y = gap.y1 + (gap.y2 - gap.y1) * t;
+    } else {
+      // Pick a point on a random edge, just inside the arena.
+      const edge = this.rng.int(0, 3);
+      const along = this.rng.next();
+      x = edge === 0 ? SPAWN_MARGIN : edge === 1 ? this.width - SPAWN_MARGIN : along * this.width;
+      y = edge === 2 ? SPAWN_MARGIN : edge === 3 ? this.height - SPAWN_MARGIN : along * this.height;
+    }
+    const enemy: EnemyState = {
       id: this.nextId++,
       kind,
       x,
@@ -285,7 +302,9 @@ export class World {
       // Stagger casters so they don't all fire at once.
       attackTimer: kind === 'caster' ? this.cfg.enemies.caster.fireInterval * (0.5 + this.rng.next()) : 0,
       strafe: this.rng.next() < 0.5 ? -1 : 1,
-    });
+    };
+    this.resolveWalls(enemy);
+    this.enemies.push(enemy);
   }
 
   private nearestPlayer(x: number, y: number): PlayerState | undefined {
@@ -318,8 +337,7 @@ export class World {
       const reach = e.radius + target.radius;
       if (dist > reach) {
         const stepLen = Math.min(e.speed * dt, dist - reach);
-        e.x += ux * stepLen;
-        e.y += uy * stepLen;
+        this.moveEnemy(e, ux * stepLen, uy * stepLen);
       }
       if (dist <= reach + 2 && e.attackTimer <= 0) {
         this.damagePlayer(target, e.damage);
@@ -350,8 +368,7 @@ export class World {
         mx /= len;
         my /= len;
       }
-      e.x = clamp(e.x + mx * e.speed * dt, e.radius, this.width - e.radius);
-      e.y = clamp(e.y + my * e.speed * dt, e.radius, this.height - e.radius);
+      this.moveEnemy(e, mx * e.speed * dt, my * e.speed * dt);
       if (e.attackTimer <= 0 && dist < range * 1.3) {
         const speed = this.cfg.enemies.caster.projectileSpeed;
         this.projectiles.push({
@@ -449,6 +466,7 @@ export class World {
       p.x = clamp(startX + mx, p.radius, this.width - p.radius);
       p.y = clamp(startY + my, p.radius, this.height - p.radius);
       this.pushPlayerOutOfEnemies(p);
+      this.resolveWalls(p);
       if (!this.enemies.some((e) => overlapPush(e, p, COLLISION_SLOP))) return;
     }
     p.x = startX;
@@ -478,8 +496,9 @@ export class World {
       for (const e of this.enemies) {
         const push = overlapPush(p, e);
         if (!push) continue;
-        e.x = clamp(e.x + push.x, e.radius, this.width - e.radius);
-        e.y = clamp(e.y + push.y, e.radius, this.height - e.radius);
+        e.x += push.x;
+        e.y += push.y;
+        this.resolveWalls(e);
       }
     }
   }
@@ -506,6 +525,45 @@ export class World {
         b.y += ny * push;
       }
     }
+    for (const e of list) this.resolveWalls(e);
+  }
+
+  /** Push a circle out of every wall, then keep it inside the arena. */
+  private resolveWalls(c: { x: number; y: number; radius: number }): void {
+    // Two passes, for corners where two walls meet.
+    for (let pass = 0; pass < 2; pass++) {
+      let moved = false;
+      for (const wall of this.map.walls) {
+        const push = circleRectPush(c, wall);
+        if (!push) continue;
+        c.x += push.x;
+        c.y += push.y;
+        moved = true;
+      }
+      if (!moved) break;
+    }
+    c.x = clamp(c.x, c.radius, this.width - c.radius);
+    c.y = clamp(c.y, c.radius, this.height - c.radius);
+  }
+
+  /**
+   * Move an enemy by (dx, dy), sliding along walls. If a wall cancels most of the step (head-on
+   * into the flat face of a pillar), step sideways instead so it works its way around.
+   */
+  private moveEnemy(e: EnemyState, dx: number, dy: number): void {
+    const startX = e.x;
+    const startY = e.y;
+    e.x += dx;
+    e.y += dy;
+    this.resolveWalls(e);
+    const want = Math.hypot(dx, dy);
+    if (this.map.walls.length === 0 || want < 1e-6) return;
+    if (Math.hypot(e.x - startX, e.y - startY) >= want * 0.3) return;
+    e.x = startX - dy * e.strafe;
+    e.y = startY + dx * e.strafe;
+    this.resolveWalls(e);
+    // Boxed in on that side too (a corner): try the other way next time.
+    if (Math.hypot(e.x - startX, e.y - startY) < want * 0.3) e.strafe = -e.strafe;
   }
 
   private updateProjectiles(dt: number): void {
@@ -516,6 +574,11 @@ export class World {
       pr.ttl -= dt;
       if (pr.ttl <= 0 || pr.x < -50 || pr.y < -50 || pr.x > this.width + 50 || pr.y > this.height + 50) continue;
       if (pr.team === 'player' ? this.hitEnemy(pr) : this.hitPlayer(pr)) continue;
+      if (this.map.walls.some((w) => circleRectPush(pr, w))) {
+        // Spells stop at walls; fireballs still explode there.
+        if (pr.team === 'player' && pr.explosionRadius > 0) this.explode(pr);
+        continue;
+      }
       survivors.push(pr);
     }
     this.projectiles = survivors;
@@ -524,17 +587,18 @@ export class World {
   private hitEnemy(pr: ProjectileState): boolean {
     const target = this.enemies.find((e) => overlaps(pr, e));
     if (!target) return false;
-    if (pr.explosionRadius > 0) {
-      // Explode at the impact point: every enemy touching the blast takes full damage.
-      const blast = { x: pr.x, y: pr.y, radius: pr.explosionRadius };
-      const caught = this.enemies.filter((e) => overlaps(blast, e));
-      const targets = caught.map((e) => ({ id: e.id, x: e.x, y: e.y, radius: e.radius }));
-      this.events.push({ type: 'explosion', ...blast, color: pr.color, targets });
-      for (const e of caught) this.damageEnemy(e, pr.damage);
-    } else {
-      this.damageEnemy(target, pr.damage);
-    }
+    if (pr.explosionRadius > 0) this.explode(pr);
+    else this.damageEnemy(target, pr.damage);
     return true;
+  }
+
+  /** Explode at the projectile's position: every enemy touching the blast takes full damage. */
+  private explode(pr: ProjectileState): void {
+    const blast = { x: pr.x, y: pr.y, radius: pr.explosionRadius };
+    const caught = this.enemies.filter((e) => overlaps(blast, e));
+    const targets = caught.map((e) => ({ id: e.id, x: e.x, y: e.y, radius: e.radius }));
+    this.events.push({ type: 'explosion', ...blast, color: pr.color, targets });
+    for (const e of caught) this.damageEnemy(e, pr.damage);
   }
 
   private damageEnemy(target: EnemyState, damage: number): void {

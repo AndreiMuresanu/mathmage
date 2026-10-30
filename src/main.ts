@@ -56,6 +56,11 @@ function showMenu(): void {
       play: () => startMatch(config),
       configure: showConfig,
       decks: showDecks,
+      map: config.map,
+      selectMap: (id) => {
+        config = { ...config, map: id };
+        saveCurrentConfig(config);
+      },
     }),
   );
 }
