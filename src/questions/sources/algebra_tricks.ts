@@ -148,9 +148,9 @@ const squareIrrational: Template = (rng) => {
 };
 
 const squareMinimum: Template = (rng) => {
-  const a = rng.int(1, 4);
-  const h = nonZero(rng, -6, 6);
-  const k = rng.int(-15, 15);
+  const a = rng.int(1, 3);
+  const h = nonZero(rng, -4, 4);
+  const k = rng.int(-9, 9);
   const poly = sum([[a, 'x^2'], [-2 * a * h, 'x'], [a * h * h + k, '']]);
   const inner = sum([[1, 'x^2'], [-2 * h, 'x']]).tex;
   const askX = rng.next() < 0.5;
@@ -176,7 +176,7 @@ const addSubtract: Template = (rng) =>
   retry(() => {
     if (rng.next() < 0.35) {
       // n⁴ + 4 = (n² + 2)² − (2n)²
-      const n = rng.int(6, 20);
+      const n = rng.int(3, 8);
       const den = n * n - 2 * n + 2;
       const value = n * n + 2 * n + 2;
       const steps = [
@@ -190,8 +190,8 @@ const addSubtract: Template = (rng) =>
       });
     }
     // x⁴ + px² + q² = (x² + q)² − (mx)², with no real roots so the factorization is unique
-    const m = rng.int(1, 5);
-    const q = rng.int(1, 12);
+    const m = rng.int(1, 4);
+    const q = rng.int(1, 8);
     if (m * m >= 4 * q) return undefined;
     const p = 2 * q - m * m;
     const quartic = sum([[1, 'x^4'], [p, 'x^2'], [q * q, '']]);
@@ -260,7 +260,7 @@ const squareExtremes: Template = (rng) => {
       target: poly.math,
     });
   }
-  const S = 2 * rng.int(2, 20);
+  const S = 2 * rng.int(1, 6);
   if (variant === 1) {
     const steps = [
       `**Substitute** $y = ${S} - x$: $xy = ${S}x - x^2$`,
@@ -288,9 +288,9 @@ const squareExtremes: Template = (rng) => {
 // ---------------------------------------------------------------- Substitution
 
 const biquadratic: Template = (rng) => {
-  const [p, q] = distinctInts(rng, 2, 1, 6);
+  const [p, q] = distinctInts(rng, 2, 1, 4);
   const s1 = p * p;
-  const s2 = rng.next() < 0.35 ? -rng.int(1, 6) : q * q;
+  const s2 = rng.next() < 0.35 ? -rng.int(1, 5) : q * q;
   const eq = sum([[1, 'x^4'], [-(s1 + s2), 'x^2'], [s1 * s2, '']]);
   const roots = s2 > 0 ? [p, -p, q, -q] : [p, -p];
   const best = Math.max(...roots);
@@ -346,8 +346,8 @@ const exponentialQuadratic: Template = (rng) =>
 
 const repeatedChunk: Template = (rng) =>
   retry(() => {
-    const b = nonZero(rng, -3, 3);
-    const [r1, r2] = distinctInts(rng, 2, -6, 6);
+    const b = nonZero(rng, -2, 2);
+    const [r1, r2] = distinctInts(rng, 2, -3, 3);
     const u1 = r1 * (r1 + b);
     const u2 = r2 * (r2 + b);
     if (u1 === u2) return undefined;
@@ -481,7 +481,7 @@ const fractionalPowers: Template = (rng) =>
   retry(() => {
     if (rng.next() < 0.5) {
       // x^{2/3} − s·x^{1/3} + p = 0 with u = ∛x
-      const [p, q] = distinctInts(rng, 2, -3, 4);
+      const [p, q] = distinctInts(rng, 2, -3, 3);
       const eq = sum([[1, ['x^{2/3}', 'cbrt(x)^2']], [-(p + q), ['x^{1/3}', 'cbrt(x)']], [p * q, '']]);
       const big = Math.max(p, q);
       const steps = [
@@ -496,7 +496,7 @@ const fractionalPowers: Template = (rng) =>
       });
     }
     // √x − s·x^{1/4} + p = 0 with u = x^{1/4} ≥ 0
-    const n = rng.int(2, 4);
+    const n = rng.int(2, 3);
     const negative = rng.next() < 0.4;
     const m = negative ? -rng.int(1, 4) : rng.int(1, n - 1);
     if (m === -n) return undefined;
@@ -538,7 +538,7 @@ const reciprocalPair: Template = (rng) => {
 };
 
 const fourConsecutive: Template = (rng) => {
-  const m = rng.int(1, 4);
+  const m = rng.int(1, 3);
   const a = rng.int(-4, 4);
   const N = m * (m + 1) * (m + 2) * (m + 3);
   const f = (c: number) => (c === 0 ? 'x' : `(${shift(c)})`);
@@ -560,7 +560,7 @@ const fourConsecutive: Template = (rng) => {
   );
 };
 
-const LOG_RECIPROCAL: [c: number, k: number][] = [[2, 2], [3, 2], [2, 3], [5, 2], [4, 2]];
+const LOG_RECIPROCAL: [c: number, k: number][] = [[2, 2], [3, 2]];
 
 const logReciprocal: Template = (rng) => {
   const [c, k] = rng.pick(LOG_RECIPROCAL);
@@ -854,7 +854,7 @@ const specialProducts: Template = (rng) => {
 };
 
 const cubeForms: Template = (rng) => {
-  const [a, b] = distinctInts(rng, 2, -6, 7, [0]);
+  const [a, b] = distinctInts(rng, 2, -3, 3, [0]);
   const s = a + b;
   const p = a * b;
   const variant = s === 0 ? 1 : rng.int(0, 2);
@@ -1377,7 +1377,7 @@ const factorPowers: Template = (rng) =>
     const factor = B ** (j + i) + (plus ? 1 : -1);
     const n = rng.int(i, B === 2 ? 6 : 3);
     const rhs = factor * B ** (n - i);
-    if (rhs > 3000) return undefined;
+    if (rhs > 300) return undefined;
     const low = i ? `${B}^{x - ${i}}` : `${B}^x`;
     const sign = plus ? '+' : '-';
     const steps = [
@@ -1449,7 +1449,7 @@ const logPower: Template = (rng) => {
   if (variant === 0) {
     // (B^j)^{log_B c} = c^j
     const B = rng.pick([2, 3, 5]);
-    const j = rng.int(2, 3);
+    const j = 2;
     const c = rng.pick([2, 3, 5, 6, 7].filter((v) => v !== B));
     const steps = [
       `**Rewrite the base as a power of ${B}:** $${B ** j}^{\\log_{${B}} ${c}} = \\left(${B}^{\\log_{${B}} ${c}}\\right)^{${j}}$`,
@@ -1462,7 +1462,7 @@ const logPower: Template = (rng) => {
   }
   if (variant === 1) {
     const j = rng.int(2, 3);
-    const c = rng.int(2, 7);
+    const c = rng.int(2, j === 3 ? 4 : 7);
     const steps = [`**Move the coefficient inside the log:** $${j}\\ln ${c} = \\ln ${c}^{${j}} = \\ln ${c ** j}$`, `$e^{\\ln ${c ** j}} = ${c ** j}$`];
     return build('exponentsLogs', `elog:${j}:${c}`, `Compute: $$e^{${j}\\ln ${c}}$$`, num(c ** j), steps, { at: {}, target: `e^(${j}*log(${c}))` });
   }
@@ -1686,9 +1686,9 @@ const ratioTrick: Template = (rng) =>
 
 const exponentRewrite: Template = (rng) => {
   const B = rng.pick([2, 3]);
-  const c = rng.pick(B === 2 ? [3, 5, 6, 7] : [2, 4, 5, 7]);
-  const j = rng.int(2, B === 2 ? 3 : 2);
-  const k = rng.pick([-1, 1, 2]);
+  const c = rng.pick(B === 2 ? [3, 5, 7] : [2, 4, 5]);
+  const j = 2;
+  const k = rng.pick([-1, 1]);
   const value = c ** j * B ** (j * k);
   const display = k < 0 ? fracText(c ** j, B ** (-j * k)) : String(value);
   const steps = [
@@ -1707,8 +1707,8 @@ const exponentRewrite: Template = (rng) => {
 
 const vietaRoots: Template = (rng) =>
   retry(() => {
-    const s = rng.int(-9, 9);
-    const p = nonZero(rng, -9, 9);
+    const s = rng.int(-5, 5);
+    const p = nonZero(rng, -6, 6);
     const disc = s * s - 4 * p;
     // Real, irrational roots, so solving directly is the slow way.
     if (disc <= 0 || Number.isInteger(Math.sqrt(disc))) return undefined;
@@ -1744,9 +1744,9 @@ const plugInValues: Template = (rng) =>
     if (variant === 0) {
       // Sum of the coefficients of (ax + b)^n (x + c)^m is p(1).
       const [a, b, c] = [rng.int(1, 3), nonZero(rng, -3, 3), nonZero(rng, -3, 3)];
-      const [n, m] = [rng.int(3, 9), rng.int(1, 3)];
+      const [n, m] = [rng.int(3, 6), rng.int(1, 3)];
       const value = (a + b) ** n * (1 + c) ** m;
-      if (Math.abs(value) > 5000) return undefined;
+      if (Math.abs(value) > 200) return undefined;
       const lin = sum([[a, 'x'], [b, '']]);
       const tex = `(${lin.tex})^{${n}}(${shift(c)})${m > 1 ? `^{${m}}` : ''}`;
       const steps = [
@@ -1782,8 +1782,8 @@ const plugInValues: Template = (rng) =>
       );
     }
     // Even-power coefficients of (x + b)^n: (p(1) + p(−1)) / 2.
-    const b = rng.pick([1, 2, 3, -2]);
-    const n = rng.int(3, 6);
+    const b = rng.pick([1, 2, -2]);
+    const n = rng.int(3, 5);
     const [p1, pm1] = [(1 + b) ** n, (b - 1) ** n];
     let value = 0;
     for (let k = 0; k <= n; k += 2) value += binomial(n, k) * b ** (n - k);

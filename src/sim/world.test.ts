@@ -354,6 +354,101 @@ describe('lasers', () => {
   });
 });
 
+describe('heal orbs', () => {
+  /** A world where the player shoots one weak enemy dead (straight right). */
+  function killOne(chance: number) {
+    const world = new World(config((c) => { c.enemies.healDropChance = chance; c.player.startMana = 100; }), 1);
+    const p = world.players[0];
+    world.enemies.push({ id: 1, kind: 'chaser', x: p.x + 150, y: p.y, radius: 14, hp: 1, maxHp: 1, speed: 0, damage: 0, attackTimer: 1e9, strafe: 1 });
+    world.step(1 / 60, { local: { ...idle, aim: 0, casting: true } });
+    run(world, 1);
+    expect(world.enemies).toHaveLength(0);
+    return world;
+  }
+
+  it('a defeated enemy drops an orb where it died (at 100% chance) and never at 0%', () => {
+    const world = killOne(1);
+    expect(world.pickups).toHaveLength(1);
+    expect(world.pickups[0]).toMatchObject({ heal: DEFAULT_CONFIG.enemies.healAmount });
+    expect(world.pickups[0].x).toBeCloseTo(world.players[0].x + 150, 0);
+    expect(killOne(0).pickups).toHaveLength(0);
+  });
+
+  it('drops at roughly the configured rate', () => {
+    let drops = 0;
+    const world = new World(config((c) => { c.enemies.healDropChance = 0.33; }), 9);
+    const p = world.players[0];
+    for (let i = 0; i < 600; i++) {
+      // Kill enemies far from the player so the orbs aren't picked up.
+      world.enemies.push({ id: 1000 + i, kind: 'chaser', x: 50, y: 50, radius: 14, hp: 1, maxHp: 1, speed: 0, damage: 0, attackTimer: 1e9, strafe: 1 });
+      world.projectiles.push({ id: 5000 + i, team: 'player', ownerId: 'local', x: 50, y: 50, vx: 0, vy: 0, radius: 4, damage: 5, stun: 0, explosionRadius: 0, ttl: 1, color: '#fff' });
+      world.step(1 / 60, { local: idle });
+    }
+    drops = world.pickups.length;
+    expect(p.hp).toBe(p.maxHp);
+    expect(drops / 600).toBeGreaterThan(0.27);
+    expect(drops / 600).toBeLessThan(0.39);
+  });
+
+  it('touching an orb heals the configured amount (capped at max HP) and uses it up', () => {
+    const world = new World(config((c) => { c.enemies.healAmount = 3; }), 1);
+    const p = world.players[0];
+    p.hp = p.maxHp - 10;
+    world.pickups.push({ id: 1, x: p.x, y: p.y, radius: 9, heal: 3, ttl: 20 });
+    world.step(1 / 60, { local: idle });
+    expect(p.hp).toBe(p.maxHp - 7);
+    expect(world.pickups).toHaveLength(0);
+    expect(world.drainEvents()).toContainEqual(expect.objectContaining({ type: 'healed', amount: 3 }));
+    p.hp = p.maxHp - 1;
+    world.pickups.push({ id: 2, x: p.x, y: p.y, radius: 9, heal: 3, ttl: 20 });
+    world.step(1 / 60, { local: idle });
+    expect(p.hp).toBe(p.maxHp);
+  });
+
+  it('touching the edge of the glow counts, and nearby orbs drift in and get collected', () => {
+    const world = new World(config((c) => { c.enemies.healAmount = 3; }), 1);
+    const p = world.players[0];
+    p.hp = 50;
+    // Just inside reach: player radius + orb radius.
+    world.pickups.push({ id: 1, x: p.x + p.radius + 17, y: p.y, radius: 18, heal: 3, ttl: 20 });
+    world.step(1 / 60, { local: idle });
+    expect(p.hp).toBe(53);
+    // A near miss 60px beyond touching is pulled in within a second, while standing still.
+    world.pickups.push({ id: 2, x: p.x, y: p.y + p.radius + 18 + 60, radius: 18, heal: 3, ttl: 20 });
+    run(world, 1);
+    expect(world.pickups).toHaveLength(0);
+    expect(p.hp).toBe(56);
+    // Far away orbs stay put.
+    world.pickups.push({ id: 3, x: p.x + 400, y: p.y, radius: 18, heal: 3, ttl: 20 });
+    run(world, 1);
+    expect(world.pickups[0]).toMatchObject({ id: 3, x: p.x + 400 });
+  });
+
+  it('drift distance is configurable (0 = no drift)', () => {
+    const world = new World(config((c) => { c.enemies.healOrbDriftRange = 0; }), 1);
+    const p = world.players[0];
+    p.hp = 50;
+    world.pickups.push({ id: 1, x: p.x + p.radius + 18 + 30, y: p.y, radius: 18, heal: 3, ttl: 20 });
+    run(world, 1);
+    expect(world.pickups).toHaveLength(1);
+    world.cfg.enemies.healOrbDriftRange = 40;
+    run(world, 1);
+    expect(world.pickups).toHaveLength(0);
+    expect(p.hp).toBe(53);
+  });
+
+  it('stays on the ground while the player is at full health, and expires after its lifetime', () => {
+    const world = new World(config(), 1);
+    const p = world.players[0];
+    world.pickups.push({ id: 1, x: p.x, y: p.y, radius: 9, heal: 3, ttl: 2 });
+    run(world, 1);
+    expect(world.pickups).toHaveLength(1);
+    expect(p.hp).toBe(p.maxHp);
+    run(world, 1.1);
+    expect(world.pickups).toHaveLength(0);
+  });
+});
+
 describe('config migration', () => {
   it('adds the Contest Mix deck to configs saved before it existed, but not after', () => {
     const old = mergeWithDefaults({ questionSources: [{ sourceId: 'arithmetic', weight: 2 }] }) as GameConfig;

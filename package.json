@@ -9,7 +9,8 @@
     "preview": "vite preview",
     "predeploy": "npm run build",
     "deploy": "gh-pages -d dist",
-    "test": "vitest run"
+    "test": "vitest run",
+    "deck:contest": "python scripts/generate_contest_deck.py"
   },
   "devDependencies": {
     "@types/katex": "^0.16.8",

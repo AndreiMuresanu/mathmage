@@ -1,11 +1,14 @@
 import Phaser from 'phaser';
-import type { EnemyKind, SimEvent } from '../sim/types';
+import type { EnemyKind, PickupState, SimEvent } from '../sim/types';
 import { LOCAL_PLAYER, PAUSE_KEYS, type Match } from './Match';
 import { BLOCK_SIZE, CIRCLE_RADIUS, colorToInt, ensureTextures } from './textures';
 
 const PLAYER_COLOR = 0xb48cff;
 const ENEMY_COLORS: Record<EnemyKind, number> = { chaser: 0xff5c5c, caster: 0xe05cff };
 const HIT_FLASH_MS = 70;
+/** Glowing red of heal orbs: a bright core with a softer glow. */
+const HEAL_COLOR = 0xff4545;
+const HEAL_GLOW_COLOR = 0xff3030;
 /** Fire palette over a particle's life, in hard steps: yellow → orange → red → dark red. */
 const FIRE_COLORS = [0xffe14d, 0xff9a1f, 0xe8401a, 0x8a1a08];
 /** Mana orb colors (twinkle between them). */
@@ -74,6 +77,9 @@ export class GameScene extends Phaser.Scene {
   private overlay!: Phaser.GameObjects.Graphics;
   private enemyViews = new Map<number, Phaser.GameObjects.Image>();
   private projectileViews = new Map<number, Phaser.GameObjects.Image>();
+  /** Heal orbs: a bright core plus a soft glow behind it. */
+  private healOrbViews = new Map<number, Phaser.GameObjects.Image>();
+  private healGlowViews = new Map<number, Phaser.GameObjects.Image>();
   private flashUntil = new Map<number, number>();
   private fire!: Phaser.GameObjects.Particles.ParticleEmitter;
   private smoke!: Phaser.GameObjects.Particles.ParticleEmitter;
@@ -92,6 +98,8 @@ export class GameScene extends Phaser.Scene {
     this.match = data.match;
     this.enemyViews = new Map();
     this.projectileViews = new Map();
+    this.healOrbViews = new Map();
+    this.healGlowViews = new Map();
     this.flashUntil = new Map();
     this.burning = [];
     this.orbs = [];
@@ -171,7 +179,9 @@ export class GameScene extends Phaser.Scene {
     const events = this.match.update(Math.min(deltaMs / 1000, MAX_DT), {
       move,
       aim: Math.atan2(pointer.worldY - p.y, pointer.worldX - p.x),
-      casting: pointer.leftButtonDown(),
+      // Only presses that started on the arena cast: Phaser also tracks presses on page elements over
+      // the canvas (the answer box, panels, buttons), and clicking those shouldn't fire a spell.
+      casting: pointer.leftButtonDown() && pointer.downElement === this.game.canvas,
     });
     for (const e of events) this.handleEvent(e);
     // Effects (bursts, floating text) follow the game speed: frozen when paused, slow during slow motion.
@@ -188,6 +198,10 @@ export class GameScene extends Phaser.Scene {
     switch (e.type) {
       case 'enemyHit':
         this.flashUntil.set(e.enemyId, this.time.now + HIT_FLASH_MS);
+        break;
+      case 'healed':
+        this.burst(e.x, e.y, HEAL_COLOR, 10);
+        this.floatText(p.x, p.y - 30, `+${Math.round(e.amount)} HP`, '#ff5c5c');
         break;
       case 'enemyDied':
         this.burst(e.x, e.y, ENEMY_COLORS[e.kind], 10);
@@ -234,6 +248,17 @@ export class GameScene extends Phaser.Scene {
     syncViews(this, this.enemyViews, world.enemies, (e, view) => {
       const flashing = (this.flashUntil.get(e.id) ?? 0) > this.time.now;
       view.setPosition(e.x, e.y).setScale(e.radius / CIRCLE_RADIUS).setTint(flashing ? 0xffffff : ENEMY_COLORS[e.kind]);
+    });
+    // Heal orbs pulse gently, and flicker during their last 3 seconds.
+    const pulse = 1 + 0.15 * Math.sin(this.time.now / 160);
+    const orbAlpha = (orb: PickupState) => (orb.ttl < 3 && Math.floor(this.time.now / 120) % 2 === 0 ? 0.25 : 1);
+    syncViews(this, this.healGlowViews, world.pickups, (orb, view, created) => {
+      if (created) view.setTint(HEAL_GLOW_COLOR).setBlendMode(Phaser.BlendModes.ADD).setDepth(5);
+      view.setPosition(orb.x, orb.y).setScale((orb.radius / CIRCLE_RADIUS) * pulse).setAlpha(0.45 * orbAlpha(orb));
+    });
+    syncViews(this, this.healOrbViews, world.pickups, (orb, view, created) => {
+      if (created) view.setTint(HEAL_COLOR).setDepth(6);
+      view.setPosition(orb.x, orb.y).setScale(((orb.radius * 0.5) / CIRCLE_RADIUS) * (0.85 + 0.15 * pulse)).setAlpha(orbAlpha(orb));
     });
     syncViews(this, this.projectileViews, world.projectiles, (pr, view, created) => {
       if (created) view.setTint(colorToInt(pr.color)).setScale(pr.radius / CIRCLE_RADIUS).setBlendMode(Phaser.BlendModes.ADD);

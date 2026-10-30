@@ -5,6 +5,7 @@ import type {
   EnemyState,
   MatchStats,
   PlayerIntent,
+  PickupState,
   PlayerState,
   ProjectileState,
   SimEvent,
@@ -16,6 +17,10 @@ const SPAWN_MARGIN = 30;
 const PROJECTILE_TTL = 3;
 /** Delay before the "not enough mana" feedback can repeat while the cast button is held. */
 const NO_MANA_FEEDBACK_DELAY = 0.4;
+/** Radius of a heal orb's pickup area (the renderer draws its glow this big, so touching the glow counts). */
+const HEAL_ORB_RADIUS = 18;
+/** How fast a magnetized heal orb moves toward the player, in px/s. */
+const HEAL_ORB_MAGNET_SPEED = 260;
 /** Overlap (px) tolerated when checking whether a player move ended up stuck inside an enemy. */
 const COLLISION_SLOP = 0.5;
 /** How strongly casters avoid each other relative to their other movement. */
@@ -33,6 +38,8 @@ export class World {
   players: PlayerState[];
   enemies: EnemyState[] = [];
   projectiles: ProjectileState[] = [];
+  /** Heal orbs on the ground. */
+  pickups: PickupState[] = [];
   wave: WaveState;
   stats: MatchStats;
   over = false;
@@ -143,6 +150,7 @@ export class World {
     this.separateEnemies();
     this.pushEnemiesOutOfPlayers();
     this.updateProjectiles(dt);
+    this.updatePickups(dt);
     if (this.players.every((p) => !p.alive)) {
       this.over = true;
       this.events.push({ type: 'gameOver' });
@@ -537,7 +545,52 @@ export class World {
       this.enemies = this.enemies.filter((e) => e !== target);
       this.stats.kills++;
       this.events.push({ type: 'enemyDied', x: target.x, y: target.y, kind: target.kind });
+      this.maybeDropHealOrb(target.x, target.y);
     }
+  }
+
+  private maybeDropHealOrb(x: number, y: number): void {
+    const { healDropChance, healAmount, healOrbLifetime } = this.cfg.enemies;
+    if (healAmount <= 0 || this.rng.next() >= healDropChance) return;
+    this.pickups.push({
+      id: this.nextId++,
+      x: clamp(x, HEAL_ORB_RADIUS, this.width - HEAL_ORB_RADIUS),
+      y: clamp(y, HEAL_ORB_RADIUS, this.height - HEAL_ORB_RADIUS),
+      radius: HEAL_ORB_RADIUS,
+      heal: healAmount,
+      ttl: healOrbLifetime > 0 ? healOrbLifetime : Infinity,
+    });
+  }
+
+  /**
+   * Age heal orbs; orbs near a player who can use them drift toward that player, and a player
+   * who touches one (and isn't at full health) collects it.
+   */
+  private updatePickups(dt: number): void {
+    this.pickups = this.pickups.filter((orb) => {
+      orb.ttl -= dt;
+      if (orb.ttl <= 0) return false;
+      const needy = this.players.filter((p) => p.alive && p.hp < p.maxHp);
+      const nearest = needy.reduce<PlayerState | undefined>(
+        (best, p) => (!best || Math.hypot(p.x - orb.x, p.y - orb.y) < Math.hypot(best.x - orb.x, best.y - orb.y) ? p : best),
+        undefined,
+      );
+      if (nearest) {
+        const d = Math.hypot(nearest.x - orb.x, nearest.y - orb.y);
+        const reach = nearest.radius + orb.radius;
+        if (d > reach && d < reach + this.cfg.enemies.healOrbDriftRange) {
+          const step = Math.min(d - reach + 0.5, HEAL_ORB_MAGNET_SPEED * dt);
+          orb.x += ((nearest.x - orb.x) / d) * step;
+          orb.y += ((nearest.y - orb.y) / d) * step;
+        }
+      }
+      const player = needy.find((p) => overlaps(orb, p));
+      if (!player) return true;
+      const amount = Math.min(orb.heal, player.maxHp - player.hp);
+      player.hp += amount;
+      this.events.push({ type: 'healed', playerId: player.id, amount, x: orb.x, y: orb.y });
+      return false;
+    });
   }
 
   private hitPlayer(pr: ProjectileState): boolean {

@@ -175,6 +175,10 @@ export const CONFIG_GROUPS: GroupDef[] = [
       num('damageMult', 'Enemy damage ×', 0, 50, 0.05),
       num('speedMult', 'Enemy speed ×', 0.05, 10, 0.05),
       bool('surround', 'Casters surround the player', 'Casters spread out to evenly spaced angles around the player instead of all coming from one side.'),
+      num('healDropChance', 'Heal orb drop chance', 0, 1, 0.01, 'Chance that a defeated enemy drops a glowing red heal orb (0.33 = 33%).'),
+      num('healAmount', 'Heal orb amount', 0, 10000, 1, 'Health restored by touching a heal orb. Orbs stay put while you are at full health.'),
+      num('healOrbLifetime', 'Heal orb lifetime (s)', 0, 600, 1, 'Seconds before an uncollected orb disappears; 0 = never.'),
+      num('healOrbDriftRange', 'Heal orb drift distance', 0, 1000, 5, 'Orbs within this distance (in pixels, beyond touching) drift toward you while you are hurt. 0 = no drift.'),
     ],
   },
   {

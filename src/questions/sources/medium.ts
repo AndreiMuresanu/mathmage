@@ -15,11 +15,11 @@ function numeric(id: string, prompt: string, value: number, steps: string[], dis
 }
 
 export const linearEquation: Generator = (rng) => {
-  const x = nonZero(rng, -12, 15);
+  const x = nonZero(rng, -6, 8);
   if (rng.next() < 0.5) {
     // ax + b = c
-    const a = nonZero(rng, -9, 12);
-    const b = nonZero(rng, -40, 40);
+    const a = nonZero(rng, -6, 9);
+    const b = nonZero(rng, -20, 20);
     const c = a * x + b;
     return numeric(`med:lin:${a}:${b}:${c}`, `Solve for $x$: $${coefX(a)}${plusConst(b)} = ${c}$`, x, [
       `Move the constant: $${coefX(a)} = ${c} ${b < 0 ? '+' : '-'} ${Math.abs(b)} = ${c - b}$`,
@@ -27,10 +27,10 @@ export const linearEquation: Generator = (rng) => {
     ]);
   }
   // ax + b = cx + d
-  const a = nonZero(rng, 2, 12);
-  let c = nonZero(rng, -6, 9);
+  const a = nonZero(rng, 2, 7);
+  let c = nonZero(rng, -3, 5);
   if (c === a) c = a - 1 || -1;
-  const b = rng.int(-30, 30);
+  const b = rng.int(-15, 15);
   const d = (a - c) * x + b;
   return numeric(
     `med:lin2:${a}:${b}:${c}:${d}`,
@@ -44,9 +44,9 @@ export const linearEquation: Generator = (rng) => {
 };
 
 export const percentage: Generator = (rng) => {
-  const p = rng.pick([5, 10, 12, 15, 20, 25, 30, 35, 40, 60, 75, 80, 120, 150]);
+  const p = rng.pick([5, 10, 15, 20, 25, 30, 40, 50, 60, 75, 80]);
   const unit = 100 / gcd(p, 100); // base must be a multiple of this for a whole-number answer
-  const base = unit * rng.int(1, Math.max(1, Math.floor(600 / unit)));
+  const base = unit * rng.int(1, Math.max(1, Math.floor(200 / unit)));
   const result = (p * base) / 100;
   if (rng.next() < 0.7) {
     return numeric(`med:pct:${p}:${base}`, `What is ${p}% of ${base}?`, result, [
@@ -88,10 +88,10 @@ export const powersAndRoots: Generator = (rng) => {
 };
 
 export const fractions: Generator = (rng) => {
-  const b = rng.int(2, 12);
-  const d = rng.int(2, 12);
-  const a = rng.int(1, 11);
-  const c = rng.int(1, 11);
+  const b = rng.int(2, 6);
+  const d = rng.int(2, 6);
+  const a = rng.int(1, 5);
+  const c = rng.int(1, 5);
   const op = rng.pick(['+', '-', '\\times'] as const);
   let num: number;
   let den: number;
@@ -141,9 +141,9 @@ export const orderOfOperations: Generator = (rng) => {
   switch (rng.int(0, 2)) {
     case 0: {
       // a + b × c²
-      const a = rng.int(2, 40);
-      const b = rng.int(2, 9);
-      const c = rng.int(2, 9);
+      const a = rng.int(2, 20);
+      const b = rng.int(2, 5);
+      const c = rng.int(2, 5);
       return numeric(`med:ops1:${a}:${b}:${c}`, `$$${a} + ${b} \\times ${c}^2$$`, a + b * c * c, [
         `Exponent first: $${c}^2 = ${c * c}$`,
         `Then multiply: $${b} \\times ${c * c} = ${b * c * c}$`,
@@ -152,10 +152,10 @@ export const orderOfOperations: Generator = (rng) => {
     }
     case 1: {
       // (a − b)² − c × d
-      const a = rng.int(1, 15);
-      const b = rng.int(1, 20);
-      const c = rng.int(2, 12);
-      const d = rng.int(2, 12);
+      const a = rng.int(1, 10);
+      const b = rng.int(1, 12);
+      const c = rng.int(2, 9);
+      const d = rng.int(2, 9);
       const diff = a - b;
       return numeric(`med:ops2:${a}:${b}:${c}:${d}`, `$$(${a} - ${b})^2 - ${c} \\times ${d}$$`, diff * diff - c * d, [
         `Parentheses: $${a} - ${b} = ${diff}$`,
@@ -166,9 +166,9 @@ export const orderOfOperations: Generator = (rng) => {
     }
     default: {
       // a × (−b)² − c²   — the classic sign trap
-      const a = rng.int(2, 6);
-      const b = rng.int(2, 9);
-      const c = rng.int(2, 9);
+      const a = rng.int(2, 5);
+      const b = rng.int(2, 6);
+      const c = rng.int(2, 6);
       const value = a * b * b - c * c;
       return numeric(`med:ops3:${a}:${b}:${c}`, `$$${a} \\times (-${b})^2 - ${c}^2$$`, value, [
         `$(-${b})^2 = ${b * b}$ (the square of a negative is positive)`,
@@ -180,13 +180,13 @@ export const orderOfOperations: Generator = (rng) => {
 };
 
 export const averages: Generator = (rng) => {
-  const n = rng.int(4, 5);
-  const mean = rng.int(8, 60);
+  const n = rng.int(3, 5);
+  const mean = rng.int(5, 20);
   // Deviations that sum to zero keep the mean a whole number.
   const values: number[] = [];
   let total = 0;
   for (let i = 0; i < n - 1; i++) {
-    const v = mean + rng.int(-12, 12);
+    const v = mean + rng.int(-5, 5);
     values.push(v);
     total += v;
   }

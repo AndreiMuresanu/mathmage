@@ -70,6 +70,17 @@ export interface ProjectileState {
   color: string;
 }
 
+/** A heal orb dropped by a defeated enemy. */
+export interface PickupState {
+  id: number;
+  x: number;
+  y: number;
+  radius: number;
+  heal: number;
+  /** Seconds until it disappears (Infinity = never). */
+  ttl: number;
+}
+
 export interface WaveState {
   round: number;
   phase: 'break' | 'active';
@@ -106,6 +117,7 @@ export type SimEvent =
   | { type: 'playerDied'; playerId: string }
   | { type: 'enemyHit'; enemyId: number; x: number; y: number; amount: number }
   | { type: 'enemyDied'; x: number; y: number; kind: EnemyKind }
+  | { type: 'healed'; playerId: string; amount: number; x: number; y: number }
   | { type: 'explosion'; x: number; y: number; radius: number; color: string; targets: { id: number; x: number; y: number; radius: number }[] }
   | { type: 'beam'; x1: number; y1: number; x2: number; y2: number; width: number; color: string }
   | { type: 'roundStart'; round: number }

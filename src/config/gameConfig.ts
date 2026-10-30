@@ -173,6 +173,14 @@ export interface GameConfig {
     speedMult: number;
     /** Casters spread out to evenly spaced angles around the player instead of all coming from one side. */
     surround: boolean;
+    /** Chance (0–1) that a defeated enemy drops a heal orb. */
+    healDropChance: number;
+    /** Health restored by touching a heal orb. */
+    healAmount: number;
+    /** Seconds before an uncollected heal orb disappears (0 = never). */
+    healOrbLifetime: number;
+    /** Heal orbs within this distance (px, beyond touching) drift toward a hurt player (0 = no drift). */
+    healOrbDriftRange: number;
     chaser: ChaserConfig;
     caster: CasterConfig;
   };
@@ -225,8 +233,8 @@ export const DEFAULT_CONFIG: GameConfig = {
       label: 'Easy',
       weight: 80,
       ratingOffset: -382, // 90% success
-      manaReward: 6,
-      stunSeconds: 8,
+      manaReward: 10,
+      stunSeconds: 5,
       autoNextOnCorrect: false,
       timeLimit: 30,
     },
@@ -234,8 +242,8 @@ export const DEFAULT_CONFIG: GameConfig = {
       label: 'Medium',
       weight: 15,
       ratingOffset: -147, // 70% success
-      manaReward: 12,
-      stunSeconds: 8,
+      manaReward: 24,
+      stunSeconds: 5,
       autoNextOnCorrect: false,
       timeLimit: 45,
     },
@@ -244,7 +252,7 @@ export const DEFAULT_CONFIG: GameConfig = {
       weight: 5,
       ratingOffset: 0, // 50% success
       manaReward: 100,
-      stunSeconds: 8,
+      stunSeconds: 5,
       autoNextOnCorrect: false,
       timeLimit: 60,
     },
@@ -301,6 +309,10 @@ export const DEFAULT_CONFIG: GameConfig = {
     damageMult: 1,
     speedMult: 1,
     surround: true,
+    healDropChance: 0.33,
+    healAmount: 3,
+    healOrbLifetime: 40,
+    healOrbDriftRange: 50,
     chaser: { hp: 10, speed: 50, damage: 5, radius: 14, attackCooldown: 0.8 },
     caster: { hp: 10, speed: 70, damage: 4, radius: 13, fireInterval: 2.2, stunSeconds: 0.1, range: 320, spacing: 140, projectileSpeed: 350 },
   },

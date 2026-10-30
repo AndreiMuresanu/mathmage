@@ -2,6 +2,8 @@ import type { GameConfig, QuestionTypeConfig, SlotSource } from '../config/gameC
 import { pickNear } from './near';
 import { DEFAULT_DIFFICULTY, spreadCompensation, type SkillRatings } from './rating';
 import { weightedPick, type Rng } from '../util/rng';
+// contest.json is GENERATED — don't edit it by hand. Edit scripts/generate_contest_deck.py (which
+// verifies every answer) and run `npm run deck:contest`; hand edits are overwritten.
 import contestFile from './data/contest.json';
 import hardMathFile from './data/hard-math.json';
 import { importJson } from './import/json';

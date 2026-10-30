@@ -161,10 +161,10 @@
     {
       "id": "hm-020",
       "difficulty": 1500,
-      "prompt": "In how many distinct ways can the letters of MISSISSIPPI be arranged?",
-      "answer": "34650",
+      "prompt": "In how many distinct ways can the letters of ALABAMA be arranged?",
+      "answer": "210",
       "tags": ["counting"],
-      "steps": ["11 letters: M×1, I×4, S×4, P×2.", "$\\frac{11!}{4!\\,4!\\,2!} = 34650$."]
+      "steps": ["7 letters with A four times: $\\frac{7!}{4!} = 7 \\cdot 6 \\cdot 5 = 210$."]
     },
     {
       "id": "hm-021",
@@ -193,10 +193,10 @@
     {
       "id": "hm-024",
       "difficulty": 1350,
-      "prompt": "How many integers from 1 to 1000 are divisible by 3 or 5?",
-      "answer": "467",
+      "prompt": "How many integers from 1 to 100 are divisible by 3 or 5?",
+      "answer": "47",
       "tags": ["counting"],
-      "steps": ["Divisible by 3: 333. By 5: 200. By 15: 66.", "Inclusion–exclusion: $333 + 200 - 66 = 467$."]
+      "steps": ["Divisible by 3: 33. By 5: 20. By 15: 6.", "Inclusion–exclusion: $33 + 20 - 6 = 47$."]
     },
     {
       "id": "hm-025",
@@ -209,10 +209,10 @@
     {
       "id": "hm-026",
       "difficulty": 1000,
-      "prompt": "A right triangle has legs of length 20 and 21. What is the length of its hypotenuse?",
-      "answer": "29",
+      "prompt": "A right triangle has legs of length 12 and 16. What is the length of its hypotenuse?",
+      "answer": "20",
       "tags": ["geometry"],
-      "steps": ["$\\sqrt{20^2 + 21^2} = \\sqrt{400 + 441} = \\sqrt{841} = 29$."]
+      "steps": ["Scale the 3–4–5 triangle by 4: the hypotenuse is $4 \\cdot 5 = 20$."]
     },
     {
       "id": "hm-027",
@@ -220,7 +220,7 @@
       "prompt": "What is the area of a triangle with side lengths 13, 14, and 15?",
       "answer": "84",
       "tags": ["geometry"],
-      "steps": ["Heron: $s = 21$, area $= \\sqrt{21 \\cdot 8 \\cdot 7 \\cdot 6} = \\sqrt{7056} = 84$."]
+      "steps": ["Drop the altitude to the side 14: it splits it into 5 and 9, with height 12 (a 5–12–13 and a 9–12–15 right triangle).", "Area $= \\frac12 \\cdot 14 \\cdot 12 = 84$."]
     },
     {
       "id": "hm-028",
@@ -369,10 +369,10 @@
     {
       "id": "hm-046",
       "difficulty": 1300,
-      "prompt": "Evaluate $1^3 + 2^3 + \\cdots + 10^3$.",
-      "answer": "3025",
+      "prompt": "Evaluate $1^3 + 2^3 + 3^3 + 4^3 + 5^3$.",
+      "answer": "225",
       "tags": ["series"],
-      "steps": ["$\\sum_{k=1}^n k^3 = \\left(\\frac{n(n+1)}{2}\\right)^2$.", "$55^2 = 3025$."]
+      "steps": ["$\\sum_{k=1}^n k^3 = \\left(\\frac{n(n+1)}{2}\\right)^2$.", "$15^2 = 225$."]
     },
     {
       "id": "hm-047",
