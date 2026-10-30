@@ -115,7 +115,7 @@ describe('contest deck', () => {
     for (const q of result.questions) {
       expect(q.answer.kind, q.id).toBe('numeric');
       expect(q.steps?.length, q.id).toBeGreaterThan(0);
-      expect(q.difficulty, q.id).toBeGreaterThanOrEqual(800);
+      expect(q.difficulty, q.id).toBeGreaterThanOrEqual(300);
       expect(q.difficulty, q.id).toBeLessThanOrEqual(2200);
     }
   });

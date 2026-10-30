@@ -12,7 +12,7 @@ import { createDeckSource } from './sources/deck';
 import { createMediumSource } from './sources/medium';
 import { createAlgebraTricksSource } from './sources/algebra_tricks';
 import { loadImportedDecks, saveImportedDecks } from './storage';
-import type { Deck, Question, QuestionSource } from './types';
+import { MENTAL_MATH_TAG, type Deck, type Question, type QuestionSource } from './types';
 
 /** How many questions to sample from a source without `nextNear` when looking for a target rating. */
 const SAMPLES = 10;
@@ -114,6 +114,7 @@ export class QuestionRegistry {
     ratings: SkillRatings,
     rng: Rng,
     spread = 100,
+    mentalMathWeight = 1,
   ): DrawnQuestion | undefined {
     const usable = this.usableSources(sources);
     const tiers = types.map((type, typeIndex) => ({ type, typeIndex }));
@@ -129,18 +130,20 @@ export class QuestionRegistry {
     const offset = tier.type.ratingOffset * spreadCompensation(spread) * ratings.offsetScale(skill);
     const target = ratings.rating(skill) + offset;
 
-    // One candidate per source in this skill, then the best fit (weighted by source weight).
+    // One candidate per source in this skill, then the best fit (weighted by source weight, and
+    // down-weighting mostly-computation questions).
+    const appeal = (q: Question) => (q.tags?.includes(MENTAL_MATH_TAG) ? mentalMathWeight : 1);
     const candidates = usable
       .filter((s) => this.sources.get(s.sourceId)!.skill === skill)
-      .map((s) => ({ question: this.questionNear(this.sources.get(s.sourceId)!, rng, target, spread), weight: s.weight }));
-    const chosen = pickNear(rng, candidates, (c) => c.question.difficulty ?? DEFAULT_DIFFICULTY, target, spread, (c) => c.weight)!;
+      .map((s) => ({ question: this.questionNear(this.sources.get(s.sourceId)!, rng, target, spread, appeal), weight: s.weight }));
+    const chosen = pickNear(rng, candidates, (c) => c.question.difficulty ?? DEFAULT_DIFFICULTY, target, spread, (c) => c.weight * appeal(c.question))!;
     return { typeIndex: tier.typeIndex, question: chosen.question, skill, target };
   }
 
-  private questionNear(source: QuestionSource, rng: Rng, target: number, spread: number): Question {
+  private questionNear(source: QuestionSource, rng: Rng, target: number, spread: number, appeal: (q: Question) => number): Question {
     if (source.nextNear) return source.nextNear(rng, target, spread);
     const samples = Array.from({ length: SAMPLES }, () => source.next(rng));
-    return pickNear(rng, samples, (q) => q.difficulty ?? DEFAULT_DIFFICULTY, target, spread)!;
+    return pickNear(rng, samples, (q) => q.difficulty ?? DEFAULT_DIFFICULTY, target, spread, appeal)!;
   }
 
   private addSource(source: QuestionSource, builtIn: boolean, size?: number): void {

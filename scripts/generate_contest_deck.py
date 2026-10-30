@@ -484,12 +484,9 @@ q(1550, ['matrices'], 'What is $\\det \\begin{pmatrix} 1 & 1 & 1 \\\\ 1 & 2 & 3 
   lambda: float(sp.Matrix([[1, 1, 1], [1, 2, 3], [1, 4, 9]]).det()))
 
 # ------------------------------------------------------------------ statistics
-q(950, ['statistics'], 'What is the mean of $2, 4, 4, 4, 5, 5, 7, 9$?', '5', ['Sum $40$ over $8$ numbers: $5$.'], lambda: sum([2, 4, 4, 4, 5, 5, 7, 9]) / 8)
-q(1350, ['statistics'], 'What is the (population) standard deviation of $2, 4, 4, 4, 5, 5, 7, 9$?', '2', ['Mean $5$; squared deviations $9, 1, 1, 1, 0, 0, 4, 16$ sum to $32$.', 'Variance $32/8 = 4$, so the standard deviation is $2$.'],
-  lambda: sqrt(sum((v - 5) ** 2 for v in [2, 4, 4, 4, 5, 5, 7, 9]) / 8))
+# (No "calculate the mean" questions: they're just adding up a list.)
 q(1100, ['statistics'], 'What is the median of $3, 1, 4, 1, 5, 9, 2, 6$? (A fraction like 7/2 is fine.)', '7/2', ['Sorted: $1, 1, 2, 3, 4, 5, 6, 9$. The middle two are $3$ and $4$.', 'Median $= \\frac{7}{2}$.'],
   lambda: (sorted([3, 1, 4, 1, 5, 9, 2, 6])[3] + sorted([3, 1, 4, 1, 5, 9, 2, 6])[4]) / 2)
-q(1150, ['statistics'], 'Five numbers have mean $12$. After one is removed, the other four have mean $10$. What number was removed?', '20', ['Total before: $60$. Total after: $40$.', 'Removed: $20$.'], lambda: 5 * 12 - 4 * 10)
 q(1650, ['probability', 'statistics'], 'What is the variance of a single roll of a fair six-sided die? (A fraction like 35/12 is fine.)', '35/12', ['$E[X^2] = \\frac{91}{6}$ and $E[X] = \\frac72$.', '$\\frac{91}{6} - \\frac{49}{4} = \\frac{35}{12}$.'],
   lambda: sum(v * v for v in range(1, 7)) / 6 - 3.5**2)
 q(1800, ['probability'], 'Two fair four-sided dice (numbered 1–4) are rolled. What is the expected value of the larger number? (A fraction like 25/8 is fine.)', '25/8',
@@ -642,6 +639,184 @@ q(2050, ['algebra', 'polynomials'], 'Let $r$, $s$, $t$ be the roots of $x^3 - 3x
 q(1900, ['counting'], 'How many subsets of $\\{1, 2, 3, \\ldots, 10\\}$ have an even sum? (The empty set counts, with sum 0.)', '512',
   ['Toggling the element $1$ in or out flips the parity of the sum, pairing even-sum subsets with odd-sum ones.', 'So exactly half of the $2^{10}$ subsets have an even sum: $512$.'],
   lambda: sum(1 for m in range(1 << 10) if sum(i + 1 for i in range(10) if m >> i & 1) % 2 == 0))
+
+
+# ------------------------------------------------------------------ warm-ups (ratings 300-900)
+# Puzzles for the bottom of the rating scale, so a new player gets ideas to spot instead of sums
+# to grind. Every number stays small: the time should go into seeing the idea, not computing.
+
+# patterns
+q(400, ['sequences'], 'What comes next: $2, 4, 8, 16, \\ldots$?', '32', ['Each term doubles: $16 \\times 2 = 32$.'], lambda: 2**5)
+q(450, ['sequences'], 'What comes next: $1, 4, 9, 16, 25, \\ldots$?', '36', ['These are the squares $1^2, 2^2, \\ldots, 5^2$; next is $6^2 = 36$.'], lambda: 6**2)
+q(500, ['sequences'], 'What comes next: $1, 1, 2, 3, 5, 8, \\ldots$?', '13', ['Each term is the sum of the two before it: $5 + 8 = 13$.'], lambda: 5 + 8)
+q(550, ['sequences'], 'What comes next: $1, 3, 6, 10, 15, \\ldots$?', '21', ['The gaps grow by one: $+2, +3, +4, +5$, then $+6$.', '$15 + 6 = 21$.'], lambda: sum(range(1, 7)))
+q(600, ['sequences', 'number theory'], 'What comes next: $2, 3, 5, 7, 11, \\ldots$?', '13', ['These are the primes; the next prime after $11$ is $13$.'],
+  lambda: [m for m in range(12, 100) if is_prime(m)][0])
+q(650, ['sequences'], 'What comes next: $1, 2, 4, 7, 11, 16, \\ldots$?', '22', ['The gaps are $1, 2, 3, 4, 5$, so the next gap is $6$: $16 + 6 = 22$.'], lambda: 1 + sum(range(1, 7)))
+q(700, ['sequences'], 'What comes next: $3, 5, 9, 17, 33, \\ldots$?', '65', ['Each term is double the previous one, minus $1$: $2 \\cdot 33 - 1 = 65$.', '(Equivalently, the terms are $2^n + 1$.)'], lambda: 2**6 + 1)
+q(800, ['sequences'], 'What comes next: $2, 6, 12, 20, 30, \\ldots$?', '42', ['The terms are $1 \\cdot 2, 2 \\cdot 3, 3 \\cdot 4, 4 \\cdot 5, 5 \\cdot 6$.', 'Next: $6 \\cdot 7 = 42$.'], lambda: 6 * 7)
+q(800, ['sequences'], 'What comes next: $1, 2, 6, 24, 120, \\ldots$?', '720', ['Multiply by $2, 3, 4, 5$, then $6$: these are the factorials.', '$120 \\times 6 = 720$.'], lambda: factorial(6))
+q(600, ['sequences'], 'The pattern $1, 2, 3, 1, 2, 3, 1, 2, 3, \\ldots$ goes on forever. What is the $100$th term?', '1',
+  ['The pattern repeats every $3$ terms, and $99$ is a multiple of $3$, so term $99$ is a $3$.', 'Term $100$ starts a new block: $1$.'],
+  lambda: [1, 2, 3][(100 - 1) % 3])
+
+# think of a number / working backwards
+q(450, ['algebra'], 'I think of a number, double it, then add $3$, and get $17$. What was my number?', '7',
+  ['Undo the steps in reverse: $17 - 3 = 14$, then $14 \\div 2 = 7$.'], lambda: (17 - 3) / 2)
+q(550, ['algebra'], 'I think of a number, add $5$, then multiply by $3$, and get $36$. What was my number?', '7',
+  ['Undo in reverse: $36 \\div 3 = 12$, then $12 - 5 = 7$.'], lambda: 36 / 3 - 5)
+q(650, ['algebra'], 'Sam spends half of his coins, then $3$ more coins, and has $7$ coins left. How many coins did he start with?', '20',
+  ['Work backwards: before spending the last $3$ he had $7 + 3 = 10$.', 'That was half of what he started with: $20$.'],
+  lambda: [s for s in range(0, 100, 2) if s / 2 - 3 == 7][0])
+q(700, ['algebra'], 'A number doubled is $1$ less than the number tripled. What is the number?', '1',
+  ['$2n = 3n - 1$, so $n = 1$.'], lambda: [m for m in range(-10, 10) if 2 * m == 3 * m - 1][0])
+q(500, ['algebra'], 'If $x + 3 = 10$, what is $2x + 6$?', '20', ['No need to find $x$: $2x + 6 = 2(x + 3) = 2 \\cdot 10 = 20$.'], lambda: 2 * 7 + 6)
+q(600, ['algebra'], 'If $x - y = 4$, what is $3x - 3y$?', '12', ['$3x - 3y = 3(x - y) = 3 \\cdot 4 = 12$.'], lambda: 3 * 4)
+q(450, ['algebra'], 'If $2x + 2y = 18$, what is $x + y$?', '9', ['Divide both sides by $2$: $x + y = 9$.'], lambda: 18 / 2)
+q(450, ['algebra'], 'If $a = 2b$ and $b = 3c$, what is $a$ when $c = 5$?', '30', ['$b = 3 \\cdot 5 = 15$, then $a = 2 \\cdot 15 = 30$.'], lambda: 2 * 3 * 5)
+q(850, ['algebra'], 'If $\\frac{x}{y} = 3$, what is $\\frac{x + y}{y}$?', '4', ['$\\frac{x + y}{y} = \\frac{x}{y} + 1 = 3 + 1 = 4$.'], lambda: (3 + 1) / 1)
+
+# word problems with a twist
+q(550, ['algebra'], 'Two whole numbers have product $24$ and sum $10$. What is the larger one?', '6',
+  ['Try factor pairs of $24$: $1 \\cdot 24, 2 \\cdot 12, 3 \\cdot 8, 4 \\cdot 6$.', 'Only $4 + 6 = 10$; the larger is $6$.'],
+  lambda: max(a for a in range(1, 25) for b in range(1, 25) if a * b == 24 and a + b == 10))
+q(600, ['algebra'], 'Two numbers add up to $20$ and differ by $4$. What is the larger number?', '12',
+  ['Larger $= \\frac{\\text{sum} + \\text{difference}}{2} = \\frac{20 + 4}{2} = 12$.'], lambda: (20 + 4) / 2)
+q(600, ['algebra'], 'Three consecutive whole numbers add up to $48$. What is the largest of them?', '17',
+  ['The middle number is $48 \\div 3 = 16$, so they are $15, 16, 17$.'], lambda: [m for m in range(50) if m + (m + 1) + (m + 2) == 48][0] + 2)
+q(650, ['algebra'], 'Five consecutive whole numbers add up to $50$. What is the smallest of them?', '8',
+  ['The middle number is $50 \\div 5 = 10$, so they are $8, 9, 10, 11, 12$.'], lambda: [m for m in range(50) if 5 * m + 10 == 50][0])
+q(700, ['algebra'], 'A bat and a ball cost $110$ cents together. The bat costs $100$ cents more than the ball. How many cents does the ball cost?', '5',
+  ['Not $10$! If the ball costs $b$, the bat costs $b + 100$.', '$2b + 100 = 110$, so $b = 5$.'], lambda: [b for b in range(111) if b + (b + 100) == 110][0])
+q(750, ['algebra'], 'Mia is $4$ years older than Leo. In $3$ years their ages will add up to $30$. How old is Leo now?', '10',
+  ['In $3$ years: $(L + 3) + (L + 7) = 30$.', '$2L = 20$, so $L = 10$.'], lambda: [a for a in range(40) if (a + 3) + (a + 4 + 3) == 30][0])
+q(850, ['algebra'], 'A father is $30$ and his son is $4$. In how many years will the father be exactly three times as old as his son?', '9',
+  ['$30 + t = 3(4 + t)$, so $30 + t = 12 + 3t$.', '$2t = 18$, so $t = 9$ (father $39$, son $13$).'], lambda: [t for t in range(50) if 30 + t == 3 * (4 + t)][0])
+q(800, ['algebra'], 'A farm has only chickens and cows: $10$ heads and $28$ legs. How many cows are there?', '4',
+  ['If all $10$ were chickens there would be $20$ legs.', 'Each cow adds $2$ more legs: $(28 - 20) \\div 2 = 4$ cows.'],
+  lambda: [c for c in range(11) if 4 * c + 2 * (10 - c) == 28][0])
+q(750, ['algebra'], 'If $5$ machines make $5$ widgets in $5$ minutes, how many minutes do $100$ machines take to make $100$ widgets?', '5',
+  ['Each machine makes $1$ widget in $5$ minutes.', 'So $100$ machines make $100$ widgets in the same $5$ minutes.'], lambda: 5)
+q(900, ['algebra'], 'A snail climbs $3$ m up a $10$ m wall each day and slides $2$ m back down each night. On which day does it reach the top?', '8',
+  ['After $7$ full days and nights it is at $7$ m.', 'On day $8$ it climbs $3$ m to reach $10$ m before sliding back.'],
+  lambda: next(d for d in range(1, 30) if (d - 1) * 1 + 3 >= 10))
+q(750, ['algebra'], '$2$ apples weigh the same as $3$ oranges, and $1$ orange weighs the same as $4$ grapes. How many grapes weigh the same as $4$ apples?', '24',
+  ['$4$ apples $= 6$ oranges.', '$6$ oranges $= 6 \\times 4 = 24$ grapes.'], lambda: 4 / 2 * 3 * 4)
+q(700, ['algebra'], 'A car travels $60$ km in $45$ minutes. At that speed, how many km does it travel in an hour?', '80',
+  ['$45$ minutes is $\\frac34$ of an hour, so $15$ minutes covers $20$ km.', 'An hour is four $15$-minute blocks: $80$ km.'], lambda: 60 / 45 * 60)
+q(550, ['algebra'], '$3$ pencils cost $150$ cents. How many cents do $7$ pencils cost?', '350', ['One pencil costs $50$ cents, so $7$ cost $350$ cents.'], lambda: 150 / 3 * 7)
+q(900, ['algebra'], 'A price goes up by $10\\%$ and then down by $10\\%$. By what percent is the final price below the original?', '1',
+  ['Up $10\\%$: $\\times 1.1$. Down $10\\%$: $\\times 0.9$.', '$1.1 \\times 0.9 = 0.99$, so the price is $1\\%$ lower.'], lambda: (1 - 1.1 * 0.9) * 100)
+q(550, ['algebra'], 'What is $50\\%$ of $50\\%$ of $80$?', '20', ['Half of half is a quarter: $\\frac{80}{4} = 20$.'], lambda: 0.5 * 0.5 * 80)
+q(500, ['algebra'], 'What is half of a third of $60$?', '10', ['Half of a third is a sixth: $\\frac{60}{6} = 10$.'], lambda: 60 / 3 / 2)
+q(450, ['algebra'], 'What fraction of an hour is $20$ minutes? (A fraction like 1/4 is fine.)', '1/3', ['$\\frac{20}{60} = \\frac13$.'], lambda: 20 / 60)
+
+# counting
+q(400, ['counting'], 'A log is cut into $5$ pieces. How many cuts were made?', '4', ['Each cut adds one piece, starting from $1$ piece: $4$ cuts.'], lambda: 5 - 1)
+q(500, ['counting'], 'How many whole numbers are there from $5$ to $15$, including both?', '11', ['Not $10$: count both ends, $15 - 5 + 1 = 11$.'], lambda: len(range(5, 16)))
+q(550, ['counting'], 'A $20$ m fence has a post every $4$ m, including one at each end. How many posts are there?', '6',
+  ['$20 \\div 4 = 5$ gaps, and one more post than gaps: $6$.'], lambda: len(range(0, 21, 4)))
+q(750, ['counting'], 'It takes $3$ minutes to cut a log into $4$ pieces. At the same rate, how many minutes does it take to cut a log into $7$ pieces?', '6',
+  ['$4$ pieces need $3$ cuts, so each cut takes $1$ minute.', '$7$ pieces need $6$ cuts: $6$ minutes.'], lambda: (7 - 1) * 3 / (4 - 1))
+q(450, ['counting'], 'You have $3$ shirts and $4$ pairs of pants. How many different outfits of one shirt and one pair of pants can you make?', '12',
+  ['Each shirt goes with any of the $4$ pants: $3 \\times 4 = 12$.'], lambda: len(list(itertools.product(range(3), range(4)))))
+q(500, ['counting'], 'In how many different orders can $3$ people stand in a line?', '6', ['$3$ choices for first, $2$ for second, $1$ for last: $3 \\cdot 2 \\cdot 1 = 6$.'],
+  lambda: len(list(itertools.permutations(range(3)))))
+q(600, ['counting'], 'Four teams each play every other team exactly once. How many games are played?', '6',
+  ['Each of the $4$ teams plays $3$ games, but each game involves $2$ teams: $\\frac{4 \\cdot 3}{2} = 6$.'], lambda: comb(4, 2))
+q(700, ['counting'], 'Five friends each send a card to every other friend. How many cards are sent?', '20',
+  ['Each of the $5$ friends sends $4$ cards: $5 \\times 4 = 20$.', '(Unlike handshakes, a card from A to B is different from one from B to A.)'],
+  lambda: len(list(itertools.permutations(range(5), 2))))
+q(650, ['counting'], 'How many two-digit numbers have digits that add up to $5$?', '5', ['$14, 23, 32, 41, 50$: five of them.'],
+  lambda: sum(1 for m in range(10, 100) if m // 10 + m % 10 == 5))
+q(600, ['counting', 'number theory'], 'How many multiples of $7$ are there from $1$ to $100$?', '14', ['$7 \\times 14 = 98 \\le 100 < 105 = 7 \\times 15$, so $14$.'],
+  lambda: sum(1 for m in range(1, 101) if m % 7 == 0))
+q(650, ['counting', 'number theory'], 'How many perfect squares are there from $1$ to $50$?', '7', ['$1, 4, 9, 16, 25, 36, 49$: seven ($8^2 = 64$ is too big).'],
+  lambda: sum(1 for m in range(1, 51) if isqrt(m) ** 2 == m))
+q(800, ['counting'], 'The pages of a book are numbered $1$ to $40$. How many times is the digit $3$ printed?', '14',
+  ['As a units digit: $3, 13, 23, 33$ (four times).', 'As a tens digit: $30$ to $39$ (ten times).', 'Total: $14$ (the $33$ counts twice).'],
+  lambda: sum(str(m).count('3') for m in range(1, 41)))
+q(800, ['counting', 'geometry'], 'How many squares of any size are there in a $3 \\times 3$ grid of squares?', '14',
+  ['$1 \\times 1$: $9$. $2 \\times 2$: $4$. $3 \\times 3$: $1$.', 'Total: $9 + 4 + 1 = 14$.'], lambda: sum((3 - s + 1) ** 2 for s in range(1, 4)))
+q(800, ['counting'], 'How many rectangles (squares included) are there in a $1 \\times 4$ strip of squares?', '10',
+  ['A rectangle is fixed by choosing its left and right edges from the $5$ vertical lines.', '$\\binom52 = 10$.'], lambda: comb(5, 2))
+q(850, ['counting'], 'Moving one unit right or one unit up at a time, how many paths go from $(0, 0)$ to $(2, 2)$?', '6',
+  ['Every path is $4$ moves, $2$ of them right: choose which ones.', '$\\binom42 = 6$.'],
+  lambda: sum(1 for p in itertools.product('RU', repeat=4) if p.count('R') == 2))
+q(850, ['counting', 'geometry'], 'How many diagonals does a hexagon have?', '9',
+  ['Each of the $6$ corners connects to $3$ non-neighbours, and each diagonal has $2$ ends.', '$\\frac{6 \\cdot 3}{2} = 9$.'], lambda: comb(6, 2) - 6)
+q(900, ['counting', 'geometry'], 'A round pizza is cut with $3$ straight cuts. What is the greatest number of pieces you can get?', '7',
+  ['Each new cut can cross every earlier cut once, adding one more piece than the number of crossings.', '$1 + 1 + 2 + 3 = 7$.'], lambda: 1 + 1 + 2 + 3)
+q(600, ['counting', 'logic'], 'A drawer has red socks and blue socks. How many socks must you take out in the dark to be sure of a matching pair?', '3',
+  ['Two socks could be one of each colour.', 'A third sock must match one of them.'], lambda: 2 + 1)
+q(850, ['counting', 'logic'], 'A drawer has $10$ red and $10$ blue socks. How many socks must you take out in the dark to be sure of getting two red socks?', '12',
+  ['Worst case: all $10$ blue socks come first.', 'Then $2$ more are both red: $12$.'], lambda: 10 + 2)
+q(500, ['logic'], 'In a race, you overtake the runner in second place. What place are you in now?', '2', ['You took their place: second (not first!).'], lambda: 2)
+q(700, ['logic'], 'What is the largest number of Sundays a $31$-day month can have?', '5',
+  ['$31$ days is $4$ full weeks plus $3$ days.', 'If the month starts on Friday, Saturday or Sunday, it has $5$ Sundays.'],
+  lambda: max(sum(1 for d in range(31) if (start + d) % 7 == 0) for start in range(7)))
+
+# probability
+q(500, ['probability'], 'A bag holds $3$ red and $5$ blue marbles. What is the probability of drawing a red one? (A fraction like 1/4 is fine.)', '3/8',
+  ['$3$ red out of $8$ marbles: $\\frac38$.'], lambda: 3 / 8)
+q(600, ['probability'], 'A fair die is rolled. What is the probability of rolling a number greater than $4$? (A fraction like 1/4 is fine.)', '1/3',
+  ['Only $5$ and $6$: $\\frac26 = \\frac13$.'], lambda: sum(1 for d in range(1, 7) if d > 4) / 6)
+q(650, ['probability'], 'Two fair coins are flipped. What is the probability that both land heads? (A fraction like 1/3 is fine.)', '1/4',
+  ['Outcomes HH, HT, TH, TT are equally likely; only HH works: $\\frac14$.'], lambda: 1 / 4)
+
+# number sense: let the structure do the work
+q(550, ['number theory'], 'What is $17 \\times 6 + 17 \\times 4$?', '170', ['Factor out $17$: $17 \\times (6 + 4) = 17 \\times 10 = 170$.'], lambda: 17 * 6 + 17 * 4)
+q(600, ['number theory'], 'What is $25 \\times 37 \\times 4$?', '3700', ['Reorder: $25 \\times 4 = 100$, then $100 \\times 37 = 3700$.'], lambda: 25 * 37 * 4)
+q(650, ['number theory'], 'What is $101 \\times 37 - 37$?', '3700', ['Factor out $37$: $37 \\times (101 - 1) = 37 \\times 100 = 3700$.'], lambda: 101 * 37 - 37)
+q(900, ['number theory'], 'What is $2024^2 - 2023 \\times 2025$?', '1', ['$2023 \\times 2025 = (2024 - 1)(2024 + 1) = 2024^2 - 1$.', 'So the difference is $1$.'], lambda: 2024**2 - 2023 * 2025)
+q(450, ['number theory'], 'What is $1 + 2 + 3 + \\cdots + 9$?', '45', ['Pair them up: $(1 + 9) + (2 + 8) + (3 + 7) + (4 + 6) + 5 = 4 \\cdot 10 + 5 = 45$.'], lambda: sum(range(1, 10)))
+q(550, ['number theory'], 'What is $1 + 3 + 5 + 7 + 9 + 11$?', '36', ['The sum of the first $n$ odd numbers is $n^2$: here $6^2 = 36$.'], lambda: sum(range(1, 12, 2)))
+q(750, ['number theory'], 'What is $2 + 4 + 6 + \\cdots + 20$?', '110', ['It is $2 \\times (1 + 2 + \\cdots + 10) = 2 \\times 55 = 110$.'], lambda: sum(range(2, 21, 2)))
+q(850, ['number theory'], 'What is $1 - 2 + 3 - 4 + \\cdots + 99 - 100$?', '-50', ['Group in pairs: $(1 - 2) + (3 - 4) + \\cdots$ is $50$ pairs of $-1$.', 'Total: $-50$.'],
+  lambda: sum(m if m % 2 else -m for m in range(1, 101)))
+q(850, ['number theory'], 'What is $\\left(1 - \\frac12\\right)\\left(1 - \\frac13\\right)\\left(1 - \\frac14\\right)\\left(1 - \\frac15\\right)$? (A fraction like 2/7 is fine.)', '1/5',
+  ['$\\frac12 \\cdot \\frac23 \\cdot \\frac34 \\cdot \\frac45$: everything cancels except $\\frac15$.'], lambda: float(F(1, 2) * F(2, 3) * F(3, 4) * F(4, 5)))
+q(750, ['number theory'], 'What is the sum of the digits of $10^5 - 1$?', '45', ['$10^5 - 1 = 99999$: five nines, $5 \\times 9 = 45$.'], lambda: sum(int(c) for c in str(10**5 - 1)))
+q(650, ['number theory'], 'How many zeros does $25 \\times 8 \\times 5 \\times 4$ end in?', '3', ['Pair $25 \\times 4 = 100$ and $8 \\times 5 = 40$: $100 \\times 40 = 4000$.', 'Three zeros.'],
+  lambda: len(str(25 * 8 * 5 * 4)) - len(str(25 * 8 * 5 * 4).rstrip('0')))
+q(800, ['number theory'], 'What is the last digit of $9^9$?', '9', ['Powers of $9$ end in $9, 1, 9, 1, \\ldots$: odd powers end in $9$.'], lambda: 9**9 % 10)
+q(850, ['number theory'], 'What is the last digit of $2^{20}$?', '6', ['Last digits of powers of $2$ cycle $2, 4, 8, 6$ every $4$ steps.', '$20$ is a multiple of $4$, so it ends in $6$.'], lambda: 2**20 % 10)
+q(800, ['number theory'], 'What is the last digit of $3 \\times 13 \\times 23 \\times 33$?', '1', ['Only last digits matter: $3 \\times 3 \\times 3 \\times 3 = 81$.', 'Last digit $1$.'], lambda: 3 * 13 * 23 * 33 % 10)
+q(350, ['number theory'], 'What is the smallest prime number?', '2', ['$1$ is not prime; $2$ is the smallest (and only even) prime.'], lambda: [m for m in range(10) if is_prime(m)][0])
+q(650, ['number theory'], 'How many prime numbers are less than $20$?', '8', ['$2, 3, 5, 7, 11, 13, 17, 19$: eight.'], lambda: sum(1 for m in range(20) if is_prime(m)))
+q(500, ['number theory'], 'What is the largest number that divides both $12$ and $18$?', '6', ['Divisors of $12$: $1, 2, 3, 4, 6, 12$. The largest that also divides $18$ is $6$.'], lambda: gcd(12, 18))
+q(550, ['number theory'], 'What is the smallest positive number divisible by both $4$ and $6$?', '12', ['Multiples of $6$: $6, 12, \\ldots$; the first one divisible by $4$ is $12$.'], lambda: lcm(4, 6))
+q(650, ['number theory'], 'How many divisors does $12$ have?', '6', ['$1, 2, 3, 4, 6, 12$: six.'], lambda: len(divisors(12)))
+q(700, ['number theory'], 'What is the smallest two-digit number whose digits multiply to $12$?', '26', ['Digit pairs with product $12$: $2 \\cdot 6$, $3 \\cdot 4$.', 'The smallest arrangement is $26$.'],
+  lambda: min(m for m in range(10, 100) if (m // 10) * (m % 10) == 12))
+q(850, ['number theory'], 'What is the smallest whole number greater than $1$ that leaves a remainder of $1$ when divided by $2$, by $3$, and by $4$?', '13',
+  ['One more than a common multiple of $2, 3, 4$.', 'The smallest common multiple is $12$, so the answer is $13$.'],
+  lambda: min(m for m in range(2, 100) if m % 2 == 1 and m % 3 == 1 and m % 4 == 1))
+q(750, ['number theory'], 'In a $3 \\times 3$ magic square using each of $1$ to $9$ once, what does every row add up to?', '15',
+  ['All nine numbers add to $45$, shared equally by the $3$ rows: $45 \\div 3 = 15$.'], lambda: sum(range(1, 10)) / 3)
+q(850, ['number theory'], 'In a $3 \\times 3$ magic square using each of $1$ to $9$ once, which number is in the centre?', '5',
+  ['The centre lies on $4$ lines (middle row, middle column, both diagonals) that each sum to $15$.', 'Those lines cover every cell once and the centre $3$ extra times: $60 = 45 + 3c$, so $c = 5$.'],
+  lambda: next(sq[4] for sq in itertools.permutations(range(1, 10))
+               if all(sum(sq[i] for i in line) == 15 for line in [(0, 1, 2), (3, 4, 5), (6, 7, 8), (0, 3, 6), (1, 4, 7), (2, 5, 8), (0, 4, 8), (2, 4, 6)])))
+q(650, ['number theory'], 'A clock shows $9$ o\'clock. What hour will it show $50$ hours later?', '11',
+  ['$48$ hours is exactly $4$ full turns of a $12$-hour clock, so only $2$ hours matter.', '$9 + 2 = 11$.'], lambda: (9 + 50 - 1) % 12 + 1)
+
+# geometry
+q(300, ['geometry'], 'What do the angles of a triangle add up to, in degrees?', '180', ['The angles of any triangle sum to $180^\\circ$.'], lambda: 180)
+q(400, ['geometry'], 'Two angles of a triangle are $50^\\circ$ and $60^\\circ$. What is the third angle, in degrees?', '70', ['$180 - 50 - 60 = 70$.'], lambda: 180 - 50 - 60)
+q(600, ['geometry'], 'An isosceles triangle has a top angle of $40^\\circ$. What is each of its two equal base angles, in degrees?', '70',
+  ['The base angles share $180 - 40 = 140$ degrees equally: $70$ each.'], lambda: (180 - 40) / 2)
+q(400, ['geometry'], 'How many edges does a cube have?', '12', ['$4$ on top, $4$ on the bottom, $4$ upright: $12$.'], lambda: 12)
+q(450, ['geometry'], 'How many lines of symmetry does a square have?', '4', ['Two through the midpoints of opposite sides, and two diagonals.'], lambda: 4)
+q(450, ['geometry'], 'What is the angle between the hands of a clock at $3$:$00$, in degrees?', '90', ['The hands are a quarter turn apart: $\\frac{360}{4} = 90$.'], lambda: 360 / 4)
+q(550, ['geometry'], 'How many degrees does the minute hand of a clock turn in $20$ minutes?', '120', ['$20$ minutes is a third of an hour: $\\frac{360}{3} = 120$.'], lambda: 360 * 20 / 60)
+q(500, ['geometry'], 'A square has perimeter $20$. What is its area?', '25', ['Each side is $20 \\div 4 = 5$, so the area is $5^2 = 25$.'], lambda: (20 / 4) ** 2)
+q(550, ['geometry'], 'If every side of a square is doubled, its area becomes how many times as large?', '4', ['$(2s)^2 = 4s^2$: four times as large.'], lambda: 2**2)
+q(600, ['geometry'], 'A right triangle has legs $6$ and $8$. What is its hypotenuse?', '10', ['It is the $3$-$4$-$5$ triangle scaled by $2$: $10$.'], lambda: math.hypot(6, 8))
+q(750, ['geometry'], 'A rectangle is twice as long as it is wide, and its perimeter is $30$. What is its area?', '50',
+  ['The perimeter is $2(w + 2w) = 6w = 30$, so $w = 5$ and the length is $10$.', 'Area: $5 \\times 10 = 50$.'],
+  lambda: [w * 2 * w for w in range(1, 30) if 6 * w == 30][0])
+q(800, ['geometry'], 'What is each exterior angle of a regular pentagon, in degrees?', '72', ['The exterior angles of any polygon add up to $360^\\circ$.', '$360 \\div 5 = 72$.'], lambda: 360 / 5)
 
 
 # ------------------------------------------------------------------ verify and write

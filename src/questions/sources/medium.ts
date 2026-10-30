@@ -1,6 +1,6 @@
 import type { MediumConfig } from '../../config/gameConfig';
 import type { Rng } from '../../util/rng';
-import type { Question, QuestionSource } from '../types';
+import { MENTAL_MATH_TAG, type Question, type QuestionSource } from '../types';
 import { coefX, gcd, lcm, nonZero, paren, plusConst } from './format';
 
 /**
@@ -179,39 +179,6 @@ export const orderOfOperations: Generator = (rng) => {
   }
 };
 
-export const averages: Generator = (rng) => {
-  const n = rng.int(3, 5);
-  const mean = rng.int(5, 20);
-  // Deviations that sum to zero keep the mean a whole number.
-  const values: number[] = [];
-  let total = 0;
-  for (let i = 0; i < n - 1; i++) {
-    const v = mean + rng.int(-5, 5);
-    values.push(v);
-    total += v;
-  }
-  values.push(mean * n - total);
-  if (values.some((v) => v <= 0)) return averages(rng);
-  if (rng.next() < 0.5) {
-    return numeric(`med:mean:${values.join(',')}`, `What is the mean (average) of ${values.join(', ')}?`, mean, [
-      `Sum: $${values.join(' + ')} = ${mean * n}$`,
-      `Divide by ${n}: $${mean * n} \\div ${n} = ${mean}$`,
-    ]);
-  }
-  const known = values.slice(0, -1);
-  const missing = values[values.length - 1];
-  return numeric(
-    `med:meanmiss:${values.join(',')}`,
-    `The mean of ${n} numbers is ${mean}. ${n - 1} of them are ${known.join(', ')}. What is the remaining number?`,
-    missing,
-    [
-      `Total must be $${n} \\times ${mean} = ${mean * n}$`,
-      `Known numbers sum to $${known.reduce((s, v) => s + v, 0)}$`,
-      `Last number: $${mean * n} - ${known.reduce((s, v) => s + v, 0)} = ${missing}$`,
-    ],
-  );
-};
-
 export const quadraticRoots: Generator = (rng) => {
   const r1 = rng.int(-9, 9);
   let r2 = rng.int(-9, 9);
@@ -237,7 +204,6 @@ const GENERATORS: Record<keyof MediumConfig, Generator> = {
   fractions: fractions,
   bigMultiplication: bigMultiplication,
   orderOfOperations: orderOfOperations,
-  averages: averages,
   quadraticRoots: quadraticRoots,
 };
 
@@ -262,18 +228,24 @@ export function mediumDifficulty(id: string): number {
     case 'ops1': return 700;
     case 'ops2': return 850;
     case 'ops3': return 900; // the (−b)² sign trap
-    case 'mean': return 850;
-    case 'meanmiss': return 950;
     case 'quad': return 1150;
     default: return 950;
   }
 }
 
+/** Variants that are mostly computation (no idea to find), tagged MENTAL_MATH_TAG. */
+const MENTAL_MATH_KINDS = new Set(['pct', 'pctof', 'sq', 'sqrt', 'pow2', 'pow3', 'cbrt', 'frac', 'mul', 'ops1', 'ops2', 'ops3']);
+
 export function generateMedium(cfg: MediumConfig, rng: Rng): Question {
   const enabled = (Object.keys(GENERATORS) as (keyof MediumConfig)[]).filter((k) => cfg[k]);
   const kind = enabled.length ? rng.pick(enabled) : 'linearEquations';
   const question = GENERATORS[kind](rng);
-  return { ...question, difficulty: mediumDifficulty(question.id) };
+  const mental = MENTAL_MATH_KINDS.has(question.id.split(':')[1]);
+  return {
+    ...question,
+    difficulty: mediumDifficulty(question.id),
+    tags: mental ? [...(question.tags ?? []), MENTAL_MATH_TAG] : question.tags,
+  };
 }
 
 export function createMediumSource(getConfig: () => MediumConfig): QuestionSource {

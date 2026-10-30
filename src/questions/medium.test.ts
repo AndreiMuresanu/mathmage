@@ -4,7 +4,6 @@ import { DEFAULT_CONFIG } from '../config/gameConfig';
 import { createRng } from '../util/rng';
 import { checkAnswer } from './answerCheck';
 import {
-  averages,
   bigMultiplication,
   fractions,
   generateMedium,
@@ -94,23 +93,9 @@ describe('medium generators', () => {
     }
   });
 
-  it('averages match the listed numbers', () => {
-    for (const q of many(averages)) {
-      const v = value(q);
-      if (q.prompt.startsWith('What is the mean')) {
-        const nums = q.prompt.split('of ')[1].match(/\d+/g)!.map(Number);
-        expect(nums.reduce((s, x) => s + x, 0) / nums.length).toBe(v);
-      } else {
-        const [n, mean, , ...known] = q.prompt.match(/\d+/g)!.map(Number);
-        expect(known.reduce((s, x) => s + x, 0) + v).toBe(n * mean);
-        expect(v).toBeGreaterThan(0);
-      }
-    }
-  });
-
   it('only draws from enabled kinds, and every question has steps', () => {
     const rng = createRng(5);
-    const cfg = { ...DEFAULT_CONFIG.medium, percentages: false, fractions: false, averages: false, quadraticRoots: false, linearEquations: false, bigMultiplication: false, orderOfOperations: false };
+    const cfg = { ...DEFAULT_CONFIG.medium, percentages: false, fractions: false, quadraticRoots: false, linearEquations: false, bigMultiplication: false, orderOfOperations: false };
     for (let i = 0; i < 50; i++) expect(generateMedium(cfg, rng).id).toMatch(/^med:(sq|sqrt|pow2|pow3|cbrt):/);
     for (let i = 0; i < 300; i++) expect(generateMedium(DEFAULT_CONFIG.medium, rng).steps?.length).toBeGreaterThan(0);
   });

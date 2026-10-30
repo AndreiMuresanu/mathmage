@@ -1,7 +1,7 @@
 import type { ArithmeticConfig } from '../../config/gameConfig';
 import type { Rng } from '../../util/rng';
 import { pickNear } from '../near';
-import type { Question, QuestionSource } from '../types';
+import { MENTAL_MATH_TAG, type Question, type QuestionSource } from '../types';
 
 type Op = '+' | '-' | '*' | '/';
 
@@ -108,7 +108,7 @@ export function generateArithmetic(cfg: ArithmeticConfig, rng: Rng): Question {
         prompt: `$$${latex}$$`,
         answer: { kind: 'numeric', value: expr.value, display: formatNumber(expr.value) },
         steps: steps(expr),
-        tags: ['arithmetic'],
+        tags: ['arithmetic', MENTAL_MATH_TAG],
       };
     } catch (e) {
       if (!(e instanceof Reject)) throw e;
@@ -122,14 +122,15 @@ export function generateArithmetic(cfg: ArithmeticConfig, rng: Rng): Question {
     prompt: `$$${a} + ${b}$$`,
     answer: { kind: 'numeric', value: a + b, display: String(a + b) },
     steps: [`$${a} + ${b} = ${a + b}$`],
-    tags: ['arithmetic'],
+    tags: ['arithmetic', MENTAL_MATH_TAG],
   };
 }
 
 /**
  * Arithmetic difficulty ladder for adaptive mode: the bottom of the rating scale. The target
  * audience is high school and up, so this is deliberately coarse — just enough to calibrate a
- * starting player quickly before the medium generator and algebra tricks take over.
+ * starting player quickly before the contest warm-ups take over. It stops at small numbers on
+ * purpose: long multi-term sums are grinding, not problem solving.
  */
 const BASE: ArithmeticConfig = {
   allowAdd: true,
@@ -152,12 +153,8 @@ export const ARITHMETIC_LEVELS: { rating: number; config: ArithmeticConfig }[] =
   { rating: 250, config: { ...BASE, allowMultiply: false, allowDivide: false, maxOperand: 20 } },
   // Times tables and division facts.
   { rating: 400, config: { ...BASE, allowAdd: false, allowSubtract: false, minOperand: 2, maxOperand: 10 } },
-  // Mixed operations, 2–3 numbers, parentheses.
-  { rating: 550, config: { ...BASE, minOperand: 2, maxOperand: 12, maxTerms: 3, allowParens: true, maxAbsResult: 200 } },
-  // Bigger numbers, three terms.
-  { rating: 700, config: { ...BASE, minOperand: 2, maxOperand: 20, minTerms: 3, maxTerms: 3, allowParens: true, maxAbsResult: 500 } },
-  // Three to four terms, up to 25.
-  { rating: 850, config: { ...BASE, minOperand: 2, maxOperand: 25, minTerms: 3, maxTerms: 4, allowParens: true, maxAbsResult: 1000 } },
+  // Mixed operations, 2–3 small numbers, parentheses.
+  { rating: 550, config: { ...BASE, minOperand: 2, maxOperand: 10, maxTerms: 3, allowParens: true, maxAbsResult: 100 } },
 ];
 
 function atLevel(level: { rating: number; config: ArithmeticConfig }, rng: Rng): Question {
@@ -168,7 +165,7 @@ export function createArithmeticSource(): QuestionSource {
   return {
     id: 'arithmetic',
     name: 'Arithmetic (generated)',
-    description: 'Random arithmetic expressions, from 1 + 1 up to four-term mixed operations (ratings 100–850).',
+    description: 'Random arithmetic expressions, from 1 + 1 up to three small numbers with parentheses (ratings 100–550).',
     skill: 'math',
     next: (rng) => atLevel(rng.pick(ARITHMETIC_LEVELS), rng),
     nextNear: (rng, target, spread) => atLevel(pickNear(rng, ARITHMETIC_LEVELS, (l) => l.rating, target, spread)!, rng),

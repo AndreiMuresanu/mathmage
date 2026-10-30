@@ -2591,31 +2591,6 @@
     },
     {
       "id": "ct-207",
-      "difficulty": 950,
-      "prompt": "What is the mean of $2, 4, 4, 4, 5, 5, 7, 9$?",
-      "answer": "5",
-      "tags": [
-        "statistics"
-      ],
-      "steps": [
-        "Sum $40$ over $8$ numbers: $5$."
-      ]
-    },
-    {
-      "id": "ct-208",
-      "difficulty": 1350,
-      "prompt": "What is the (population) standard deviation of $2, 4, 4, 4, 5, 5, 7, 9$?",
-      "answer": "2",
-      "tags": [
-        "statistics"
-      ],
-      "steps": [
-        "Mean $5$; squared deviations $9, 1, 1, 1, 0, 0, 4, 16$ sum to $32$.",
-        "Variance $32/8 = 4$, so the standard deviation is $2$."
-      ]
-    },
-    {
-      "id": "ct-209",
       "difficulty": 1100,
       "prompt": "What is the median of $3, 1, 4, 1, 5, 9, 2, 6$? (A fraction like 7/2 is fine.)",
       "answer": "7/2",
@@ -2628,20 +2603,7 @@
       ]
     },
     {
-      "id": "ct-210",
-      "difficulty": 1150,
-      "prompt": "Five numbers have mean $12$. After one is removed, the other four have mean $10$. What number was removed?",
-      "answer": "20",
-      "tags": [
-        "statistics"
-      ],
-      "steps": [
-        "Total before: $60$. Total after: $40$.",
-        "Removed: $20$."
-      ]
-    },
-    {
-      "id": "ct-211",
+      "id": "ct-208",
       "difficulty": 1650,
       "prompt": "What is the variance of a single roll of a fair six-sided die? (A fraction like 35/12 is fine.)",
       "answer": "35/12",
@@ -2655,7 +2617,7 @@
       ]
     },
     {
-      "id": "ct-212",
+      "id": "ct-209",
       "difficulty": 1800,
       "prompt": "Two fair four-sided dice (numbered 1–4) are rolled. What is the expected value of the larger number? (A fraction like 25/8 is fine.)",
       "answer": "25/8",
@@ -2668,7 +2630,7 @@
       ]
     },
     {
-      "id": "ct-213",
+      "id": "ct-210",
       "difficulty": 1000,
       "prompt": "What is the $20$th term of the arithmetic sequence $3, 7, 11, 15, \\ldots$?",
       "answer": "79",
@@ -2680,7 +2642,7 @@
       ]
     },
     {
-      "id": "ct-214",
+      "id": "ct-211",
       "difficulty": 900,
       "prompt": "What is $1 + 2 + 3 + \\cdots + 100$?",
       "answer": "5050",
@@ -2692,7 +2654,7 @@
       ]
     },
     {
-      "id": "ct-215",
+      "id": "ct-212",
       "difficulty": 1250,
       "prompt": "What is $1 + 3 + 9 + 27 + 81$?",
       "answer": "121",
@@ -2704,7 +2666,7 @@
       ]
     },
     {
-      "id": "ct-216",
+      "id": "ct-213",
       "difficulty": 1450,
       "prompt": "A sequence has $a_1 = 1$ and $a_{n+1} = 2a_n + 1$. What is $a_{10}$?",
       "answer": "1023",
@@ -2718,7 +2680,7 @@
       ]
     },
     {
-      "id": "ct-217",
+      "id": "ct-214",
       "difficulty": 1400,
       "prompt": "What is $1^2 + 2^2 + 3^2 + \\cdots + 10^2$?",
       "answer": "385",
@@ -2730,7 +2692,7 @@
       ]
     },
     {
-      "id": "ct-218",
+      "id": "ct-215",
       "difficulty": 1000,
       "prompt": "With $F_1 = F_2 = 1$ and $F_{n} = F_{n-1} + F_{n-2}$, what is the Fibonacci number $F_{10}$?",
       "answer": "55",
@@ -2742,7 +2704,7 @@
       ]
     },
     {
-      "id": "ct-219",
+      "id": "ct-216",
       "difficulty": 1400,
       "prompt": "What is the sum of all two-digit multiples of $11$?",
       "answer": "495",
@@ -2754,7 +2716,7 @@
       ]
     },
     {
-      "id": "ct-220",
+      "id": "ct-217",
       "difficulty": 1150,
       "prompt": "How many terms are in the sequence $5, 8, 11, \\ldots, 200$?",
       "answer": "66",
@@ -2766,7 +2728,7 @@
       ]
     },
     {
-      "id": "ct-221",
+      "id": "ct-218",
       "difficulty": 1400,
       "prompt": "What is the minimum value of $x + \\frac{4}{x}$ for $x > 0$?",
       "answer": "4",
@@ -2778,7 +2740,7 @@
       ]
     },
     {
-      "id": "ct-222",
+      "id": "ct-219",
       "difficulty": 1150,
       "prompt": "If $x + y = 10$, what is the largest possible value of $xy$?",
       "answer": "25",
@@ -2790,7 +2752,7 @@
       ]
     },
     {
-      "id": "ct-223",
+      "id": "ct-220",
       "difficulty": 1350,
       "prompt": "What is the minimum of $x^2 + y^2$ if $x + y = 4$?",
       "answer": "8",
@@ -2802,7 +2764,7 @@
       ]
     },
     {
-      "id": "ct-224",
+      "id": "ct-221",
       "difficulty": 1300,
       "prompt": "What is the minimum value of $(x - 1)^2 + (x - 5)^2$?",
       "answer": "8",
@@ -2814,7 +2776,7 @@
       ]
     },
     {
-      "id": "ct-225",
+      "id": "ct-222",
       "difficulty": 1700,
       "prompt": "What is the remainder when $2^{100}$ is divided by $101$?",
       "answer": "1",
@@ -2826,7 +2788,7 @@
       ]
     },
     {
-      "id": "ct-226",
+      "id": "ct-223",
       "difficulty": 2050,
       "prompt": "What is the largest $k$ such that $2^k$ divides $3^{1024} - 1$?",
       "answer": "12",
@@ -2840,7 +2802,7 @@
       ]
     },
     {
-      "id": "ct-227",
+      "id": "ct-224",
       "difficulty": 1650,
       "prompt": "How many ordered pairs of positive integers $(x, y)$ satisfy $3x + 5y = 100$?",
       "answer": "6",
@@ -2853,7 +2815,7 @@
       ]
     },
     {
-      "id": "ct-228",
+      "id": "ct-225",
       "difficulty": 1700,
       "prompt": "If $x^2 + x + 1 = 0$, what is $x^{2025}$?",
       "answer": "1",
@@ -2867,7 +2829,7 @@
       ]
     },
     {
-      "id": "ct-229",
+      "id": "ct-226",
       "difficulty": 1600,
       "prompt": "What is $1 \\cdot 2 + 2 \\cdot 3 + 3 \\cdot 4 + \\cdots + 10 \\cdot 11$?",
       "answer": "440",
@@ -2879,7 +2841,7 @@
       ]
     },
     {
-      "id": "ct-230",
+      "id": "ct-227",
       "difficulty": 1600,
       "prompt": "What is $\\sqrt{2025 \\cdot 2027 + 1}$?",
       "answer": "2026",
@@ -2891,7 +2853,7 @@
       ]
     },
     {
-      "id": "ct-231",
+      "id": "ct-228",
       "difficulty": 1450,
       "prompt": "$2^{2026} - 2^{2025} - 2^{2024} = 2^k$. What is $k$?",
       "answer": "2024",
@@ -2903,7 +2865,7 @@
       ]
     },
     {
-      "id": "ct-232",
+      "id": "ct-229",
       "difficulty": 1850,
       "prompt": "Three different numbers are chosen at random from $1, 2, \\ldots, 10$. What is the probability that no two of them are consecutive?",
       "answer": "7/15",
@@ -2917,7 +2879,7 @@
       ]
     },
     {
-      "id": "ct-233",
+      "id": "ct-230",
       "difficulty": 1800,
       "prompt": "How many right triangles have all three vertices among the vertices of a regular octagon?",
       "answer": "24",
@@ -2931,7 +2893,7 @@
       ]
     },
     {
-      "id": "ct-234",
+      "id": "ct-231",
       "difficulty": 1550,
       "prompt": "The interior angles of a convex polygon add up to $1260°$. How many diagonals does it have?",
       "answer": "27",
@@ -2944,7 +2906,7 @@
       ]
     },
     {
-      "id": "ct-235",
+      "id": "ct-232",
       "difficulty": 1650,
       "prompt": "An equilateral triangle is inscribed in a circle of radius $2$. What is its area? (An answer like 3sqrt(3) is fine.)",
       "answer": "3sqrt(3)",
@@ -2957,7 +2919,7 @@
       ]
     },
     {
-      "id": "ct-236",
+      "id": "ct-233",
       "difficulty": 1450,
       "prompt": "A $3 \\times 3 \\times 3$ cube is painted on the outside and cut into 27 unit cubes. How many unit cubes have exactly two painted faces?",
       "answer": "12",
@@ -2971,7 +2933,7 @@
       ]
     },
     {
-      "id": "ct-237",
+      "id": "ct-234",
       "difficulty": 1900,
       "prompt": "A fair coin is flipped until two heads in a row appear. What is the expected number of flips?",
       "answer": "6",
@@ -2985,7 +2947,7 @@
       ]
     },
     {
-      "id": "ct-238",
+      "id": "ct-235",
       "difficulty": 1650,
       "prompt": "For how many positive integers $n \\le 100$ is $n^2 + n$ divisible by $6$?",
       "answer": "66",
@@ -2998,7 +2960,7 @@
       ]
     },
     {
-      "id": "ct-239",
+      "id": "ct-236",
       "difficulty": 1750,
       "prompt": "How many four-digit numbers have strictly increasing digits (like 1357)?",
       "answer": "126",
@@ -3011,7 +2973,7 @@
       ]
     },
     {
-      "id": "ct-240",
+      "id": "ct-237",
       "difficulty": 1850,
       "prompt": "How many ordered triples of positive integers $(a, b, c)$ satisfy $abc = 72$?",
       "answer": "60",
@@ -3025,7 +2987,7 @@
       ]
     },
     {
-      "id": "ct-241",
+      "id": "ct-238",
       "difficulty": 1800,
       "prompt": "What is the smallest positive integer with exactly $12$ positive divisors?",
       "answer": "60",
@@ -3038,7 +3000,7 @@
       ]
     },
     {
-      "id": "ct-242",
+      "id": "ct-239",
       "difficulty": 1600,
       "prompt": "What is the sum of all positive integers $n$ such that $n$ divides $n^2 + 10$?",
       "answer": "18",
@@ -3051,7 +3013,7 @@
       ]
     },
     {
-      "id": "ct-243",
+      "id": "ct-240",
       "difficulty": 1700,
       "prompt": "Let $f(x) = ax^7 + bx^3 + cx - 5$. If $f(-7) = 7$, what is $f(7)$?",
       "answer": "-17",
@@ -3065,7 +3027,7 @@
       ]
     },
     {
-      "id": "ct-244",
+      "id": "ct-241",
       "difficulty": 1950,
       "prompt": "How many real solutions does $\\frac{x}{10} = \\sin x$ have?",
       "answer": "7",
@@ -3078,7 +3040,7 @@
       ]
     },
     {
-      "id": "ct-245",
+      "id": "ct-242",
       "difficulty": 1750,
       "prompt": "Evaluate $\\displaystyle\\sum_{k=1}^{99} \\frac{1}{\\sqrt{k} + \\sqrt{k+1}}$.",
       "answer": "9",
@@ -3092,7 +3054,7 @@
       ]
     },
     {
-      "id": "ct-246",
+      "id": "ct-243",
       "difficulty": 1600,
       "prompt": "If $\\log_a b = 2$ and $\\log_b c = 3$, what is $\\log_c a$? (A fraction like 1/6 is fine.)",
       "answer": "1/6",
@@ -3105,7 +3067,7 @@
       ]
     },
     {
-      "id": "ct-247",
+      "id": "ct-244",
       "difficulty": 1700,
       "prompt": "Evaluate $\\displaystyle\\int_0^1 x \\ln x \\, dx$. (A fraction like -1/4 is fine.)",
       "answer": "-1/4",
@@ -3118,7 +3080,7 @@
       ]
     },
     {
-      "id": "ct-248",
+      "id": "ct-245",
       "difficulty": 1900,
       "prompt": "Evaluate $\\displaystyle\\int_0^{\\pi/2} \\ln(\\tan x) \\, dx$.",
       "answer": "0",
@@ -3131,7 +3093,7 @@
       ]
     },
     {
-      "id": "ct-249",
+      "id": "ct-246",
       "difficulty": 1900,
       "prompt": "Evaluate $\\displaystyle\\int_0^{\\pi/2} \\frac{\\sin x}{\\sin x + \\cos x} \\, dx$. (An answer like pi/4 is fine.)",
       "answer": "pi/4",
@@ -3144,7 +3106,7 @@
       ]
     },
     {
-      "id": "ct-250",
+      "id": "ct-247",
       "difficulty": 1750,
       "prompt": "Evaluate $\\displaystyle\\lim_{n \\to \\infty} n\\left(\\sqrt{n^2 + 1} - n\\right)$. (A fraction like 1/2 is fine.)",
       "answer": "1/2",
@@ -3157,7 +3119,7 @@
       ]
     },
     {
-      "id": "ct-251",
+      "id": "ct-248",
       "difficulty": 1950,
       "prompt": "Evaluate $\\displaystyle\\sum_{n=0}^{\\infty} \\frac{n^2}{2^n}$.",
       "answer": "6",
@@ -3170,7 +3132,7 @@
       ]
     },
     {
-      "id": "ct-252",
+      "id": "ct-249",
       "difficulty": 2000,
       "prompt": "What is the radius of convergence of $\\displaystyle\\sum_{n=1}^{\\infty} \\frac{n!}{n^n} x^n$? (An answer like e is fine.)",
       "answer": {
@@ -3188,7 +3150,7 @@
       ]
     },
     {
-      "id": "ct-253",
+      "id": "ct-250",
       "difficulty": 1750,
       "prompt": "What is $\\det \\begin{pmatrix} 2 & 1 & 1 \\\\ 1 & 2 & 1 \\\\ 1 & 1 & 2 \\end{pmatrix}$?",
       "answer": "4",
@@ -3201,7 +3163,7 @@
       ]
     },
     {
-      "id": "ct-254",
+      "id": "ct-251",
       "difficulty": 1850,
       "prompt": "A $3 \\times 3$ matrix $A$ has eigenvalues $1$, $2$ and $3$. What is $\\det(A^2 + I)$?",
       "answer": "100",
@@ -3214,7 +3176,7 @@
       ]
     },
     {
-      "id": "ct-255",
+      "id": "ct-252",
       "difficulty": 1850,
       "prompt": "A $5 \\times 5$ matrix $P$ satisfies $P^2 = P$ and has rank $3$. What is the trace of $P$?",
       "answer": "3",
@@ -3227,7 +3189,7 @@
       ]
     },
     {
-      "id": "ct-256",
+      "id": "ct-253",
       "difficulty": 1800,
       "prompt": "How many integers from $1$ to $1000$ have digits that add up to $10$?",
       "answer": "63",
@@ -3241,7 +3203,7 @@
       ]
     },
     {
-      "id": "ct-257",
+      "id": "ct-254",
       "difficulty": 1400,
       "prompt": "What is the area of a triangle with sides $10$, $10$ and $12$?",
       "answer": "48",
@@ -3254,7 +3216,7 @@
       ]
     },
     {
-      "id": "ct-258",
+      "id": "ct-255",
       "difficulty": 1800,
       "prompt": "A circle is inscribed in a rhombus whose diagonals are $30$ and $40$. What is the radius of the circle?",
       "answer": "12",
@@ -3267,7 +3229,7 @@
       ]
     },
     {
-      "id": "ct-259",
+      "id": "ct-256",
       "difficulty": 1750,
       "prompt": "Two circles have radii $5$ and $3$ and centers $10$ apart. How long is a common external tangent segment? (An answer like 4sqrt(6) is fine.)",
       "answer": "4sqrt(6)",
@@ -3280,7 +3242,7 @@
       ]
     },
     {
-      "id": "ct-260",
+      "id": "ct-257",
       "difficulty": 1750,
       "prompt": "Two circles have radii $5$ and $3$ and centers $10$ apart. How long is a common internal tangent segment (one that crosses between them)?",
       "answer": "6",
@@ -3292,7 +3254,7 @@
       ]
     },
     {
-      "id": "ct-261",
+      "id": "ct-258",
       "difficulty": 1550,
       "prompt": "A right triangle has legs $6$ and $8$. How long is the altitude to the hypotenuse? (A fraction like 24/5 is fine.)",
       "answer": "24/5",
@@ -3305,7 +3267,7 @@
       ]
     },
     {
-      "id": "ct-262",
+      "id": "ct-259",
       "difficulty": 1550,
       "prompt": "In triangle $ABC$, $AB = 6$, $AC = 9$ and $BC = 10$. The bisector of angle $A$ meets $BC$ at $D$. What is $BD$?",
       "answer": "4",
@@ -3318,7 +3280,7 @@
       ]
     },
     {
-      "id": "ct-263",
+      "id": "ct-260",
       "difficulty": 1750,
       "prompt": "How many non-congruent triangles with integer side lengths have perimeter $12$?",
       "answer": "3",
@@ -3332,7 +3294,7 @@
       ]
     },
     {
-      "id": "ct-264",
+      "id": "ct-261",
       "difficulty": 1500,
       "prompt": "How many zeros does $1000!$ end with?",
       "answer": "249",
@@ -3344,7 +3306,7 @@
       ]
     },
     {
-      "id": "ct-265",
+      "id": "ct-262",
       "difficulty": 2000,
       "prompt": "Two points are chosen independently and uniformly at random on a segment of length $1$, cutting it into three pieces. What is the probability that the three pieces can form a triangle? (A fraction like 1/4 is fine.)",
       "answer": "1/4",
@@ -3358,7 +3320,7 @@
       ]
     },
     {
-      "id": "ct-266",
+      "id": "ct-263",
       "difficulty": 2050,
       "prompt": "What is the remainder when $1^{2025} + 2^{2025} + 3^{2025} + \\cdots + 2024^{2025}$ is divided by $2025$?",
       "answer": "0",
@@ -3371,7 +3333,7 @@
       ]
     },
     {
-      "id": "ct-267",
+      "id": "ct-264",
       "difficulty": 1950,
       "prompt": "Let $r$, $s$, $t$ be the roots of $x^3 - 6x^2 + 5x - 1 = 0$. What is $\\frac{1}{r} + \\frac{1}{s} + \\frac{1}{t}$?",
       "answer": "5",
@@ -3385,7 +3347,7 @@
       ]
     },
     {
-      "id": "ct-268",
+      "id": "ct-265",
       "difficulty": 2050,
       "prompt": "Let $r$, $s$, $t$ be the roots of $x^3 - 3x + 1 = 0$. What is $r^3 + s^3 + t^3$?",
       "answer": "-3",
@@ -3399,7 +3361,7 @@
       ]
     },
     {
-      "id": "ct-269",
+      "id": "ct-266",
       "difficulty": 1900,
       "prompt": "How many subsets of $\\{1, 2, 3, \\ldots, 10\\}$ have an even sum? (The empty set counts, with sum 0.)",
       "answer": "512",
@@ -3409,6 +3371,1205 @@
       "steps": [
         "Toggling the element $1$ in or out flips the parity of the sum, pairing even-sum subsets with odd-sum ones.",
         "So exactly half of the $2^{10}$ subsets have an even sum: $512$."
+      ]
+    },
+    {
+      "id": "ct-267",
+      "difficulty": 400,
+      "prompt": "What comes next: $2, 4, 8, 16, \\ldots$?",
+      "answer": "32",
+      "tags": [
+        "sequences"
+      ],
+      "steps": [
+        "Each term doubles: $16 \\times 2 = 32$."
+      ]
+    },
+    {
+      "id": "ct-268",
+      "difficulty": 450,
+      "prompt": "What comes next: $1, 4, 9, 16, 25, \\ldots$?",
+      "answer": "36",
+      "tags": [
+        "sequences"
+      ],
+      "steps": [
+        "These are the squares $1^2, 2^2, \\ldots, 5^2$; next is $6^2 = 36$."
+      ]
+    },
+    {
+      "id": "ct-269",
+      "difficulty": 500,
+      "prompt": "What comes next: $1, 1, 2, 3, 5, 8, \\ldots$?",
+      "answer": "13",
+      "tags": [
+        "sequences"
+      ],
+      "steps": [
+        "Each term is the sum of the two before it: $5 + 8 = 13$."
+      ]
+    },
+    {
+      "id": "ct-270",
+      "difficulty": 550,
+      "prompt": "What comes next: $1, 3, 6, 10, 15, \\ldots$?",
+      "answer": "21",
+      "tags": [
+        "sequences"
+      ],
+      "steps": [
+        "The gaps grow by one: $+2, +3, +4, +5$, then $+6$.",
+        "$15 + 6 = 21$."
+      ]
+    },
+    {
+      "id": "ct-271",
+      "difficulty": 600,
+      "prompt": "What comes next: $2, 3, 5, 7, 11, \\ldots$?",
+      "answer": "13",
+      "tags": [
+        "sequences",
+        "number theory"
+      ],
+      "steps": [
+        "These are the primes; the next prime after $11$ is $13$."
+      ]
+    },
+    {
+      "id": "ct-272",
+      "difficulty": 650,
+      "prompt": "What comes next: $1, 2, 4, 7, 11, 16, \\ldots$?",
+      "answer": "22",
+      "tags": [
+        "sequences"
+      ],
+      "steps": [
+        "The gaps are $1, 2, 3, 4, 5$, so the next gap is $6$: $16 + 6 = 22$."
+      ]
+    },
+    {
+      "id": "ct-273",
+      "difficulty": 700,
+      "prompt": "What comes next: $3, 5, 9, 17, 33, \\ldots$?",
+      "answer": "65",
+      "tags": [
+        "sequences"
+      ],
+      "steps": [
+        "Each term is double the previous one, minus $1$: $2 \\cdot 33 - 1 = 65$.",
+        "(Equivalently, the terms are $2^n + 1$.)"
+      ]
+    },
+    {
+      "id": "ct-274",
+      "difficulty": 800,
+      "prompt": "What comes next: $2, 6, 12, 20, 30, \\ldots$?",
+      "answer": "42",
+      "tags": [
+        "sequences"
+      ],
+      "steps": [
+        "The terms are $1 \\cdot 2, 2 \\cdot 3, 3 \\cdot 4, 4 \\cdot 5, 5 \\cdot 6$.",
+        "Next: $6 \\cdot 7 = 42$."
+      ]
+    },
+    {
+      "id": "ct-275",
+      "difficulty": 800,
+      "prompt": "What comes next: $1, 2, 6, 24, 120, \\ldots$?",
+      "answer": "720",
+      "tags": [
+        "sequences"
+      ],
+      "steps": [
+        "Multiply by $2, 3, 4, 5$, then $6$: these are the factorials.",
+        "$120 \\times 6 = 720$."
+      ]
+    },
+    {
+      "id": "ct-276",
+      "difficulty": 600,
+      "prompt": "The pattern $1, 2, 3, 1, 2, 3, 1, 2, 3, \\ldots$ goes on forever. What is the $100$th term?",
+      "answer": "1",
+      "tags": [
+        "sequences"
+      ],
+      "steps": [
+        "The pattern repeats every $3$ terms, and $99$ is a multiple of $3$, so term $99$ is a $3$.",
+        "Term $100$ starts a new block: $1$."
+      ]
+    },
+    {
+      "id": "ct-277",
+      "difficulty": 450,
+      "prompt": "I think of a number, double it, then add $3$, and get $17$. What was my number?",
+      "answer": "7",
+      "tags": [
+        "algebra"
+      ],
+      "steps": [
+        "Undo the steps in reverse: $17 - 3 = 14$, then $14 \\div 2 = 7$."
+      ]
+    },
+    {
+      "id": "ct-278",
+      "difficulty": 550,
+      "prompt": "I think of a number, add $5$, then multiply by $3$, and get $36$. What was my number?",
+      "answer": "7",
+      "tags": [
+        "algebra"
+      ],
+      "steps": [
+        "Undo in reverse: $36 \\div 3 = 12$, then $12 - 5 = 7$."
+      ]
+    },
+    {
+      "id": "ct-279",
+      "difficulty": 650,
+      "prompt": "Sam spends half of his coins, then $3$ more coins, and has $7$ coins left. How many coins did he start with?",
+      "answer": "20",
+      "tags": [
+        "algebra"
+      ],
+      "steps": [
+        "Work backwards: before spending the last $3$ he had $7 + 3 = 10$.",
+        "That was half of what he started with: $20$."
+      ]
+    },
+    {
+      "id": "ct-280",
+      "difficulty": 700,
+      "prompt": "A number doubled is $1$ less than the number tripled. What is the number?",
+      "answer": "1",
+      "tags": [
+        "algebra"
+      ],
+      "steps": [
+        "$2n = 3n - 1$, so $n = 1$."
+      ]
+    },
+    {
+      "id": "ct-281",
+      "difficulty": 500,
+      "prompt": "If $x + 3 = 10$, what is $2x + 6$?",
+      "answer": "20",
+      "tags": [
+        "algebra"
+      ],
+      "steps": [
+        "No need to find $x$: $2x + 6 = 2(x + 3) = 2 \\cdot 10 = 20$."
+      ]
+    },
+    {
+      "id": "ct-282",
+      "difficulty": 600,
+      "prompt": "If $x - y = 4$, what is $3x - 3y$?",
+      "answer": "12",
+      "tags": [
+        "algebra"
+      ],
+      "steps": [
+        "$3x - 3y = 3(x - y) = 3 \\cdot 4 = 12$."
+      ]
+    },
+    {
+      "id": "ct-283",
+      "difficulty": 450,
+      "prompt": "If $2x + 2y = 18$, what is $x + y$?",
+      "answer": "9",
+      "tags": [
+        "algebra"
+      ],
+      "steps": [
+        "Divide both sides by $2$: $x + y = 9$."
+      ]
+    },
+    {
+      "id": "ct-284",
+      "difficulty": 450,
+      "prompt": "If $a = 2b$ and $b = 3c$, what is $a$ when $c = 5$?",
+      "answer": "30",
+      "tags": [
+        "algebra"
+      ],
+      "steps": [
+        "$b = 3 \\cdot 5 = 15$, then $a = 2 \\cdot 15 = 30$."
+      ]
+    },
+    {
+      "id": "ct-285",
+      "difficulty": 850,
+      "prompt": "If $\\frac{x}{y} = 3$, what is $\\frac{x + y}{y}$?",
+      "answer": "4",
+      "tags": [
+        "algebra"
+      ],
+      "steps": [
+        "$\\frac{x + y}{y} = \\frac{x}{y} + 1 = 3 + 1 = 4$."
+      ]
+    },
+    {
+      "id": "ct-286",
+      "difficulty": 550,
+      "prompt": "Two whole numbers have product $24$ and sum $10$. What is the larger one?",
+      "answer": "6",
+      "tags": [
+        "algebra"
+      ],
+      "steps": [
+        "Try factor pairs of $24$: $1 \\cdot 24, 2 \\cdot 12, 3 \\cdot 8, 4 \\cdot 6$.",
+        "Only $4 + 6 = 10$; the larger is $6$."
+      ]
+    },
+    {
+      "id": "ct-287",
+      "difficulty": 600,
+      "prompt": "Two numbers add up to $20$ and differ by $4$. What is the larger number?",
+      "answer": "12",
+      "tags": [
+        "algebra"
+      ],
+      "steps": [
+        "Larger $= \\frac{\\text{sum} + \\text{difference}}{2} = \\frac{20 + 4}{2} = 12$."
+      ]
+    },
+    {
+      "id": "ct-288",
+      "difficulty": 600,
+      "prompt": "Three consecutive whole numbers add up to $48$. What is the largest of them?",
+      "answer": "17",
+      "tags": [
+        "algebra"
+      ],
+      "steps": [
+        "The middle number is $48 \\div 3 = 16$, so they are $15, 16, 17$."
+      ]
+    },
+    {
+      "id": "ct-289",
+      "difficulty": 650,
+      "prompt": "Five consecutive whole numbers add up to $50$. What is the smallest of them?",
+      "answer": "8",
+      "tags": [
+        "algebra"
+      ],
+      "steps": [
+        "The middle number is $50 \\div 5 = 10$, so they are $8, 9, 10, 11, 12$."
+      ]
+    },
+    {
+      "id": "ct-290",
+      "difficulty": 700,
+      "prompt": "A bat and a ball cost $110$ cents together. The bat costs $100$ cents more than the ball. How many cents does the ball cost?",
+      "answer": "5",
+      "tags": [
+        "algebra"
+      ],
+      "steps": [
+        "Not $10$! If the ball costs $b$, the bat costs $b + 100$.",
+        "$2b + 100 = 110$, so $b = 5$."
+      ]
+    },
+    {
+      "id": "ct-291",
+      "difficulty": 750,
+      "prompt": "Mia is $4$ years older than Leo. In $3$ years their ages will add up to $30$. How old is Leo now?",
+      "answer": "10",
+      "tags": [
+        "algebra"
+      ],
+      "steps": [
+        "In $3$ years: $(L + 3) + (L + 7) = 30$.",
+        "$2L = 20$, so $L = 10$."
+      ]
+    },
+    {
+      "id": "ct-292",
+      "difficulty": 850,
+      "prompt": "A father is $30$ and his son is $4$. In how many years will the father be exactly three times as old as his son?",
+      "answer": "9",
+      "tags": [
+        "algebra"
+      ],
+      "steps": [
+        "$30 + t = 3(4 + t)$, so $30 + t = 12 + 3t$.",
+        "$2t = 18$, so $t = 9$ (father $39$, son $13$)."
+      ]
+    },
+    {
+      "id": "ct-293",
+      "difficulty": 800,
+      "prompt": "A farm has only chickens and cows: $10$ heads and $28$ legs. How many cows are there?",
+      "answer": "4",
+      "tags": [
+        "algebra"
+      ],
+      "steps": [
+        "If all $10$ were chickens there would be $20$ legs.",
+        "Each cow adds $2$ more legs: $(28 - 20) \\div 2 = 4$ cows."
+      ]
+    },
+    {
+      "id": "ct-294",
+      "difficulty": 750,
+      "prompt": "If $5$ machines make $5$ widgets in $5$ minutes, how many minutes do $100$ machines take to make $100$ widgets?",
+      "answer": "5",
+      "tags": [
+        "algebra"
+      ],
+      "steps": [
+        "Each machine makes $1$ widget in $5$ minutes.",
+        "So $100$ machines make $100$ widgets in the same $5$ minutes."
+      ]
+    },
+    {
+      "id": "ct-295",
+      "difficulty": 900,
+      "prompt": "A snail climbs $3$ m up a $10$ m wall each day and slides $2$ m back down each night. On which day does it reach the top?",
+      "answer": "8",
+      "tags": [
+        "algebra"
+      ],
+      "steps": [
+        "After $7$ full days and nights it is at $7$ m.",
+        "On day $8$ it climbs $3$ m to reach $10$ m before sliding back."
+      ]
+    },
+    {
+      "id": "ct-296",
+      "difficulty": 750,
+      "prompt": "$2$ apples weigh the same as $3$ oranges, and $1$ orange weighs the same as $4$ grapes. How many grapes weigh the same as $4$ apples?",
+      "answer": "24",
+      "tags": [
+        "algebra"
+      ],
+      "steps": [
+        "$4$ apples $= 6$ oranges.",
+        "$6$ oranges $= 6 \\times 4 = 24$ grapes."
+      ]
+    },
+    {
+      "id": "ct-297",
+      "difficulty": 700,
+      "prompt": "A car travels $60$ km in $45$ minutes. At that speed, how many km does it travel in an hour?",
+      "answer": "80",
+      "tags": [
+        "algebra"
+      ],
+      "steps": [
+        "$45$ minutes is $\\frac34$ of an hour, so $15$ minutes covers $20$ km.",
+        "An hour is four $15$-minute blocks: $80$ km."
+      ]
+    },
+    {
+      "id": "ct-298",
+      "difficulty": 550,
+      "prompt": "$3$ pencils cost $150$ cents. How many cents do $7$ pencils cost?",
+      "answer": "350",
+      "tags": [
+        "algebra"
+      ],
+      "steps": [
+        "One pencil costs $50$ cents, so $7$ cost $350$ cents."
+      ]
+    },
+    {
+      "id": "ct-299",
+      "difficulty": 900,
+      "prompt": "A price goes up by $10\\%$ and then down by $10\\%$. By what percent is the final price below the original?",
+      "answer": "1",
+      "tags": [
+        "algebra"
+      ],
+      "steps": [
+        "Up $10\\%$: $\\times 1.1$. Down $10\\%$: $\\times 0.9$.",
+        "$1.1 \\times 0.9 = 0.99$, so the price is $1\\%$ lower."
+      ]
+    },
+    {
+      "id": "ct-300",
+      "difficulty": 550,
+      "prompt": "What is $50\\%$ of $50\\%$ of $80$?",
+      "answer": "20",
+      "tags": [
+        "algebra"
+      ],
+      "steps": [
+        "Half of half is a quarter: $\\frac{80}{4} = 20$."
+      ]
+    },
+    {
+      "id": "ct-301",
+      "difficulty": 500,
+      "prompt": "What is half of a third of $60$?",
+      "answer": "10",
+      "tags": [
+        "algebra"
+      ],
+      "steps": [
+        "Half of a third is a sixth: $\\frac{60}{6} = 10$."
+      ]
+    },
+    {
+      "id": "ct-302",
+      "difficulty": 450,
+      "prompt": "What fraction of an hour is $20$ minutes? (A fraction like 1/4 is fine.)",
+      "answer": "1/3",
+      "tags": [
+        "algebra"
+      ],
+      "steps": [
+        "$\\frac{20}{60} = \\frac13$."
+      ]
+    },
+    {
+      "id": "ct-303",
+      "difficulty": 400,
+      "prompt": "A log is cut into $5$ pieces. How many cuts were made?",
+      "answer": "4",
+      "tags": [
+        "counting"
+      ],
+      "steps": [
+        "Each cut adds one piece, starting from $1$ piece: $4$ cuts."
+      ]
+    },
+    {
+      "id": "ct-304",
+      "difficulty": 500,
+      "prompt": "How many whole numbers are there from $5$ to $15$, including both?",
+      "answer": "11",
+      "tags": [
+        "counting"
+      ],
+      "steps": [
+        "Not $10$: count both ends, $15 - 5 + 1 = 11$."
+      ]
+    },
+    {
+      "id": "ct-305",
+      "difficulty": 550,
+      "prompt": "A $20$ m fence has a post every $4$ m, including one at each end. How many posts are there?",
+      "answer": "6",
+      "tags": [
+        "counting"
+      ],
+      "steps": [
+        "$20 \\div 4 = 5$ gaps, and one more post than gaps: $6$."
+      ]
+    },
+    {
+      "id": "ct-306",
+      "difficulty": 750,
+      "prompt": "It takes $3$ minutes to cut a log into $4$ pieces. At the same rate, how many minutes does it take to cut a log into $7$ pieces?",
+      "answer": "6",
+      "tags": [
+        "counting"
+      ],
+      "steps": [
+        "$4$ pieces need $3$ cuts, so each cut takes $1$ minute.",
+        "$7$ pieces need $6$ cuts: $6$ minutes."
+      ]
+    },
+    {
+      "id": "ct-307",
+      "difficulty": 450,
+      "prompt": "You have $3$ shirts and $4$ pairs of pants. How many different outfits of one shirt and one pair of pants can you make?",
+      "answer": "12",
+      "tags": [
+        "counting"
+      ],
+      "steps": [
+        "Each shirt goes with any of the $4$ pants: $3 \\times 4 = 12$."
+      ]
+    },
+    {
+      "id": "ct-308",
+      "difficulty": 500,
+      "prompt": "In how many different orders can $3$ people stand in a line?",
+      "answer": "6",
+      "tags": [
+        "counting"
+      ],
+      "steps": [
+        "$3$ choices for first, $2$ for second, $1$ for last: $3 \\cdot 2 \\cdot 1 = 6$."
+      ]
+    },
+    {
+      "id": "ct-309",
+      "difficulty": 600,
+      "prompt": "Four teams each play every other team exactly once. How many games are played?",
+      "answer": "6",
+      "tags": [
+        "counting"
+      ],
+      "steps": [
+        "Each of the $4$ teams plays $3$ games, but each game involves $2$ teams: $\\frac{4 \\cdot 3}{2} = 6$."
+      ]
+    },
+    {
+      "id": "ct-310",
+      "difficulty": 700,
+      "prompt": "Five friends each send a card to every other friend. How many cards are sent?",
+      "answer": "20",
+      "tags": [
+        "counting"
+      ],
+      "steps": [
+        "Each of the $5$ friends sends $4$ cards: $5 \\times 4 = 20$.",
+        "(Unlike handshakes, a card from A to B is different from one from B to A.)"
+      ]
+    },
+    {
+      "id": "ct-311",
+      "difficulty": 650,
+      "prompt": "How many two-digit numbers have digits that add up to $5$?",
+      "answer": "5",
+      "tags": [
+        "counting"
+      ],
+      "steps": [
+        "$14, 23, 32, 41, 50$: five of them."
+      ]
+    },
+    {
+      "id": "ct-312",
+      "difficulty": 600,
+      "prompt": "How many multiples of $7$ are there from $1$ to $100$?",
+      "answer": "14",
+      "tags": [
+        "counting",
+        "number theory"
+      ],
+      "steps": [
+        "$7 \\times 14 = 98 \\le 100 < 105 = 7 \\times 15$, so $14$."
+      ]
+    },
+    {
+      "id": "ct-313",
+      "difficulty": 650,
+      "prompt": "How many perfect squares are there from $1$ to $50$?",
+      "answer": "7",
+      "tags": [
+        "counting",
+        "number theory"
+      ],
+      "steps": [
+        "$1, 4, 9, 16, 25, 36, 49$: seven ($8^2 = 64$ is too big)."
+      ]
+    },
+    {
+      "id": "ct-314",
+      "difficulty": 800,
+      "prompt": "The pages of a book are numbered $1$ to $40$. How many times is the digit $3$ printed?",
+      "answer": "14",
+      "tags": [
+        "counting"
+      ],
+      "steps": [
+        "As a units digit: $3, 13, 23, 33$ (four times).",
+        "As a tens digit: $30$ to $39$ (ten times).",
+        "Total: $14$ (the $33$ counts twice)."
+      ]
+    },
+    {
+      "id": "ct-315",
+      "difficulty": 800,
+      "prompt": "How many squares of any size are there in a $3 \\times 3$ grid of squares?",
+      "answer": "14",
+      "tags": [
+        "counting",
+        "geometry"
+      ],
+      "steps": [
+        "$1 \\times 1$: $9$. $2 \\times 2$: $4$. $3 \\times 3$: $1$.",
+        "Total: $9 + 4 + 1 = 14$."
+      ]
+    },
+    {
+      "id": "ct-316",
+      "difficulty": 800,
+      "prompt": "How many rectangles (squares included) are there in a $1 \\times 4$ strip of squares?",
+      "answer": "10",
+      "tags": [
+        "counting"
+      ],
+      "steps": [
+        "A rectangle is fixed by choosing its left and right edges from the $5$ vertical lines.",
+        "$\\binom52 = 10$."
+      ]
+    },
+    {
+      "id": "ct-317",
+      "difficulty": 850,
+      "prompt": "Moving one unit right or one unit up at a time, how many paths go from $(0, 0)$ to $(2, 2)$?",
+      "answer": "6",
+      "tags": [
+        "counting"
+      ],
+      "steps": [
+        "Every path is $4$ moves, $2$ of them right: choose which ones.",
+        "$\\binom42 = 6$."
+      ]
+    },
+    {
+      "id": "ct-318",
+      "difficulty": 850,
+      "prompt": "How many diagonals does a hexagon have?",
+      "answer": "9",
+      "tags": [
+        "counting",
+        "geometry"
+      ],
+      "steps": [
+        "Each of the $6$ corners connects to $3$ non-neighbours, and each diagonal has $2$ ends.",
+        "$\\frac{6 \\cdot 3}{2} = 9$."
+      ]
+    },
+    {
+      "id": "ct-319",
+      "difficulty": 900,
+      "prompt": "A round pizza is cut with $3$ straight cuts. What is the greatest number of pieces you can get?",
+      "answer": "7",
+      "tags": [
+        "counting",
+        "geometry"
+      ],
+      "steps": [
+        "Each new cut can cross every earlier cut once, adding one more piece than the number of crossings.",
+        "$1 + 1 + 2 + 3 = 7$."
+      ]
+    },
+    {
+      "id": "ct-320",
+      "difficulty": 600,
+      "prompt": "A drawer has red socks and blue socks. How many socks must you take out in the dark to be sure of a matching pair?",
+      "answer": "3",
+      "tags": [
+        "counting",
+        "logic"
+      ],
+      "steps": [
+        "Two socks could be one of each colour.",
+        "A third sock must match one of them."
+      ]
+    },
+    {
+      "id": "ct-321",
+      "difficulty": 850,
+      "prompt": "A drawer has $10$ red and $10$ blue socks. How many socks must you take out in the dark to be sure of getting two red socks?",
+      "answer": "12",
+      "tags": [
+        "counting",
+        "logic"
+      ],
+      "steps": [
+        "Worst case: all $10$ blue socks come first.",
+        "Then $2$ more are both red: $12$."
+      ]
+    },
+    {
+      "id": "ct-322",
+      "difficulty": 500,
+      "prompt": "In a race, you overtake the runner in second place. What place are you in now?",
+      "answer": "2",
+      "tags": [
+        "logic"
+      ],
+      "steps": [
+        "You took their place: second (not first!)."
+      ]
+    },
+    {
+      "id": "ct-323",
+      "difficulty": 700,
+      "prompt": "What is the largest number of Sundays a $31$-day month can have?",
+      "answer": "5",
+      "tags": [
+        "logic"
+      ],
+      "steps": [
+        "$31$ days is $4$ full weeks plus $3$ days.",
+        "If the month starts on Friday, Saturday or Sunday, it has $5$ Sundays."
+      ]
+    },
+    {
+      "id": "ct-324",
+      "difficulty": 500,
+      "prompt": "A bag holds $3$ red and $5$ blue marbles. What is the probability of drawing a red one? (A fraction like 1/4 is fine.)",
+      "answer": "3/8",
+      "tags": [
+        "probability"
+      ],
+      "steps": [
+        "$3$ red out of $8$ marbles: $\\frac38$."
+      ]
+    },
+    {
+      "id": "ct-325",
+      "difficulty": 600,
+      "prompt": "A fair die is rolled. What is the probability of rolling a number greater than $4$? (A fraction like 1/4 is fine.)",
+      "answer": "1/3",
+      "tags": [
+        "probability"
+      ],
+      "steps": [
+        "Only $5$ and $6$: $\\frac26 = \\frac13$."
+      ]
+    },
+    {
+      "id": "ct-326",
+      "difficulty": 650,
+      "prompt": "Two fair coins are flipped. What is the probability that both land heads? (A fraction like 1/3 is fine.)",
+      "answer": "1/4",
+      "tags": [
+        "probability"
+      ],
+      "steps": [
+        "Outcomes HH, HT, TH, TT are equally likely; only HH works: $\\frac14$."
+      ]
+    },
+    {
+      "id": "ct-327",
+      "difficulty": 550,
+      "prompt": "What is $17 \\times 6 + 17 \\times 4$?",
+      "answer": "170",
+      "tags": [
+        "number theory"
+      ],
+      "steps": [
+        "Factor out $17$: $17 \\times (6 + 4) = 17 \\times 10 = 170$."
+      ]
+    },
+    {
+      "id": "ct-328",
+      "difficulty": 600,
+      "prompt": "What is $25 \\times 37 \\times 4$?",
+      "answer": "3700",
+      "tags": [
+        "number theory"
+      ],
+      "steps": [
+        "Reorder: $25 \\times 4 = 100$, then $100 \\times 37 = 3700$."
+      ]
+    },
+    {
+      "id": "ct-329",
+      "difficulty": 650,
+      "prompt": "What is $101 \\times 37 - 37$?",
+      "answer": "3700",
+      "tags": [
+        "number theory"
+      ],
+      "steps": [
+        "Factor out $37$: $37 \\times (101 - 1) = 37 \\times 100 = 3700$."
+      ]
+    },
+    {
+      "id": "ct-330",
+      "difficulty": 900,
+      "prompt": "What is $2024^2 - 2023 \\times 2025$?",
+      "answer": "1",
+      "tags": [
+        "number theory"
+      ],
+      "steps": [
+        "$2023 \\times 2025 = (2024 - 1)(2024 + 1) = 2024^2 - 1$.",
+        "So the difference is $1$."
+      ]
+    },
+    {
+      "id": "ct-331",
+      "difficulty": 450,
+      "prompt": "What is $1 + 2 + 3 + \\cdots + 9$?",
+      "answer": "45",
+      "tags": [
+        "number theory"
+      ],
+      "steps": [
+        "Pair them up: $(1 + 9) + (2 + 8) + (3 + 7) + (4 + 6) + 5 = 4 \\cdot 10 + 5 = 45$."
+      ]
+    },
+    {
+      "id": "ct-332",
+      "difficulty": 550,
+      "prompt": "What is $1 + 3 + 5 + 7 + 9 + 11$?",
+      "answer": "36",
+      "tags": [
+        "number theory"
+      ],
+      "steps": [
+        "The sum of the first $n$ odd numbers is $n^2$: here $6^2 = 36$."
+      ]
+    },
+    {
+      "id": "ct-333",
+      "difficulty": 750,
+      "prompt": "What is $2 + 4 + 6 + \\cdots + 20$?",
+      "answer": "110",
+      "tags": [
+        "number theory"
+      ],
+      "steps": [
+        "It is $2 \\times (1 + 2 + \\cdots + 10) = 2 \\times 55 = 110$."
+      ]
+    },
+    {
+      "id": "ct-334",
+      "difficulty": 850,
+      "prompt": "What is $1 - 2 + 3 - 4 + \\cdots + 99 - 100$?",
+      "answer": "-50",
+      "tags": [
+        "number theory"
+      ],
+      "steps": [
+        "Group in pairs: $(1 - 2) + (3 - 4) + \\cdots$ is $50$ pairs of $-1$.",
+        "Total: $-50$."
+      ]
+    },
+    {
+      "id": "ct-335",
+      "difficulty": 850,
+      "prompt": "What is $\\left(1 - \\frac12\\right)\\left(1 - \\frac13\\right)\\left(1 - \\frac14\\right)\\left(1 - \\frac15\\right)$? (A fraction like 2/7 is fine.)",
+      "answer": "1/5",
+      "tags": [
+        "number theory"
+      ],
+      "steps": [
+        "$\\frac12 \\cdot \\frac23 \\cdot \\frac34 \\cdot \\frac45$: everything cancels except $\\frac15$."
+      ]
+    },
+    {
+      "id": "ct-336",
+      "difficulty": 750,
+      "prompt": "What is the sum of the digits of $10^5 - 1$?",
+      "answer": "45",
+      "tags": [
+        "number theory"
+      ],
+      "steps": [
+        "$10^5 - 1 = 99999$: five nines, $5 \\times 9 = 45$."
+      ]
+    },
+    {
+      "id": "ct-337",
+      "difficulty": 650,
+      "prompt": "How many zeros does $25 \\times 8 \\times 5 \\times 4$ end in?",
+      "answer": "3",
+      "tags": [
+        "number theory"
+      ],
+      "steps": [
+        "Pair $25 \\times 4 = 100$ and $8 \\times 5 = 40$: $100 \\times 40 = 4000$.",
+        "Three zeros."
+      ]
+    },
+    {
+      "id": "ct-338",
+      "difficulty": 800,
+      "prompt": "What is the last digit of $9^9$?",
+      "answer": "9",
+      "tags": [
+        "number theory"
+      ],
+      "steps": [
+        "Powers of $9$ end in $9, 1, 9, 1, \\ldots$: odd powers end in $9$."
+      ]
+    },
+    {
+      "id": "ct-339",
+      "difficulty": 850,
+      "prompt": "What is the last digit of $2^{20}$?",
+      "answer": "6",
+      "tags": [
+        "number theory"
+      ],
+      "steps": [
+        "Last digits of powers of $2$ cycle $2, 4, 8, 6$ every $4$ steps.",
+        "$20$ is a multiple of $4$, so it ends in $6$."
+      ]
+    },
+    {
+      "id": "ct-340",
+      "difficulty": 800,
+      "prompt": "What is the last digit of $3 \\times 13 \\times 23 \\times 33$?",
+      "answer": "1",
+      "tags": [
+        "number theory"
+      ],
+      "steps": [
+        "Only last digits matter: $3 \\times 3 \\times 3 \\times 3 = 81$.",
+        "Last digit $1$."
+      ]
+    },
+    {
+      "id": "ct-341",
+      "difficulty": 350,
+      "prompt": "What is the smallest prime number?",
+      "answer": "2",
+      "tags": [
+        "number theory"
+      ],
+      "steps": [
+        "$1$ is not prime; $2$ is the smallest (and only even) prime."
+      ]
+    },
+    {
+      "id": "ct-342",
+      "difficulty": 650,
+      "prompt": "How many prime numbers are less than $20$?",
+      "answer": "8",
+      "tags": [
+        "number theory"
+      ],
+      "steps": [
+        "$2, 3, 5, 7, 11, 13, 17, 19$: eight."
+      ]
+    },
+    {
+      "id": "ct-343",
+      "difficulty": 500,
+      "prompt": "What is the largest number that divides both $12$ and $18$?",
+      "answer": "6",
+      "tags": [
+        "number theory"
+      ],
+      "steps": [
+        "Divisors of $12$: $1, 2, 3, 4, 6, 12$. The largest that also divides $18$ is $6$."
+      ]
+    },
+    {
+      "id": "ct-344",
+      "difficulty": 550,
+      "prompt": "What is the smallest positive number divisible by both $4$ and $6$?",
+      "answer": "12",
+      "tags": [
+        "number theory"
+      ],
+      "steps": [
+        "Multiples of $6$: $6, 12, \\ldots$; the first one divisible by $4$ is $12$."
+      ]
+    },
+    {
+      "id": "ct-345",
+      "difficulty": 650,
+      "prompt": "How many divisors does $12$ have?",
+      "answer": "6",
+      "tags": [
+        "number theory"
+      ],
+      "steps": [
+        "$1, 2, 3, 4, 6, 12$: six."
+      ]
+    },
+    {
+      "id": "ct-346",
+      "difficulty": 700,
+      "prompt": "What is the smallest two-digit number whose digits multiply to $12$?",
+      "answer": "26",
+      "tags": [
+        "number theory"
+      ],
+      "steps": [
+        "Digit pairs with product $12$: $2 \\cdot 6$, $3 \\cdot 4$.",
+        "The smallest arrangement is $26$."
+      ]
+    },
+    {
+      "id": "ct-347",
+      "difficulty": 850,
+      "prompt": "What is the smallest whole number greater than $1$ that leaves a remainder of $1$ when divided by $2$, by $3$, and by $4$?",
+      "answer": "13",
+      "tags": [
+        "number theory"
+      ],
+      "steps": [
+        "One more than a common multiple of $2, 3, 4$.",
+        "The smallest common multiple is $12$, so the answer is $13$."
+      ]
+    },
+    {
+      "id": "ct-348",
+      "difficulty": 750,
+      "prompt": "In a $3 \\times 3$ magic square using each of $1$ to $9$ once, what does every row add up to?",
+      "answer": "15",
+      "tags": [
+        "number theory"
+      ],
+      "steps": [
+        "All nine numbers add to $45$, shared equally by the $3$ rows: $45 \\div 3 = 15$."
+      ]
+    },
+    {
+      "id": "ct-349",
+      "difficulty": 850,
+      "prompt": "In a $3 \\times 3$ magic square using each of $1$ to $9$ once, which number is in the centre?",
+      "answer": "5",
+      "tags": [
+        "number theory"
+      ],
+      "steps": [
+        "The centre lies on $4$ lines (middle row, middle column, both diagonals) that each sum to $15$.",
+        "Those lines cover every cell once and the centre $3$ extra times: $60 = 45 + 3c$, so $c = 5$."
+      ]
+    },
+    {
+      "id": "ct-350",
+      "difficulty": 650,
+      "prompt": "A clock shows $9$ o'clock. What hour will it show $50$ hours later?",
+      "answer": "11",
+      "tags": [
+        "number theory"
+      ],
+      "steps": [
+        "$48$ hours is exactly $4$ full turns of a $12$-hour clock, so only $2$ hours matter.",
+        "$9 + 2 = 11$."
+      ]
+    },
+    {
+      "id": "ct-351",
+      "difficulty": 300,
+      "prompt": "What do the angles of a triangle add up to, in degrees?",
+      "answer": "180",
+      "tags": [
+        "geometry"
+      ],
+      "steps": [
+        "The angles of any triangle sum to $180^\\circ$."
+      ]
+    },
+    {
+      "id": "ct-352",
+      "difficulty": 400,
+      "prompt": "Two angles of a triangle are $50^\\circ$ and $60^\\circ$. What is the third angle, in degrees?",
+      "answer": "70",
+      "tags": [
+        "geometry"
+      ],
+      "steps": [
+        "$180 - 50 - 60 = 70$."
+      ]
+    },
+    {
+      "id": "ct-353",
+      "difficulty": 600,
+      "prompt": "An isosceles triangle has a top angle of $40^\\circ$. What is each of its two equal base angles, in degrees?",
+      "answer": "70",
+      "tags": [
+        "geometry"
+      ],
+      "steps": [
+        "The base angles share $180 - 40 = 140$ degrees equally: $70$ each."
+      ]
+    },
+    {
+      "id": "ct-354",
+      "difficulty": 400,
+      "prompt": "How many edges does a cube have?",
+      "answer": "12",
+      "tags": [
+        "geometry"
+      ],
+      "steps": [
+        "$4$ on top, $4$ on the bottom, $4$ upright: $12$."
+      ]
+    },
+    {
+      "id": "ct-355",
+      "difficulty": 450,
+      "prompt": "How many lines of symmetry does a square have?",
+      "answer": "4",
+      "tags": [
+        "geometry"
+      ],
+      "steps": [
+        "Two through the midpoints of opposite sides, and two diagonals."
+      ]
+    },
+    {
+      "id": "ct-356",
+      "difficulty": 450,
+      "prompt": "What is the angle between the hands of a clock at $3$:$00$, in degrees?",
+      "answer": "90",
+      "tags": [
+        "geometry"
+      ],
+      "steps": [
+        "The hands are a quarter turn apart: $\\frac{360}{4} = 90$."
+      ]
+    },
+    {
+      "id": "ct-357",
+      "difficulty": 550,
+      "prompt": "How many degrees does the minute hand of a clock turn in $20$ minutes?",
+      "answer": "120",
+      "tags": [
+        "geometry"
+      ],
+      "steps": [
+        "$20$ minutes is a third of an hour: $\\frac{360}{3} = 120$."
+      ]
+    },
+    {
+      "id": "ct-358",
+      "difficulty": 500,
+      "prompt": "A square has perimeter $20$. What is its area?",
+      "answer": "25",
+      "tags": [
+        "geometry"
+      ],
+      "steps": [
+        "Each side is $20 \\div 4 = 5$, so the area is $5^2 = 25$."
+      ]
+    },
+    {
+      "id": "ct-359",
+      "difficulty": 550,
+      "prompt": "If every side of a square is doubled, its area becomes how many times as large?",
+      "answer": "4",
+      "tags": [
+        "geometry"
+      ],
+      "steps": [
+        "$(2s)^2 = 4s^2$: four times as large."
+      ]
+    },
+    {
+      "id": "ct-360",
+      "difficulty": 600,
+      "prompt": "A right triangle has legs $6$ and $8$. What is its hypotenuse?",
+      "answer": "10",
+      "tags": [
+        "geometry"
+      ],
+      "steps": [
+        "It is the $3$-$4$-$5$ triangle scaled by $2$: $10$."
+      ]
+    },
+    {
+      "id": "ct-361",
+      "difficulty": 750,
+      "prompt": "A rectangle is twice as long as it is wide, and its perimeter is $30$. What is its area?",
+      "answer": "50",
+      "tags": [
+        "geometry"
+      ],
+      "steps": [
+        "The perimeter is $2(w + 2w) = 6w = 30$, so $w = 5$ and the length is $10$.",
+        "Area: $5 \\times 10 = 50$."
+      ]
+    },
+    {
+      "id": "ct-362",
+      "difficulty": 800,
+      "prompt": "What is each exterior angle of a regular pentagon, in degrees?",
+      "answer": "72",
+      "tags": [
+        "geometry"
+      ],
+      "steps": [
+        "The exterior angles of any polygon add up to $360^\\circ$.",
+        "$360 \\div 5 = 72$."
       ]
     }
   ]

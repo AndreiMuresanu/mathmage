@@ -51,7 +51,7 @@ export class Match {
     this.hud = new Hud(cfg);
     this.questions = new QuestionWindow({
       types: cfg.questionTypes,
-      draw: () => registry.drawQuestion(cfg.questionTypes, cfg.questionSources, this.ratings, questionRng, cfg.adaptive.spread),
+      draw: () => registry.drawQuestion(cfg.questionTypes, cfg.questionSources, this.ratings, questionRng, cfg.adaptive.spread, cfg.adaptive.mentalMathWeight),
       onResult: (drawn, correct, given, outcome, elapsed) => {
         const { typeIndex, question } = drawn;
         // Rating update (only while the player can still answer, i.e. the answer actually counts).

@@ -413,8 +413,8 @@ describe('heal orbs', () => {
     world.pickups.push({ id: 1, x: p.x + p.radius + 17, y: p.y, radius: 18, heal: 3, ttl: 20 });
     world.step(1 / 60, { local: idle });
     expect(p.hp).toBe(53);
-    // A near miss 60px beyond touching is pulled in within a second, while standing still.
-    world.pickups.push({ id: 2, x: p.x, y: p.y + p.radius + 18 + 60, radius: 18, heal: 3, ttl: 20 });
+    // A near miss just inside the drift distance is pulled in within a second, while standing still.
+    world.pickups.push({ id: 2, x: p.x, y: p.y + p.radius + 18 + world.cfg.enemies.healOrbDriftRange - 10, radius: 18, heal: 3, ttl: 20 });
     run(world, 1);
     expect(world.pickups).toHaveLength(0);
     expect(p.hp).toBe(56);

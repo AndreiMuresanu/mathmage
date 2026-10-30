@@ -13,6 +13,12 @@ export type AnswerSpec =
    */
   | { kind: 'symbolic'; expr: string; variables: string[]; ranges?: Record<string, [number, number]>; display?: string };
 
+/**
+ * Tag for questions that are mostly mental arithmetic (big products, squares, long sums) rather
+ * than an idea to spot. They're drawn less often; see AdaptiveConfig.mentalMathWeight.
+ */
+export const MENTAL_MATH_TAG = 'mental-math';
+
 export interface Question {
   id: string;
   /** Plain text with $inline$ / $$display$$ LaTeX and **bold**. */

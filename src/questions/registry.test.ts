@@ -3,6 +3,7 @@ import { cloneConfig, DEFAULT_CONFIG, type AdaptiveConfig, type QuestionTypeConf
 import { createRng } from '../util/rng';
 import { SkillRatings, spreadCompensation } from './rating';
 import { QuestionRegistry } from './registry';
+import { MENTAL_MATH_TAG } from './types';
 
 // Imported decks are saved to localStorage; give node an in-memory one.
 beforeAll(() => {
@@ -102,5 +103,34 @@ describe('drawQuestion', () => {
     expect(registry.drawQuestion([tier(0, 0)], cfg.questionSources, ratings, createRng(1))).toBeUndefined();
     expect(registry.drawQuestion([tier(0)], [{ sourceId: 'deck:deleted', weight: 1 }], ratings, createRng(1))).toBeUndefined();
     expect(registry.drawQuestion([tier(0)], [], ratings, createRng(1))).toBeUndefined();
+  });
+});
+
+describe('mental-math weighting', () => {
+  /** Share of drawn questions tagged mental-math for targets across the low end of the scale. */
+  const mentalShare = (weight: number, targets: number[]) => {
+    const rng = createRng(21);
+    let mental = 0;
+    let total = 0;
+    for (const target of targets) {
+      for (let i = 0; i < 300; i++) {
+        const q = registry.drawQuestion([tier(0)], cfg.questionSources, ratingsAt(target), rng, 100, weight)!.question;
+        if (q.tags?.includes(MENTAL_MATH_TAG)) mental++;
+        total++;
+      }
+    }
+    return mental / total;
+  };
+
+  it('mostly serves idea questions instead of pure computation from 400 up', () => {
+    const targets = [400, 500, 600, 700, 800, 900, 1000];
+    const neutral = mentalShare(1, targets);
+    const weighted = mentalShare(DEFAULT_CONFIG.adaptive.mentalMathWeight, targets);
+    expect(weighted).toBeLessThan(0.15);
+    expect(weighted).toBeLessThan(neutral / 2);
+  });
+
+  it('still has something to ask at the very bottom of the scale', () => {
+    expect(mentalShare(DEFAULT_CONFIG.adaptive.mentalMathWeight, [100])).toBeGreaterThan(0.5);
   });
 });

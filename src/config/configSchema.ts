@@ -120,6 +120,7 @@ export const CONFIG_GROUPS: GroupDef[] = [
       num('skipScore', 'Skip / timeout score', 0, 1, 0.05, 'How a skip or timeout counts, where a wrong answer = 0 and a correct one = 1.'),
       num('referenceTime', 'Reference time (s)', 1, 600, 1, 'Used to judge speed when a question type has no time limit.'),
       num('spread', 'Question match spread', 10, 1000, 10, 'How closely a question’s rating must match its target (rating points). Smaller = more precise, larger = more variety.'),
+      num('mentalMathWeight', 'Mental-math question weight', 0, 1, 0.05, 'How often questions that are mostly computation (big products, squares, long sums) are picked, compared with questions that need an idea. 1 = no preference, 0 = only when nothing else fits.'),
     ],
   },
   {
@@ -133,7 +134,6 @@ export const CONFIG_GROUPS: GroupDef[] = [
       bool('fractions', 'Fractions', 'Add, subtract or multiply two fractions.'),
       bool('bigMultiplication', 'Multi-digit multiplication', '47 × 38, 356 × 7'),
       bool('orderOfOperations', 'Order of operations', '5 + 3 × 4², 2 × (−3)² − 4²'),
-      bool('averages', 'Averages', 'Mean of a list, or the missing number for a given mean.'),
       bool('quadraticRoots', 'Quadratic roots', 'Larger solution of x² − 5x + 6 = 0'),
     ],
   },

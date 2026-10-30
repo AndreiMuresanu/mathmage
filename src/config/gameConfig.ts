@@ -65,6 +65,11 @@ export interface AdaptiveConfig {
   referenceTime: number;
   /** How closely a question's rating must match its target (rating points, ~1 standard deviation). */
   spread: number;
+  /**
+   * How likely a mostly-computation question (tagged mental-math) is to be picked, relative to one
+   * that needs an idea. 1 = no preference, 0 = never (unless nothing else is near the target).
+   */
+  mentalMathWeight: number;
 }
 
 export interface ArithmeticConfig {
@@ -91,7 +96,6 @@ export interface MediumConfig {
   fractions: boolean;
   bigMultiplication: boolean;
   orderOfOperations: boolean;
-  averages: boolean;
   quadraticRoots: boolean;
 }
 
@@ -204,7 +208,7 @@ export interface GameConfig {
 }
 
 /** Bump when saved configs need migrating (see migrateSavedConfig). */
-export const CONFIG_VERSION = 2;
+export const CONFIG_VERSION = 3;
 
 export const ARENA_WIDTH = 1280;
 export const ARENA_HEIGHT = 720;
@@ -274,15 +278,15 @@ export const DEFAULT_CONFIG: GameConfig = {
     skipScore: 0.35,
     referenceTime: 30,
     spread: 100,
+    mentalMathWeight: 0.1,
   },
   medium: {
     linearEquations: true,
     percentages: true,
     powersAndRoots: true,
     fractions: true,
-    bigMultiplication: true,
+    bigMultiplication: false,
     orderOfOperations: true,
-    averages: true,
     quadraticRoots: true,
   },
   algebraTricks: {
@@ -376,6 +380,10 @@ function migrateSavedConfig(raw: unknown): unknown {
   // Version 2 added the built-in Contest Mix deck: switch it on in configs saved before it existed.
   if (version < 2 && Array.isArray(cfg.questionSources) && !cfg.questionSources.some((s) => s?.sourceId === 'deck:contest')) {
     cfg.questionSources = [...cfg.questionSources, { sourceId: 'deck:contest', weight: 1 }];
+  }
+  // Version 3 turned multi-digit multiplication off by default (it's pure mental math).
+  if (version < 3 && cfg.medium && typeof cfg.medium === 'object') {
+    cfg.medium = { ...(cfg.medium as Record<string, unknown>), bigMultiplication: false };
   }
   cfg.version = CONFIG_VERSION;
   return cfg;
