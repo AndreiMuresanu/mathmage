@@ -12,6 +12,7 @@ import type {
   WaveState,
 } from './types';
 import { circleRectPush, getMap, segmentRectHit, type MapDef } from './maps';
+import { NavGrid } from './pathfinding';
 import { buildWaveQueue, damageScale, hpScale, roundTimeLimit } from './waves';
 
 const SPAWN_MARGIN = 30;
@@ -24,6 +25,10 @@ const HEAL_ORB_RADIUS = 18;
 const HEAL_ORB_MAGNET_SPEED = 260;
 /** Overlap (px) tolerated when checking whether a player move ended up stuck inside an enemy. */
 const COLLISION_SLOP = 0.5;
+/** Size of a pathfinding cell, in px. */
+const NAV_CELL = 20;
+/** Radius of a caster's projectile. */
+const CASTER_SHOT_RADIUS = 6;
 /** How strongly casters avoid each other relative to their other movement. */
 const SEPARATION_STRENGTH = 2;
 
@@ -38,6 +43,8 @@ export class World {
   readonly height = ARENA_HEIGHT;
   /** Layout: walls, where the player starts, where enemies come in. */
   readonly map: MapDef;
+  /** Flow field enemies follow around walls (undefined on maps without walls, or when switched off). */
+  readonly nav: NavGrid | undefined;
   players: PlayerState[];
   enemies: EnemyState[] = [];
   projectiles: ProjectileState[] = [];
@@ -52,10 +59,14 @@ export class World {
   private slots = new Map<number, number>();
   private nextId = 1;
 
-  constructor(cfg: GameConfig, seed?: number, playerIds: string[] = ['local']) {
+  constructor(cfg: GameConfig, seed?: number, playerIds: string[] = ['local'], map: MapDef = getMap(cfg.map)) {
     this.cfg = cfg;
     this.rng = createRng(seed);
-    this.map = getMap(cfg.map);
+    this.map = map;
+    const clearance = Math.max(cfg.enemies.chaser.radius, cfg.enemies.caster.radius);
+    this.nav = cfg.enemies.pathfinding && map.walls.length > 0
+      ? new NavGrid(map.walls, this.width, this.height, NAV_CELL, clearance)
+      : undefined;
     this.players = playerIds.map((id, i) => ({
       id,
       x: this.map.playerSpawn.x + i * 60,
@@ -148,6 +159,7 @@ export class World {
     dt *= this.timeScale();
     this.stats.timeSurvived += realDt;
     for (const p of this.players) this.updatePlayer(p, dt, realDt, intents[p.id]);
+    this.nav?.update(this.players.filter((p) => p.alive));
     this.updateWaves(dt);
     this.assignSurroundSlots();
     for (const e of this.enemies) this.updateEnemy(e, dt);
@@ -335,7 +347,10 @@ export class World {
 
     if (e.kind === 'chaser') {
       const reach = e.radius + target.radius;
-      if (dist > reach) {
+      const detour = this.detour(e, target);
+      if (detour) {
+        this.moveEnemy(e, detour[0] * e.speed * dt, detour[1] * e.speed * dt);
+      } else if (dist > reach) {
         const stepLen = Math.min(e.speed * dt, dist - reach);
         this.moveEnemy(e, ux * stepLen, uy * stepLen);
       }
@@ -347,7 +362,11 @@ export class World {
       const range = this.cfg.enemies.caster.range;
       let mx = 0;
       let my = 0;
-      if (slot !== undefined) {
+      const detour = this.detour(e, target);
+      if (detour) {
+        // No line of sight: find a way around the walls first.
+        [mx, my] = detour;
+      } else if (slot !== undefined) {
         // Hold our evenly spaced spot on a ring at the preferred range.
         [mx, my] = steerAround(e, target, slot, range);
       } else if (dist > range) {
@@ -369,7 +388,8 @@ export class World {
         my /= len;
       }
       this.moveEnemy(e, mx * e.speed * dt, my * e.speed * dt);
-      if (e.attackTimer <= 0 && dist < range * 1.3) {
+      const clearShot = !this.nav || this.nav.clearPath(e.x, e.y, target.x, target.y, CASTER_SHOT_RADIUS);
+      if (e.attackTimer <= 0 && dist < range * 1.3 && clearShot) {
         const speed = this.cfg.enemies.caster.projectileSpeed;
         this.projectiles.push({
           id: this.nextId++,
@@ -379,7 +399,7 @@ export class World {
           y: e.y + uy * e.radius,
           vx: ux * speed,
           vy: uy * speed,
-          radius: 6,
+          radius: CASTER_SHOT_RADIUS,
           damage: e.damage,
           stun: this.cfg.enemies.caster.stunSeconds,
           explosionRadius: 0,
@@ -546,24 +566,20 @@ export class World {
     c.y = clamp(c.y, c.radius, this.height - c.radius);
   }
 
-  /**
-   * Move an enemy by (dx, dy), sliding along walls. If a wall cancels most of the step (head-on
-   * into the flat face of a pillar), step sideways instead so it works its way around.
-   */
+  /** Move an enemy by (dx, dy), sliding along walls. */
   private moveEnemy(e: EnemyState, dx: number, dy: number): void {
-    const startX = e.x;
-    const startY = e.y;
     e.x += dx;
     e.y += dy;
     this.resolveWalls(e);
-    const want = Math.hypot(dx, dy);
-    if (this.map.walls.length === 0 || want < 1e-6) return;
-    if (Math.hypot(e.x - startX, e.y - startY) >= want * 0.3) return;
-    e.x = startX - dy * e.strafe;
-    e.y = startY + dx * e.strafe;
-    this.resolveWalls(e);
-    // Boxed in on that side too (a corner): try the other way next time.
-    if (Math.hypot(e.x - startX, e.y - startY) < want * 0.3) e.strafe = -e.strafe;
+  }
+
+  /**
+   * When a wall is in the way of `target`, the direction to walk to get around it (following the
+   * flow field); undefined when the enemy can see its target and should behave normally.
+   */
+  private detour(e: EnemyState, target: PlayerState): [number, number] | undefined {
+    if (!this.nav || this.nav.clearPath(e.x, e.y, target.x, target.y, e.radius)) return undefined;
+    return this.nav.directionFrom(e.x, e.y);
   }
 
   private updateProjectiles(dt: number): void {

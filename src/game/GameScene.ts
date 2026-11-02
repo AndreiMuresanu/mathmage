@@ -77,6 +77,8 @@ export class GameScene extends Phaser.Scene {
   private playerView!: Phaser.GameObjects.Image;
   private aimView!: Phaser.GameObjects.Image;
   private overlay!: Phaser.GameObjects.Graphics;
+  /** Dev-only F2 overlay showing the pathfinding grid (blocked cells + flow arrows). */
+  private navDebug: Phaser.GameObjects.Graphics | null = null;
   private enemyViews = new Map<number, Phaser.GameObjects.Image>();
   private projectileViews = new Map<number, Phaser.GameObjects.Image>();
   /** Heal orbs: a bright core plus a soft glow behind it. */
@@ -136,6 +138,18 @@ export class GameScene extends Phaser.Scene {
     };
     window.addEventListener('keydown', onPauseKey);
     this.input.mouse?.disableContextMenu();
+    this.navDebug = null;
+    if (import.meta.env.DEV) {
+      // F2 toggles the pathfinding overlay, for checking new maps.
+      kb.on('keydown-F2', () => {
+        if (this.navDebug) {
+          this.navDebug.destroy();
+          this.navDebug = null;
+        } else {
+          this.navDebug = this.add.graphics().setDepth(2);
+        }
+      });
+    }
     this.input.on('pointerdown', () => this.match.onArenaPointerDown());
 
     const p = this.match.world.player(LOCAL_PLAYER)!;
@@ -175,6 +189,7 @@ export class GameScene extends Phaser.Scene {
 
   update(_time: number, deltaMs: number): void {
     const world = this.match.world;
+    if (this.navDebug) this.drawNavDebug(this.navDebug);
     const p = world.player(LOCAL_PLAYER)!;
     const pointer = this.input.activePointer;
     const typing = this.match.typing;
@@ -305,6 +320,26 @@ export class GameScene extends Phaser.Scene {
   }
 
   /** A bright line that fades quickly: wide colored glow with a thin white core. */
+  /** Blocked cells in red, and an arrow per open cell pointing the way enemies would walk. */
+  private drawNavDebug(g: Phaser.GameObjects.Graphics): void {
+    g.clear();
+    const nav = this.match.world.nav;
+    if (!nav) return;
+    const size = nav.cellSize;
+    for (let i = 0; i < nav.cols * nav.rows; i++) {
+      const cx = ((i % nav.cols) + 0.5) * size;
+      const cy = (Math.floor(i / nav.cols) + 0.5) * size;
+      if (nav.blocked[i]) {
+        g.fillStyle(0xff3355, 0.18).fillRect(cx - size / 2, cy - size / 2, size, size);
+        continue;
+      }
+      const dir = nav.directionFrom(cx, cy);
+      if (!dir) continue;
+      g.lineStyle(1, 0x7df9ff, 0.45).lineBetween(cx - dir[0] * 6, cy - dir[1] * 6, cx + dir[0] * 6, cy + dir[1] * 6);
+      g.fillStyle(0x7df9ff, 0.7).fillRect(cx + dir[0] * 6 - 1.5, cy + dir[1] * 6 - 1.5, 3, 3);
+    }
+  }
+
   private beam(x1: number, y1: number, x2: number, y2: number, width: number, color: number): void {
     const g = this.add.graphics().setDepth(15).setBlendMode(Phaser.BlendModes.ADD);
     g.lineStyle(width * 2.5, color, 0.35).lineBetween(x1, y1, x2, y2);

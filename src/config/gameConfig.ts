@@ -187,6 +187,8 @@ export interface GameConfig {
     healOrbLifetime: number;
     /** Heal orbs within this distance (px, beyond touching) drift toward a hurt player (0 = no drift). */
     healOrbDriftRange: number;
+    /** Enemies find their way around walls (flow-field pathfinding). Off = walk straight at the player. */
+    pathfinding: boolean;
     chaser: ChaserConfig;
     caster: CasterConfig;
   };
@@ -320,6 +322,7 @@ export const DEFAULT_CONFIG: GameConfig = {
     healAmount: 3,
     healOrbLifetime: 40,
     healOrbDriftRange: 50,
+    pathfinding: true,
     chaser: { hp: 10, speed: 50, damage: 5, radius: 14, attackCooldown: 0.8 },
     caster: { hp: 10, speed: 70, damage: 4, radius: 13, fireInterval: 2.2, stunSeconds: 0.1, range: 320, spacing: 140, projectileSpeed: 350 },
   },
