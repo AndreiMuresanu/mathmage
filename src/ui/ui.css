@@ -586,7 +586,7 @@ code {
 }
 
 .screen-panel.menu {
-  width: min(28em, 100%);
+  width: min(32em, 100%);
   text-align: center;
 }
 
@@ -620,7 +620,7 @@ code {
 
 .map-picker {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(4, 1fr);
   gap: 0.5em;
   margin-top: 1em;
 }

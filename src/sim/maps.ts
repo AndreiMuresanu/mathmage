@@ -36,27 +36,36 @@ const SPAWN_DEPTH = 30;
 const SPAWN_INSET = 24;
 
 type Edge = 'top' | 'bottom' | 'left' | 'right';
+/** A gap in an edge wall: just the edge (centred, GAP wide), or an explicit span along it in px. */
+type Gap = Edge | { edge: Edge; from: number; to: number };
 
-/** Walls along all four screen edges, each with a centred gap where listed in `gaps`. */
-function edgeWalls(gaps: Edge[]): { walls: Rect[]; spawnGaps: Segment[] } {
+/** Walls along all four screen edges, with a gap wherever `gaps` lists one. */
+function edgeWalls(gaps: Gap[]): { walls: Rect[]; spawnGaps: Segment[] } {
   const W = ARENA_WIDTH;
   const H = ARENA_HEIGHT;
   const walls: Rect[] = [];
   const spawnGaps: Segment[] = [];
+  /** The gap span on `edge` (whose length is `length`), if it has one. */
+  const span = (edge: Edge, length: number): [number, number] | undefined => {
+    const gap = gaps.find((g) => (typeof g === 'string' ? g : g.edge) === edge);
+    if (gap === undefined) return undefined;
+    return typeof gap === 'string' ? [(length - GAP) / 2, (length + GAP) / 2] : [gap.from, gap.to];
+  };
   const horizontal = (edge: Edge, y: number, spawnY: number) => {
-    if (!gaps.includes(edge)) return void walls.push({ x: 0, y, w: W, h: EDGE_WALL });
-    const g0 = (W - GAP) / 2;
-    walls.push({ x: 0, y, w: g0, h: EDGE_WALL }, { x: g0 + GAP, y, w: W - g0 - GAP, h: EDGE_WALL });
-    spawnGaps.push({ x1: g0 + SPAWN_INSET, y1: spawnY, x2: g0 + GAP - SPAWN_INSET, y2: spawnY });
+    const g = span(edge, W);
+    if (!g) return void walls.push({ x: 0, y, w: W, h: EDGE_WALL });
+    walls.push({ x: 0, y, w: g[0], h: EDGE_WALL }, { x: g[1], y, w: W - g[1], h: EDGE_WALL });
+    spawnGaps.push({ x1: g[0] + SPAWN_INSET, y1: spawnY, x2: g[1] - SPAWN_INSET, y2: spawnY });
   };
   const vertical = (edge: Edge, x: number, spawnX: number) => {
     // Side walls run between the top and bottom walls.
     const top = EDGE_WALL;
-    const len = H - 2 * EDGE_WALL;
-    if (!gaps.includes(edge)) return void walls.push({ x, y: top, w: EDGE_WALL, h: len });
-    const g0 = (H - GAP) / 2;
-    walls.push({ x, y: top, w: EDGE_WALL, h: g0 - top }, { x, y: g0 + GAP, w: EDGE_WALL, h: H - EDGE_WALL - g0 - GAP });
-    spawnGaps.push({ x1: spawnX, y1: g0 + SPAWN_INSET, x2: spawnX, y2: g0 + GAP - SPAWN_INSET });
+    const bottom = H - EDGE_WALL;
+    const g = span(edge, H);
+    if (!g) return void walls.push({ x, y: top, w: EDGE_WALL, h: bottom - top });
+    if (g[0] > top) walls.push({ x, y: top, w: EDGE_WALL, h: g[0] - top });
+    if (g[1] < bottom) walls.push({ x, y: g[1], w: EDGE_WALL, h: bottom - g[1] });
+    spawnGaps.push({ x1: spawnX, y1: g[0] + SPAWN_INSET, x2: spawnX, y2: g[1] - SPAWN_INSET });
   };
   horizontal('top', 0, SPAWN_DEPTH);
   horizontal('bottom', H - EDGE_WALL, H - SPAWN_DEPTH);
@@ -72,6 +81,23 @@ function pillar(cx: number, cy: number, size = 72): Rect {
 
 const boxy = edgeWalls(['top', 'bottom']);
 const buttons = edgeWalls(['top', 'bottom', 'left', 'right']);
+// Mazy: enemies enter at the top-left, bottom and bottom-right; everything sits on a 20px grid
+// so walls meet cleanly (T-junctions and corners line up exactly).
+const mazy = edgeWalls([
+  { edge: 'left', from: 20, to: 160 },
+  { edge: 'bottom', from: 940, to: 1060 },
+  { edge: 'right', from: 600, to: 700 },
+]);
+/** Straight 20px-thick wall pieces for Mazy, as [x1, y1, x2, y2] outer corners. */
+const MAZY_WALLS: [number, number, number, number][] = [
+  [20, 160, 720, 180], //    shelf under the top-left entrance
+  [520, 180, 540, 340], //   hangs down from that shelf
+  [740, 260, 1260, 280], //  shelf out from the right wall
+  [260, 260, 280, 620], //   long post on the left
+  [280, 440, 840, 460], //   arm off that post
+  [1060, 380, 1080, 700], // post up from the bottom wall, beside the bottom entrance
+  [580, 600, 1060, 620], //  arm off that post
+];
 
 export const MAPS: MapDef[] = [
   { id: 'empty', name: 'Empty', walls: [], playerSpawn: { x: ARENA_WIDTH / 2, y: ARENA_HEIGHT / 2 } },
@@ -83,6 +109,13 @@ export const MAPS: MapDef[] = [
     spawnGaps: buttons.spawnGaps,
     // The centre pillar is where the player would normally start; start just below it.
     playerSpawn: { x: ARENA_WIDTH / 2, y: 440 },
+  },
+  {
+    id: 'mazy',
+    name: 'Mazy',
+    walls: [...mazy.walls, ...MAZY_WALLS.map(([x1, y1, x2, y2]) => ({ x: x1, y: y1, w: x2 - x1, h: y2 - y1 }))],
+    spawnGaps: mazy.spawnGaps,
+    playerSpawn: { x: ARENA_WIDTH / 2, y: 360 },
   },
 ];
 

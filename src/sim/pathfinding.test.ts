@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { cloneConfig, DEFAULT_CONFIG, type GameConfig } from '../config/gameConfig';
-import type { MapDef, Rect } from './maps';
+import { ARENA_HEIGHT, ARENA_WIDTH, cloneConfig, DEFAULT_CONFIG, type GameConfig } from '../config/gameConfig';
+import { MAPS, type MapDef, type Rect } from './maps';
 import { NavGrid } from './pathfinding';
 import type { PlayerIntent } from './types';
 import { World } from './world';
@@ -118,5 +118,21 @@ describe('enemies following the flow field', () => {
     open.enemies.push(caster(500));
     run(open, 0.1); // fires at once (attack timer 0); check before the shot reaches the player
     expect(open.projectiles.filter((p) => p.team === 'enemy').length).toBeGreaterThan(0);
+  });
+});
+
+describe('built-in maps', () => {
+  it('every enemy entrance has a path to the player start', () => {
+    const clearance = Math.max(DEFAULT_CONFIG.enemies.chaser.radius, DEFAULT_CONFIG.enemies.caster.radius);
+    for (const map of MAPS) {
+      if (!map.walls.length) continue;
+      const grid = new NavGrid(map.walls, ARENA_WIDTH, ARENA_HEIGHT, 20, clearance);
+      grid.update([map.playerSpawn]);
+      expect(grid.blocked[grid.cellAt(map.playerSpawn.x, map.playerSpawn.y)], `${map.id} start`).toBe(0);
+      for (const gap of map.spawnGaps ?? []) {
+        const mid = { x: (gap.x1 + gap.x2) / 2, y: (gap.y1 + gap.y2) / 2 };
+        expect(Number.isFinite(grid.dist[grid.cellAt(mid.x, mid.y)]), `${map.id} entrance at ${mid.x},${mid.y}`).toBe(true);
+      }
+    }
   });
 });
