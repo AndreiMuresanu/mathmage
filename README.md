@@ -116,6 +116,7 @@ src/
 
 ## Important references
 
+- **Online play roadmap:** [`docs/ONLINE_PLAN.md`](docs/ONLINE_PLAN.md) covers the design for P2P co-op/PvP (Trystero), matchmaking, the online leaderboard, accounts needed, and the phase-by-phase build order. Read it before working on menus, game modes, networking or the leaderboard.
 - **Phaser 4 documentation for this project:** [`node_modules/phaser/skills/`](node_modules/phaser/skills/). It has one folder per topic, each with a `SKILL.md`. Read the relevant one before writing Phaser code. Phaser 4 differs from v3, and most online examples are for v3. Useful topics:
   - `v3-to-v4-migration/`, `v4-new-features/`
   - `scenes/`, `game-setup-and-config/`
