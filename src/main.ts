@@ -12,6 +12,7 @@ import { createDeckManager } from './ui/DeckManager';
 import { createMainMenu } from './ui/MainMenu';
 import { createMultiplayerScreen } from './ui/MultiplayerScreen';
 import { createSoloSetup } from './ui/SoloSetup';
+import { createLeaderboardScreen, type LeaderboardView } from './ui/LeaderboardScreen';
 import { matchConfig, type MatchSetup } from './game/matchSetup';
 import { preloadMathFonts } from './ui/markup';
 
@@ -59,6 +60,7 @@ function showMenu(): void {
     createMainMenu({
       solo: showSoloSetup,
       multiplayer: () => showScreen(createMultiplayerScreen({ onBack: showMenu })),
+      leaderboard: () => showLeaderboard(),
       decks: showDecks,
     }),
   );
@@ -81,6 +83,28 @@ function showSoloSetup(): void {
       },
       onStart: () => startMatch({ mode: 'solo', ranked: soloRanked, map: config.map }),
       onSettings: () => showSettings(showSoloSetup),
+      onBack: showMenu,
+    }),
+  );
+}
+
+/** The board last viewed (defaults to the current map, solo, by wave). */
+let leaderboardView: LeaderboardView | undefined;
+
+/** Open the leaderboard, optionally on a given board (e.g. the one just played). */
+function showLeaderboard(board?: Partial<LeaderboardView>): void {
+  endMatch();
+  if (!game.scene.isActive('menu')) {
+    game.scene.stop('game');
+    game.scene.start('menu');
+  }
+  leaderboardView = { ...(leaderboardView ?? { map: config.map, mode: 'solo', sort: 'wave' }), ...board };
+  showScreen(
+    createLeaderboardScreen({
+      view: leaderboardView,
+      onViewChange: (v) => {
+        leaderboardView = v;
+      },
       onBack: showMenu,
     }),
   );
@@ -112,6 +136,7 @@ function startMatch(setup: MatchSetup): void {
     onTypingChange: (typing) => gameScene.setTyping(typing),
     playAgain: () => startMatch(setup),
     exitToMenu: showMenu,
+    viewLeaderboard: () => showLeaderboard({ map: setup.map, mode: 'solo' }),
   });
   game.scene.stop('menu');
   game.scene.start('game', { match });

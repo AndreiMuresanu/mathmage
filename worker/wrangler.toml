@@ -1,0 +1,15 @@
+# Math Mage online API (Cloudflare Worker + D1). Setup: see "Online leaderboard" in README.md.
+name = "mathmage-api"
+main = "src/index.ts"
+compatibility_date = "2026-10-01"
+
+[vars]
+# Restrict to the game's origin once deployed, e.g. "https://<user>.github.io".
+ALLOWED_ORIGIN = "https://andreimuresanu.com"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "mathmage"
+# Replace with the id printed by `npx wrangler d1 create mathmage`.
+database_id = "bd9c81bc-47b7-424c-9793-2df343407034"
+migrations_dir = "migrations"

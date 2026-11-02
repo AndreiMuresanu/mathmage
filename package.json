@@ -5,19 +5,26 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc && vite build",
+    "build": "tsc && tsc -p worker/tsconfig.json && vite build",
     "preview": "vite preview",
     "predeploy": "npm run build",
     "deploy": "gh-pages -d dist",
     "test": "vitest run",
-    "deck:contest": "python scripts/generate_contest_deck.py"
+    "deck:contest": "python scripts/generate_contest_deck.py",
+    "worker:dev": "wrangler d1 migrations apply mathmage --local --config worker/wrangler.toml && wrangler dev --config worker/wrangler.toml --var ALLOWED_ORIGIN:*",
+    "worker:migrate": "wrangler d1 migrations apply mathmage --remote --config worker/wrangler.toml",
+    "worker:deploy": "wrangler deploy --config worker/wrangler.toml",
+    "deploy:all": "npm run worker:migrate && npm run worker:deploy && npm run deploy",
+    "leaderboard:export": "node scripts/export_leaderboard.mjs"
   },
   "devDependencies": {
+    "@cloudflare/workers-types": "^5.20261102.1",
     "@types/katex": "^0.16.8",
     "gh-pages": "^6.3.0",
     "typescript": "~6.0.2",
     "vite": "^8.3.0",
-    "vitest": "^5.0.3"
+    "vitest": "^5.0.3",
+    "wrangler": "^4.156.2"
   },
   "dependencies": {
     "katex": "^0.19.0",

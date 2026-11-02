@@ -3,6 +3,7 @@ import { h } from './dom';
 export function createMainMenu(actions: {
   solo(): void;
   multiplayer(): void;
+  leaderboard(): void;
   decks(): void;
 }): HTMLDivElement {
   return h(
@@ -18,7 +19,7 @@ export function createMainMenu(actions: {
         {},
         h('button.primary.big', { onclick: actions.solo }, 'Play solo'),
         h('button.big', { onclick: actions.multiplayer }, 'Play multiplayer'),
-        h('button.big', { disabled: true, title: 'Coming soon' }, 'Leaderboard (coming soon)'),
+        h('button.big', { onclick: actions.leaderboard }, 'Leaderboard'),
         h('button.big', { onclick: actions.decks }, 'Question decks'),
       ),
       h(

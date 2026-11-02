@@ -275,12 +275,18 @@ A snapshot with 60 enemies is about 3 KB of JSON, so about 60 KB/s per client.
 
 ## Phasing (implemented one at a time)
 
-Status (2026-11-02): **phase 1 done**; phases 2–7 not started.
+Status (2026-11-02): **phases 1–2 done** (the Worker is written and tested locally, but not yet deployed; that needs the Cloudflare account); phases 3–7 not started.
 
 Phase 1 notes:
 - Match setup lives in `src/game/matchSetup.ts` (`MatchSetup`, `matchConfig`).
 - The main menu shows a disabled "Leaderboard (coming soon)" button until phase 2.
 - The Multiplayer screen has disabled Join / Host buttons until phases 4–5.
+
+Phase 2 notes:
+- Worker code: `worker/src/api.ts`; schema: `worker/migrations/0001_scores.sql`; client: `src/online/`.
+- Request fields use `players: [{name, elo}]` (stored in the `names` column).
+- Ranked co-op submission (host submits the team) is wired in phase 5; the API already accepts it.
+- Setup and deploy steps are in README → "Online leaderboard".
 
 1. **Menus and match setup** (no networking or backend):
    - New main menu.

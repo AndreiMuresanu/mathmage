@@ -64,7 +64,12 @@ index.html               Entry HTML (mounts the canvas + UI root)
 vite.config.ts           Vite config (base path /mathmage/ for GitHub Pages, port 3000)
 scripts/
   generate_contest_deck.py   Source of truth for the contest deck; verifies every answer
+  export_leaderboard.mjs     npm run leaderboard:export -> CSV of every online leaderboard entry
 public/                  Static assets (favicon, icons)
+worker/                  Online API: Cloudflare Worker + D1 (leaderboard; matchmaking later)
+  src/api.ts             Routes, validation, rate limit, top-1000 trimming (tested in worker/test/)
+  migrations/            D1 schema (applied with npm run worker:migrate / worker:dev)
+  wrangler.toml          Worker + database config (put your D1 database_id here)
 shots/                   Screenshots from headless test runs (not part of the game)
 src/
   main.ts                Boot: creates the Phaser game, wires menus ↔ matches, dev hook
@@ -108,6 +113,8 @@ src/
     StunPanel.ts         Stun countdown, correct answer, "Show solution", slow-mo + pause
     Hud.ts               HP/mana bars, spell bar, wave timer, rating/tier readout
     ConfigScreen.ts      Custom game settings, generated from configSchema.ts (opened from match setup)
+    LeaderboardScreen.ts Online high scores: map/mode filters, sort by wave or ELO, paging
+    ScoreSubmit.ts       Game-over "Submit to leaderboard" box (ranked solo)
     SoloSetup.ts         Play solo: map cards + Play ranked / Play custom / Settings…
     MultiplayerScreen.ts Join / host (placeholder until the netcode phases)
     mapCards.ts          Map preview cards shared by setup screens
@@ -115,6 +122,10 @@ src/
     markup.ts            Text + $LaTeX$ → HTML via KaTeX (with font preloading)
     dom.ts               Tiny element builder h('div.class', props, ...children)
     ui.css               All UI styling
+  online/
+    leaderboard.ts       API client (VITE_LEADERBOARD_URL), remembered player name
+    leaderboardTypes.ts  Types + limits shared with the Worker
+    configHash.ts        Settings fingerprint: ranked = DEFAULT_CONFIG (shared with the Worker)
   util/rng.ts            Seeded PRNG (mulberry32) + weighted pick
 ```
 
@@ -155,6 +166,28 @@ src/
   - Start the dev server without opening a browser tab (`BROWSER=none`).
   - Drive the game headlessly with Playwright.
   - In dev builds, `window.__mathmage.match` exposes the live `Match` (and its `world`) for inspecting and setting up state. It's stripped from production builds.
+
+## Online leaderboard (Cloudflare Worker)
+
+Ranked games (default settings) can be submitted to an online leaderboard served by the Worker in `worker/`. Without it the game still runs; the leaderboard just shows "offline".
+
+**Run it locally** (no account needed):
+1. `npm run worker:dev` creates a local database and serves the API at http://localhost:8787.
+2. Create `.env.local` (see `.env.example`) with `VITE_LEADERBOARD_URL=http://localhost:8787`, then `npm run dev`.
+
+**Deploy it** (needs a free Cloudflare account):
+1. Sign up at dash.cloudflare.com, then run `npx wrangler login`.
+2. `npx wrangler d1 create mathmage` and copy the printed `database_id` into `worker/wrangler.toml`.
+3. `npx wrangler secret put ADMIN_KEY --config worker/wrangler.toml` and enter a long random string (used to delete bad entries).
+4. `npm run worker:migrate`, then `npm run worker:deploy`. It prints the Worker URL.
+5. Put that URL in `.env` as `VITE_LEADERBOARD_URL=...`. In `worker/wrangler.toml`, set `ALLOWED_ORIGIN` to the game's GitHub Pages origin, then redeploy the Worker.
+6. From then on, release with `npm run deploy:all` (database migrations, then Worker, then game).
+
+The Worker rejects runs whose settings don't match `DEFAULT_CONFIG`. So whenever you change a default, release the Worker and the game together (`deploy:all`), or valid ranked runs will be refused.
+
+**Download the leaderboard:** `npm run leaderboard:export` saves every entry (all maps and modes) to `exports/leaderboard-<date>.csv`, with ranks per board, players, ELOs, wave and submission time (UTC). It reads the public API, so no login is needed. Options: `-- --out file.csv`, or `-- --url http://localhost:8787` for the local Worker.
+
+**Remove a fake entry:** `curl -X DELETE -H "Authorization: Bearer <ADMIN_KEY>" <worker-url>/scores/<id>`. The id is in the `GET /scores` response.
 
 ## Tech stack
 

@@ -15,6 +15,8 @@ export function createGameOverScreen(
   ratings: RatingSummary[] = [],
   /** e.g. "Ranked solo · Mazy". */
   subtitle = '',
+  /** Leaderboard submit box (ranked) or a "not ranked" note. */
+  leaderboard: HTMLElement | null = null,
 ): HTMLDivElement {
   const s = world.stats;
   const minutes = Math.floor(s.timeSurvived / 60);
@@ -47,6 +49,7 @@ export function createGameOverScreen(
         stat('Time survived', `${minutes}:${seconds}`),
         stat('Mana spent', String(Math.round(s.manaSpent))),
       ),
+      leaderboard,
       ratings.length ? h('h3', {}, 'Skill rating') : null,
       ...ratings.map((r) =>
         h(

@@ -4,6 +4,9 @@ import type { QuestionRegistry } from '../questions/registry';
 import type { PlayerIntent, SimEvent } from '../sim/types';
 import { World } from '../sim/world';
 import { setupLabel, type MatchSetup } from './matchSetup';
+import { configHash } from '../online/configHash';
+import { GAME_VERSION } from '../online/leaderboard';
+import { createScoreSubmit } from '../ui/ScoreSubmit';
 import { createRng } from '../util/rng';
 import { createGameOverScreen } from '../ui/GameOverScreen';
 import { Hud } from '../ui/Hud';
@@ -22,6 +25,7 @@ export interface MatchCallbacks {
   onTypingChange(typing: boolean): void;
   playAgain(): void;
   exitToMenu(): void;
+  viewLeaderboard(): void;
 }
 
 /**
@@ -184,7 +188,27 @@ export class Match {
         },
         this.ratings.all().map(([skill, r]) => ({ name: this.registry.skillName(skill), ...r })),
         `${setupLabel(this.setup)} · ${this.world.map.name}`,
+        this.leaderboardSection(),
       ),
+    );
+  }
+
+  /** Ranked solo: the submit box. Custom: a note that it isn't ranked. */
+  private leaderboardSection(): HTMLElement | null {
+    if (!this.setup.ranked) return h('p.muted', {}, 'Custom game: not ranked.');
+    if (this.setup.mode !== 'solo') return null; // ranked co-op is submitted by the host (multiplayer phases)
+    const peaks = this.ratings.all().map(([, r]) => r.peak);
+    const elo = peaks.length ? Math.max(...peaks) : this.world.cfg.adaptive.startRating;
+    return createScoreSubmit(
+      {
+        map: this.world.map.id,
+        mode: 'solo',
+        wave: this.world.wave.round,
+        elo,
+        version: GAME_VERSION,
+        configHash: configHash(this.world.cfg),
+      },
+      () => this.callbacks.viewLeaderboard(),
     );
   }
 

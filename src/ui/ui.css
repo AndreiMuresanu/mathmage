@@ -1014,3 +1014,80 @@ code {
 .rating-summary {
   margin: 0.2em 0;
 }
+
+/* ---------- Leaderboard ---------- */
+
+.screen-panel.leaderboard {
+  width: min(48em, 100%);
+}
+
+.leaderboard-filters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.8em;
+  margin-bottom: 0.8em;
+}
+
+.leaderboard-filters .spacer {
+  flex: 1;
+}
+
+button.toggle {
+  opacity: 0.65;
+}
+
+button.toggle.selected {
+  border-color: var(--accent);
+  background: rgba(0, 255, 204, 0.12);
+  opacity: 1;
+}
+
+.leaderboard-table {
+  width: 100%;
+}
+
+.leaderboard-name {
+  max-width: 18em;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.leaderboard-status {
+  text-align: center;
+  min-height: 1.2em;
+}
+
+.leaderboard-pages {
+  justify-content: center;
+}
+
+.score-submit {
+  margin: 0.8em 0;
+  padding: 0.6em 0.8em;
+  border: 1px solid rgba(0, 255, 204, 0.35);
+  border-radius: 8px;
+  background: rgba(0, 255, 204, 0.05);
+}
+
+.score-submit h3 {
+  margin: 0 0 0.4em;
+}
+
+.score-submit .name-input {
+  flex: 1;
+  min-width: 8em;
+}
+
+.score-submit-message {
+  margin: 0.3em 0 0;
+  min-height: 1.2em;
+  color: var(--muted);
+  font-size: 0.9em;
+}
+
+.score-submit-done {
+  margin: 0 0 0.4em;
+  color: var(--accent);
+}
