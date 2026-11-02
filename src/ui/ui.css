@@ -586,7 +586,7 @@ code {
 }
 
 .screen-panel.menu {
-  width: min(32em, 100%);
+  width: min(28em, 100%);
   text-align: center;
 }
 
@@ -618,11 +618,15 @@ code {
   margin: 1.4em 0;
 }
 
+.screen-panel.map-select {
+  width: min(44em, 100%);
+}
+
 .map-picker {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 0.5em;
-  margin-top: 1em;
+  grid-template-columns: repeat(auto-fill, minmax(17em, 1fr));
+  gap: 0.8em;
+  margin: 1em 0;
 }
 
 .map-card {

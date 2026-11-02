@@ -10,6 +10,7 @@ import { QuestionRegistry } from './questions/registry';
 import { createConfigScreen } from './ui/ConfigScreen';
 import { createDeckManager } from './ui/DeckManager';
 import { createMainMenu } from './ui/MainMenu';
+import { createMapSelect } from './ui/MapSelect';
 import { preloadMathFonts } from './ui/markup';
 
 preloadMathFonts();
@@ -53,14 +54,23 @@ function showMenu(): void {
   }
   showScreen(
     createMainMenu({
-      play: () => startMatch(config),
+      play: showMapSelect,
       configure: showConfig,
       decks: showDecks,
+    }),
+  );
+}
+
+function showMapSelect(): void {
+  showScreen(
+    createMapSelect({
       map: config.map,
-      selectMap: (id) => {
+      onSelect: (id) => {
         config = { ...config, map: id };
         saveCurrentConfig(config);
       },
+      onStart: () => startMatch(config),
+      onBack: showMenu,
     }),
   );
 }
