@@ -66,7 +66,7 @@ function edgeWalls(gaps: Edge[]): { walls: Rect[]; spawnGaps: Segment[] } {
 }
 
 /** A square pillar centred on (cx, cy). */
-function pillar(cx: number, cy: number, size = 56): Rect {
+function pillar(cx: number, cy: number, size = 72): Rect {
   return { x: cx - size / 2, y: cy - size / 2, w: size, h: size };
 }
 

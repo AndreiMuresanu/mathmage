@@ -533,12 +533,12 @@ describe('maps and walls', () => {
     });
     const p = world.players[0];
     p.x = 700;
-    p.y = 360; // level with the middle row of pillars; the next one spans x 872-928
+    p.y = 360; // level with the middle row of pillars; the next one spans x 864-936
     world.enemies.push(still(1, 800, 360), still(2, 1000, 360));
     world.step(1 / 60, { local: { ...idle, aim: 0, casting: true } });
     expect(world.enemies.map((e) => e.hp)).toEqual([70, 100]);
     const beam = world.drainEvents().find((e) => e.type === 'beam');
-    expect(beam && 'x2' in beam ? beam.x2 : 0).toBeCloseTo(872, 3);
+    expect(beam && 'x2' in beam ? beam.x2 : 0).toBeCloseTo(864, 3);
   });
 
   it('enemies come in only through the gaps in the edge walls', () => {
@@ -553,7 +553,7 @@ describe('maps and walls', () => {
 
   it('a chaser stuck behind a pillar works its way around to the player', () => {
     const world = mapWorld('buttons');
-    const p = world.players[0]; // (640, 440), just above the bottom-middle pillar (y 492-548)
+    const p = world.players[0]; // (640, 440), just above the bottom-middle pillar (y 484-556)
     world.enemies.push({ ...still(1, 640, 600), speed: 100 });
     run(world, 6);
     const e = world.enemies[0];
