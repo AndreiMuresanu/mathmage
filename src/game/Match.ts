@@ -3,6 +3,7 @@ import { DEFAULT_DIFFICULTY, SkillRatings, type AnswerResult } from '../question
 import type { QuestionRegistry } from '../questions/registry';
 import type { PlayerIntent, SimEvent } from '../sim/types';
 import { World } from '../sim/world';
+import { setupLabel, type MatchSetup } from './matchSetup';
 import { createRng } from '../util/rng';
 import { createGameOverScreen } from '../ui/GameOverScreen';
 import { Hud } from '../ui/Hud';
@@ -41,8 +42,12 @@ export class Match {
   readonly ratings: SkillRatings;
   private registry: QuestionRegistry;
 
-  constructor(cfg: GameConfig, registry: QuestionRegistry, root: HTMLElement, callbacks: MatchCallbacks) {
+  /** Mode, ranked/custom and map this match was started with. */
+  readonly setup: MatchSetup;
+
+  constructor(cfg: GameConfig, setup: MatchSetup, registry: QuestionRegistry, root: HTMLElement, callbacks: MatchCallbacks) {
     this.world = new World(cfg);
+    this.setup = setup;
     this.callbacks = callbacks;
     this.registry = registry;
     this.ratings = new SkillRatings(cfg.adaptive);
@@ -178,6 +183,7 @@ export class Match {
           menu: () => this.callbacks.exitToMenu(),
         },
         this.ratings.all().map(([skill, r]) => ({ name: this.registry.skillName(skill), ...r })),
+        `${setupLabel(this.setup)} · ${this.world.map.name}`,
       ),
     );
   }

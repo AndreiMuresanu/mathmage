@@ -75,7 +75,7 @@ export function createDeckManager(opts: { registry: QuestionRegistry; onBack(): 
     opts.registry.saveImportedDeck(deck);
     const numeric = parsed.questions.filter((q) => q.answer.kind === 'numeric').length;
     result.replaceChildren(
-      h('div.success', {}, `Imported "${name}": ${parsed.questions.length} cards (${numeric} numeric, ${parsed.questions.length - numeric} text). Add it to a question type in Configure match.`),
+      h('div.success', {}, `Imported "${name}": ${parsed.questions.length} cards (${numeric} numeric, ${parsed.questions.length - numeric} text). Turn it on in Play solo → Play custom → Settings… → Question sources.`),
       ...warnings,
     );
     textArea.value = '';

@@ -8,11 +8,11 @@ import { downloadText, h } from './dom';
 export interface ConfigScreenOptions {
   config: GameConfig;
   registry: QuestionRegistry;
-  onStart(config: GameConfig): void;
+  /** Back to the match setup screen (settings are saved as they change). */
   onBack(config: GameConfig): void;
 }
 
-/** Match setup: every tunable from configSchema, plus presets and JSON import/export. */
+/** Custom game settings: every tunable from configSchema, plus presets and JSON import/export. */
 export function createConfigScreen(opts: ConfigScreenOptions): HTMLDivElement {
   let draft = cloneConfig(opts.config);
   const body = h('div.config-body');
@@ -265,16 +265,8 @@ export function createConfigScreen(opts: ConfigScreenOptions): HTMLDivElement {
   renderPresetBar();
   render();
 
-  const back = h('button', { textContent: 'Back' });
+  const back = h('button.primary', { textContent: 'Done' });
   back.addEventListener('click', () => opts.onBack(draft));
-  const start = h('button.primary', { textContent: 'Start match' });
-  start.addEventListener('click', () => {
-    if (draft.spells.length === 0) {
-      renderStatus();
-      return;
-    }
-    opts.onStart(draft);
-  });
 
   return h(
     'div.screen',
@@ -282,7 +274,7 @@ export function createConfigScreen(opts: ConfigScreenOptions): HTMLDivElement {
     h(
       'div.panel.screen-panel.wide',
       {},
-      h('div.screen-header', {}, h('h1', {}, 'Configure match'), h('div.button-row', {}, back, start)),
+      h('div.screen-header', {}, h('h1', {}, 'Custom game settings'), h('div.button-row', {}, back)),
       presetBar,
       status,
       body,

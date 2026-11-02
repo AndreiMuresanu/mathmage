@@ -13,6 +13,8 @@ export function createGameOverScreen(
   world: World,
   actions: { playAgain(): void; menu(): void },
   ratings: RatingSummary[] = [],
+  /** e.g. "Ranked solo · Mazy". */
+  subtitle = '',
 ): HTMLDivElement {
   const s = world.stats;
   const minutes = Math.floor(s.timeSurvived / 60);
@@ -36,6 +38,7 @@ export function createGameOverScreen(
       'div.panel.screen-panel.narrow',
       {},
       h('h1', {}, 'The mage has fallen'),
+      subtitle ? h('p.muted.game-over-subtitle', {}, subtitle) : null,
       h(
         'div.stat-grid',
         {},

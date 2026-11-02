@@ -190,7 +190,7 @@ export class QuestionWindow {
     this.rating.textContent = difficulty === undefined ? '' : `rating ${Math.round(difficulty)}`;
     this.prompt.innerHTML = drawn
       ? renderRich(drawn.question.prompt)
-      : '<em>No question sources available. Pick some in Configure match → Question sources.</em>';
+      : '<em>No question sources available. Pick some in Play solo → Settings… → Question sources.</em>';
     this.input.value = '';
     this.input.disabled = !drawn;
     this.skipButton.disabled = !drawn;

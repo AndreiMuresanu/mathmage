@@ -21,37 +21,19 @@ function mapPreview(map: MapDef): SVGSVGElement {
 }
 
 /**
- * Map choice, shown after picking a game mode. Clicking a card selects it (double-click starts
- * right away); the last choice is remembered via `onSelect`.
+ * One clickable card per map, with the selected one highlighted. Used by every match setup
+ * screen (solo now; hosting a multiplayer game later).
  */
-export function createMapSelect(opts: {
-  /** Currently selected map id. */
-  map: string;
-  onSelect(id: string): void;
-  onStart(): void;
-  onBack(): void;
-}): HTMLDivElement {
-  let current = MAPS.some((m) => m.id === opts.map) ? opts.map : MAPS[0].id;
+export function mapCards(selected: string, onSelect: (id: string) => void): HTMLDivElement {
+  const current = MAPS.some((m) => m.id === selected) ? selected : MAPS[0].id;
   const cards = MAPS.map((map) => {
     const card = h('button.map-card', { type: 'button', title: map.name }, mapPreview(map), h('span', {}, map.name));
     card.classList.toggle('selected', map.id === current);
     card.addEventListener('click', () => {
-      current = map.id;
       for (const c of cards) c.classList.toggle('selected', c === card);
-      opts.onSelect(map.id);
+      onSelect(map.id);
     });
-    card.addEventListener('dblclick', () => opts.onStart());
     return card;
   });
-  return h(
-    'div.screen',
-    {},
-    h(
-      'div.panel.screen-panel.map-select',
-      {},
-      h('div.screen-header', {}, h('h1', {}, 'Choose a map'), h('button', { onclick: opts.onBack }, 'Back')),
-      h('div.map-picker', {}, ...cards),
-      h('div.button-row', {}, h('button.primary.big', { onclick: opts.onStart }, 'Start')),
-    ),
-  );
+  return h('div.map-picker', {}, ...cards);
 }

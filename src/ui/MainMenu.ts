@@ -1,8 +1,8 @@
 import { h } from './dom';
 
 export function createMainMenu(actions: {
-  play(): void;
-  configure(): void;
+  solo(): void;
+  multiplayer(): void;
   decks(): void;
 }): HTMLDivElement {
   return h(
@@ -16,8 +16,9 @@ export function createMainMenu(actions: {
       h(
         'div.menu-buttons',
         {},
-        h('button.primary.big', { onclick: actions.play }, 'Play survival'),
-        h('button.big', { onclick: actions.configure }, 'Configure match'),
+        h('button.primary.big', { onclick: actions.solo }, 'Play solo'),
+        h('button.big', { onclick: actions.multiplayer }, 'Play multiplayer'),
+        h('button.big', { disabled: true, title: 'Coming soon' }, 'Leaderboard (coming soon)'),
         h('button.big', { onclick: actions.decks }, 'Question decks'),
       ),
       h(

@@ -82,6 +82,7 @@ src/
     world.test.ts        Simulation unit tests
   game/                  Phaser layer
     Match.ts             One match: owns the World, question flow, ratings, HUD, game over
+    matchSetup.ts        Game mode + ranked/custom + map; ranked always runs on DEFAULT_CONFIG
     GameScene.ts         Renders the World each frame; particles, mana-orb vortex, effects
     MenuScene.ts         Animated backdrop behind menus
     textures.ts          Generated textures (circle, pixel squares for blocky particles)
@@ -106,7 +107,10 @@ src/
     QuestionWindow.ts    Translucent question popup, answer box, skip button, timer
     StunPanel.ts         Stun countdown, correct answer, "Show solution", slow-mo + pause
     Hud.ts               HP/mana bars, spell bar, wave timer, rating/tier readout
-    ConfigScreen.ts      Settings screen generated from configSchema.ts
+    ConfigScreen.ts      Custom game settings, generated from configSchema.ts (opened from match setup)
+    SoloSetup.ts         Play solo: map cards + Play ranked / Play custom / Settings…
+    MultiplayerScreen.ts Join / host (placeholder until the netcode phases)
+    mapCards.ts          Map preview cards shared by setup screens
     MainMenu.ts, GameOverScreen.ts, DeckManager.ts
     markup.ts            Text + $LaTeX$ → HTML via KaTeX (with font preloading)
     dom.ts               Tiny element builder h('div.class', props, ...children)

@@ -3,7 +3,6 @@
  * so a new tunable only needs a field in GameConfig/DEFAULT_CONFIG plus one line here.
  */
 
-import { MAPS } from '../sim/maps';
 
 export type FieldType = 'number' | 'boolean' | 'text' | 'color' | 'select';
 
@@ -51,20 +50,6 @@ const bool = (key: string, label: string, help?: string): FieldDef => ({ key, la
 
 
 export const CONFIG_GROUPS: GroupDef[] = [
-  {
-    kind: 'object',
-    title: 'Map',
-    path: '',
-    fields: [
-      {
-        key: 'map',
-        label: 'Arena',
-        type: 'select',
-        options: MAPS.map((m): [string, string] => [m.id, m.name]),
-        help: 'Walls block movement and spells (fireballs still explode on them); enemies come in through the gaps.',
-      },
-    ],
-  },
   {
     kind: 'object',
     title: 'Player',

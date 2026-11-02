@@ -1,7 +1,7 @@
 import Phaser from 'phaser';
 import 'katex/dist/katex.min.css';
 import './ui/ui.css';
-import { ARENA_HEIGHT, ARENA_WIDTH, cloneConfig, type GameConfig } from './config/gameConfig';
+import { ARENA_HEIGHT, ARENA_WIDTH, type GameConfig } from './config/gameConfig';
 import { loadCurrentConfig, saveCurrentConfig } from './config/presets';
 import { GameScene } from './game/GameScene';
 import { Match } from './game/Match';
@@ -10,12 +10,15 @@ import { QuestionRegistry } from './questions/registry';
 import { createConfigScreen } from './ui/ConfigScreen';
 import { createDeckManager } from './ui/DeckManager';
 import { createMainMenu } from './ui/MainMenu';
-import { createMapSelect } from './ui/MapSelect';
+import { createMultiplayerScreen } from './ui/MultiplayerScreen';
+import { createSoloSetup } from './ui/SoloSetup';
+import { matchConfig, type MatchSetup } from './game/matchSetup';
 import { preloadMathFonts } from './ui/markup';
 
 preloadMathFonts();
 
 const uiRoot = document.getElementById('ui-root')!;
+/** The player's saved custom-game settings (also remembers the last map picked). */
 let config: GameConfig = loadCurrentConfig();
 const registry = new QuestionRegistry(() => config);
 
@@ -54,40 +57,44 @@ function showMenu(): void {
   }
   showScreen(
     createMainMenu({
-      play: showMapSelect,
-      configure: showConfig,
+      solo: showSoloSetup,
+      multiplayer: () => showScreen(createMultiplayerScreen({ onBack: showMenu })),
       decks: showDecks,
     }),
   );
 }
 
-function showMapSelect(): void {
+/** Ranked or custom, as last chosen on the solo setup screen. */
+let soloRanked = true;
+
+function showSoloSetup(): void {
   showScreen(
-    createMapSelect({
+    createSoloSetup({
       map: config.map,
-      onSelect: (id) => {
+      ranked: soloRanked,
+      onSelectMap: (id) => {
         config = { ...config, map: id };
         saveCurrentConfig(config);
       },
-      onStart: () => startMatch(config),
+      onSelectRanked: (ranked) => {
+        soloRanked = ranked;
+      },
+      onStart: () => startMatch({ mode: 'solo', ranked: soloRanked, map: config.map }),
+      onSettings: () => showSettings(showSoloSetup),
       onBack: showMenu,
     }),
   );
 }
 
-function showConfig(): void {
+/** Custom game settings, opened from a match setup screen; `back` returns there. */
+function showSettings(back: () => void): void {
   showScreen(
     createConfigScreen({
       config,
       registry,
-      onStart: (cfg) => {
-        config = cfg;
-        saveCurrentConfig(config);
-        startMatch(config);
-      },
       onBack: (cfg) => {
         config = cfg;
-        showMenu();
+        back();
       },
     }),
   );
@@ -97,13 +104,13 @@ function showDecks(): void {
   showScreen(createDeckManager({ registry, onBack: showMenu }));
 }
 
-function startMatch(cfg: GameConfig): void {
+function startMatch(setup: MatchSetup): void {
   endMatch();
   showScreen(null);
   const gameScene = game.scene.getScene('game') as GameScene;
-  match = new Match(cloneConfig(cfg), registry, uiRoot, {
+  match = new Match(matchConfig(setup, config), setup, registry, uiRoot, {
     onTypingChange: (typing) => gameScene.setTyping(typing),
-    playAgain: () => startMatch(config),
+    playAgain: () => startMatch(setup),
     exitToMenu: showMenu,
   });
   game.scene.stop('menu');

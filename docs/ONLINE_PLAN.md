@@ -51,7 +51,7 @@ Main menu:  [Play solo]  [Play multiplayer]  [Leaderboard]  [Question decks]
 - **Custom** (solo or co-op) uses the player's saved settings and is never ranked.
 - FFA PvP is unranked until its rules exist.
 
-**Solo setup screen:** replaces today's map screen ([MapSelect.ts](../src/ui/MapSelect.ts)).
+**Solo setup screen:** [SoloSetup.ts](../src/ui/SoloSetup.ts) (replaced the old map screen).
 - Map cards.
 - "Play ranked" and "Play custom". Each starts the game at once.
 - A "Settings…" link next to Play custom.
@@ -275,7 +275,12 @@ A snapshot with 60 enemies is about 3 KB of JSON, so about 60 KB/s per client.
 
 ## Phasing (implemented one at a time)
 
-Status: every phase below is **not started** (as of 2026-11-02).
+Status (2026-11-02): **phase 1 done**; phases 2–7 not started.
+
+Phase 1 notes:
+- Match setup lives in `src/game/matchSetup.ts` (`MatchSetup`, `matchConfig`).
+- The main menu shows a disabled "Leaderboard (coming soon)" button until phase 2.
+- The Multiplayer screen has disabled Join / Host buttons until phases 4–5.
 
 1. **Menus and match setup** (no networking or backend):
    - New main menu.
