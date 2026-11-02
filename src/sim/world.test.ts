@@ -541,6 +541,42 @@ describe('maps and walls', () => {
     expect(beam && 'x2' in beam ? beam.x2 : 0).toBeCloseTo(864, 3);
   });
 
+  describe('fireball blasts and cover', () => {
+    // Buttons: from (700, 360), aiming right, the next pillar spans x 864-936, y 324-396.
+    function blastAt(enemies: [number, number][], radius = 150) {
+      const world = mapWorld('buttons', (c) => { c.spells[0].explosionRadius = radius; c.spells[0].damage = 30; });
+      const p = world.players[0];
+      p.x = 700;
+      p.y = 360;
+      enemies.forEach(([x, y], i) => world.enemies.push(still(i + 1, x, y)));
+      world.step(1 / 60, { local: { ...idle, aim: 0, casting: true } });
+      const events = [];
+      for (let t = 0; t < 1.5; t += 1 / 60) {
+        world.step(1 / 60, { local: idle });
+        events.push(...world.drainEvents());
+      }
+      const blast = events.find((e) => e.type === 'explosion');
+      return { hp: world.enemies.map((e) => e.hp), targets: blast && 'targets' in blast ? blast.targets.map((t) => t.id) : [] };
+    }
+
+    it('a blast on a wall hurts enemies on its side but not ones hidden behind it', () => {
+      const { hp, targets } = blastAt([[960, 360], [820, 420]]);
+      expect(hp).toEqual([100, 70]);
+      expect(targets).toEqual([2]);
+    });
+
+    it('a blast on an enemy does not reach another enemy hidden behind a pillar', () => {
+      expect(blastAt([[830, 360], [960, 360]]).hp).toEqual([70, 100]);
+    });
+
+    it('an enemy only partly covered by a pillar still gets hit', () => {
+      // The fireball bursts on the first enemy, well before the pillar. Seen from there, the
+      // second enemy's centre is behind the pillar but its lower side pokes out below it.
+      expect(blastAt([[760, 360], [980, 420]], 260).hp).toEqual([70, 70]);
+      expect(blastAt([[760, 360], [980, 360]], 260).hp).toEqual([70, 100]); // fully covered
+    });
+  });
+
   it('enemies come in only through the gaps in the edge walls', () => {
     const world = mapWorld('boxy');
     for (let i = 0; i < 60; i++) (world as unknown as { spawnEnemy(kind: string): void }).spawnEnemy('chaser');

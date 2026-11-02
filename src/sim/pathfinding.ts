@@ -1,4 +1,4 @@
-import { circleRectPush, segmentRectHit, type Rect } from './maps';
+import { circleRectPush, lineOfSight, type Rect } from './maps';
 
 const SQRT2 = Math.SQRT2;
 /** Neighbour offsets: four straight, then four diagonal. */
@@ -81,9 +81,7 @@ export class NavGrid {
 
   /** Whether a circle of `radius` could travel in a straight line from (x1, y1) to (x2, y2) without touching a wall. */
   clearPath(x1: number, y1: number, x2: number, y2: number, radius: number): boolean {
-    return !this.walls.some(
-      (w) => segmentRectHit(x1, y1, x2, y2, { x: w.x - radius, y: w.y - radius, w: w.w + 2 * radius, h: w.h + 2 * radius }) !== undefined,
-    );
+    return lineOfSight(this.walls, x1, y1, x2, y2, radius);
   }
 
   /** Open neighbours of `cell`; diagonals only when both straight cells beside them are open (no corner cutting). */

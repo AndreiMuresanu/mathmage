@@ -150,6 +150,16 @@ export function circleRectPush(c: { x: number; y: number; radius: number }, rect
 }
 
 /**
+ * Whether the segment (x1, y1)-(x2, y2), widened to `radius` on each side, touches none of
+ * `walls` (radius 0 = a thin ray).
+ */
+export function lineOfSight(walls: Rect[], x1: number, y1: number, x2: number, y2: number, radius = 0): boolean {
+  return !walls.some(
+    (w) => segmentRectHit(x1, y1, x2, y2, { x: w.x - radius, y: w.y - radius, w: w.w + 2 * radius, h: w.h + 2 * radius }) !== undefined,
+  );
+}
+
+/**
  * Where the segment (x1, y1)-(x2, y2) first enters `rect`, as a fraction 0..1 along it, or
  * undefined if it misses (slab method).
  */

@@ -11,7 +11,7 @@ import type {
   SimEvent,
   WaveState,
 } from './types';
-import { circleRectPush, getMap, segmentRectHit, type MapDef } from './maps';
+import { circleRectPush, getMap, lineOfSight, segmentRectHit, type MapDef } from './maps';
 import { NavGrid } from './pathfinding';
 import { buildWaveQueue, damageScale, hpScale, roundTimeLimit } from './waves';
 
@@ -590,9 +590,14 @@ export class World {
       pr.ttl -= dt;
       if (pr.ttl <= 0 || pr.x < -50 || pr.y < -50 || pr.x > this.width + 50 || pr.y > this.height + 50) continue;
       if (pr.team === 'player' ? this.hitEnemy(pr) : this.hitPlayer(pr)) continue;
-      if (this.map.walls.some((w) => circleRectPush(pr, w))) {
-        // Spells stop at walls; fireballs still explode there.
-        if (pr.team === 'player' && pr.explosionRadius > 0) this.explode(pr);
+      const wall = this.map.walls.find((w) => circleRectPush(pr, w));
+      if (wall) {
+        // Spells stop at walls; fireballs still explode there, from just in front of the wall face
+        // (so the blast's line of sight starts on the side the fireball came from).
+        if (pr.team === 'player' && pr.explosionRadius > 0) {
+          const push = circleRectPush(pr, wall)!;
+          this.explode(pr, pr.x + push.x, pr.y + push.y);
+        }
         continue;
       }
       survivors.push(pr);
@@ -603,18 +608,35 @@ export class World {
   private hitEnemy(pr: ProjectileState): boolean {
     const target = this.enemies.find((e) => overlaps(pr, e));
     if (!target) return false;
-    if (pr.explosionRadius > 0) this.explode(pr);
+    if (pr.explosionRadius > 0) this.explode(pr, pr.x, pr.y, target);
     else this.damageEnemy(target, pr.damage);
     return true;
   }
 
-  /** Explode at the projectile's position: every enemy touching the blast takes full damage. */
-  private explode(pr: ProjectileState): void {
-    const blast = { x: pr.x, y: pr.y, radius: pr.explosionRadius };
-    const caught = this.enemies.filter((e) => overlaps(blast, e));
+  /**
+   * Explode at (x, y): every enemy touching the blast that it can reach takes full damage. Walls
+   * give cover — an enemy is spared only if its centre and both sides are hidden from the blast.
+   * `struck` (the enemy the projectile hit, if any) is always caught.
+   */
+  private explode(pr: ProjectileState, x: number, y: number, struck?: EnemyState): void {
+    const blast = { x, y, radius: pr.explosionRadius };
+    const caught = this.enemies.filter((e) => e === struck || (overlaps(blast, e) && this.blastReaches(blast, e)));
     const targets = caught.map((e) => ({ id: e.id, x: e.x, y: e.y, radius: e.radius }));
     this.events.push({ type: 'explosion', ...blast, color: pr.color, targets });
     for (const e of caught) this.damageEnemy(e, pr.damage);
+  }
+
+  /** Whether any of an enemy's centre or its two sides (seen from the blast) is in the blast's line of sight. */
+  private blastReaches(blast: { x: number; y: number }, e: EnemyState): boolean {
+    const walls = this.map.walls;
+    if (walls.length === 0) return true;
+    const dx = e.x - blast.x;
+    const dy = e.y - blast.y;
+    const d = Math.hypot(dx, dy) || 1;
+    // Perpendicular offset to the edges of the enemy, as seen from the blast.
+    const ox = (-dy / d) * e.radius * 0.9;
+    const oy = (dx / d) * e.radius * 0.9;
+    return [[0, 0], [ox, oy], [-ox, -oy]].some(([px, py]) => lineOfSight(walls, blast.x, blast.y, e.x + px, e.y + py));
   }
 
   private damageEnemy(target: EnemyState, damage: number): void {
