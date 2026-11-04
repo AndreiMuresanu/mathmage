@@ -124,6 +124,11 @@ export interface CoopConfig {
   reviveHpFraction: number;
   /** How far (px) beyond touching the body a teammate can revive from. */
   reviveRange: number;
+  /**
+   * Friendly fire: how much of a spell's damage hits other players (1 = full, 0 = off). A caster
+   * never hits themselves.
+   */
+  friendlyFire: number;
 }
 
 export interface ChaserConfig {
@@ -280,10 +285,11 @@ export const DEFAULT_CONFIG: GameConfig = {
   ],
   map: 'empty',
   coop: {
-    reviveSeconds: 3,
+    reviveSeconds: 1.5,
     reviveInvulnSeconds: 3,
     reviveHpFraction: 0.5,
     reviveRange: 24,
+    friendlyFire: 1,
   },
   questionSources: [
     { sourceId: 'arithmetic', weight: 1 },

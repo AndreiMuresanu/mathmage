@@ -74,6 +74,7 @@ export const CONFIG_GROUPS: GroupDef[] = [
       num('reviveInvulnSeconds', 'Invincibility after revive (s)', 0, 30, 0.5),
       num('reviveHpFraction', 'HP after revive (fraction of max)', 0.05, 1, 0.05),
       num('reviveRange', 'Revive reach (px)', 0, 300, 2, 'How far beyond touching the body a teammate can revive from.'),
+      num('friendlyFire', 'Friendly fire damage ×', 0, 2, 0.05, 'How much of a spell’s damage hits teammates: 1 = full, 0.5 = half, 0 = off. You never hit yourself.'),
     ],
   },
   {

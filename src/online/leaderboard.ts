@@ -44,7 +44,11 @@ export async function apiRequest<T>(path: string, init?: RequestInit): Promise<T
   try {
     res = await fetch(BASE_URL + path, init);
   } catch {
-    throw new Error("Couldn't reach the leaderboard. Check your connection.");
+    throw new Error(
+      import.meta.env.DEV
+        ? `Couldn't reach the local online server (${BASE_URL}). Start it with: npm run worker:dev`
+        : "Couldn't reach the online server. Check your connection.",
+    );
   }
   const body = (await res.json().catch(() => ({}))) as T & { error?: string };
   if (!res.ok) throw new Error(body.error ?? `Leaderboard error (${res.status}).`);

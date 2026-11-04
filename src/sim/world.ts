@@ -282,6 +282,20 @@ export class World {
     const damage = spell.damage * this.cfg.player.damageDealtMult;
     const hit = this.enemies.filter((e) => distanceToSegment(e.x, e.y, x1, y1, x2, y2) <= e.radius + halfWidth);
     for (const e of hit) this.damageEnemy(e, damage);
+    for (const mate of this.teammatesOf(p.id)) {
+      if (distanceToSegment(mate.x, mate.y, x1, y1, x2, y2) <= mate.radius + halfWidth) this.friendlyHit(mate, damage);
+    }
+  }
+
+  /** Other players who can currently be hit by `ownerId`'s spells (none with friendly fire off). */
+  private teammatesOf(ownerId: string | number): PlayerState[] {
+    if (this.cfg.coop.friendlyFire <= 0) return [];
+    return this.players.filter((p) => p.alive && p.id !== ownerId);
+  }
+
+  /** A player's spell hit another player: friendly fire scales the damage. */
+  private friendlyHit(p: PlayerState, damage: number): void {
+    this.damagePlayer(p, damage * this.cfg.coop.friendlyFire);
   }
 
   private updateWaves(dt: number): void {
@@ -628,7 +642,7 @@ export class World {
       pr.y += pr.vy * dt;
       pr.ttl -= dt;
       if (pr.ttl <= 0 || pr.x < -50 || pr.y < -50 || pr.x > this.width + 50 || pr.y > this.height + 50) continue;
-      if (pr.team === 'player' ? this.hitEnemy(pr) : this.hitPlayer(pr)) continue;
+      if (pr.team === 'player' ? this.hitEnemy(pr) || this.hitTeammate(pr) : this.hitPlayer(pr)) continue;
       const wall = this.map.walls.find((w) => circleRectPush(pr, w));
       if (wall) {
         // Spells stop at walls; fireballs still explode there, from just in front of the wall face
@@ -652,21 +666,35 @@ export class World {
     return true;
   }
 
+  /** Friendly fire: a player's projectile that flies into another player hits them (or explodes on them). */
+  private hitTeammate(pr: ProjectileState): boolean {
+    const mate = this.teammatesOf(pr.ownerId).find((p) => overlaps(pr, p));
+    if (!mate) return false;
+    if (pr.explosionRadius > 0) this.explode(pr, pr.x, pr.y, undefined, mate);
+    else this.friendlyHit(mate, pr.damage);
+    return true;
+  }
+
   /**
    * Explode at (x, y): every enemy touching the blast that it can reach takes full damage. Walls
    * give cover — an enemy is spared only if its centre and both sides are hidden from the blast.
-   * `struck` (the enemy the projectile hit, if any) is always caught.
+   * `struck` (the enemy the projectile hit, if any) is always caught. With friendly fire, other
+   * players in the blast are hurt too (`struckMate`: the player it hit, if any); never the caster.
    */
-  private explode(pr: ProjectileState, x: number, y: number, struck?: EnemyState): void {
+  private explode(pr: ProjectileState, x: number, y: number, struck?: EnemyState, struckMate?: PlayerState): void {
     const blast = { x, y, radius: pr.explosionRadius };
     const caught = this.enemies.filter((e) => e === struck || (overlaps(blast, e) && this.blastReaches(blast, e)));
     const targets = caught.map((e) => ({ id: e.id, x: e.x, y: e.y, radius: e.radius }));
     this.events.push({ type: 'explosion', ...blast, color: pr.color, targets });
     for (const e of caught) this.damageEnemy(e, pr.damage);
+    if (pr.team !== 'player') return;
+    for (const mate of this.teammatesOf(pr.ownerId)) {
+      if (mate === struckMate || (overlaps(blast, mate) && this.blastReaches(blast, mate))) this.friendlyHit(mate, pr.damage);
+    }
   }
 
-  /** Whether any of an enemy's centre or its two sides (seen from the blast) is in the blast's line of sight. */
-  private blastReaches(blast: { x: number; y: number }, e: EnemyState): boolean {
+  /** Whether any of a target's centre or its two sides (seen from the blast) is in the blast's line of sight. */
+  private blastReaches(blast: { x: number; y: number }, e: { x: number; y: number; radius: number }): boolean {
     const walls = this.map.walls;
     if (walls.length === 0) return true;
     const dx = e.x - blast.x;

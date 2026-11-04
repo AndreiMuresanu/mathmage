@@ -174,12 +174,13 @@ INDEX (board, wave DESC, elo DESC), INDEX (board, elo DESC, wave DESC)
 ## Co-op PvE: downed and revive
 
 - **A downed mage:** a player at 0 HP is *downed*, not removed. Their body stays where they fell, they can't move, cast or answer questions, and enemies ignore them.
-- **Reviving:** a living teammate holds **F** while touching the body (within `coop.reviveRange`) for `coop.reviveSeconds` (default **3**). It costs no mana.
+- **Reviving:** a living teammate holds **F** while touching the body (within `coop.reviveRange`) for `coop.reviveSeconds` (default **1.5**). It costs no mana.
   - The progress resets if the teammate lets go, moves away, or is downed.
   - Being hit doesn't reset it.
   - Several teammates at once don't speed it up.
 - **After a revive:** the mage is back with `coop.reviveHp` (default 50% of max HP) and `coop.reviveInvulnSeconds` (default **3**) of invincibility, blinking. This uses the existing `invulnRemaining`.
 - **Game over** happens when every mage is downed at the same time. Solo is unchanged: down means game over.
+- **Friendly fire:** players' sparks, fireball blasts and lasers also hurt teammates, scaled by `coop.friendlyFire` (default 1 = full damage; 0 = off). A caster never hits themselves, and downed mages can't be hit.
 - **Implementation:**
   - `PlayerIntent.reviving`, `PlayerState.downed` and `PlayerState.reviveProgress`.
   - Events: `downed` and `revived`.

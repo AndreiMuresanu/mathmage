@@ -75,7 +75,12 @@ export class RoomSession {
       const timer = setTimeout(() => {
         if (accepted) return;
         transport.leave();
-        reject(new Error("Couldn't find that room. Check the Room ID, or ask the host to keep it open."));
+        reject(
+          new Error(
+            "Couldn't connect to that room. Check the Room ID and that the host is still in the game room. " +
+              'If it still fails, your network may be blocking direct connections between players.',
+          ),
+        );
       }, timeoutMs);
       transport.on(CH.roster, (data, from) => {
         const roster = data as RosterMsg;

@@ -297,7 +297,8 @@ export class GameScene extends Phaser.Scene {
         view = this.add.image(pl.x, pl.y, 'circle').setTint(TEAMMATE_COLOR).setScale(pl.radius / CIRCLE_RADIUS).setDepth(9);
         this.teammateViews.set(pl.id, view);
       }
-      view.setPosition(pl.x, pl.y).setAlpha(!pl.alive ? 0.35 : pl.invulnRemaining > 0 && blink ? 0.4 : 1);
+      // Downed mages only fade slightly, so they still read as a player (the cross and ring mark them).
+      view.setPosition(pl.x, pl.y).setAlpha(!pl.alive ? 0.8 : pl.invulnRemaining > 0 && blink ? 0.4 : 1);
     }
     for (const [id, view] of this.teammateViews) {
       if (seen.has(id)) continue;

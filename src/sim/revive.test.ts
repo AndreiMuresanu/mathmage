@@ -7,6 +7,8 @@ import { World } from './world';
 const idle: PlayerIntent = { move: { x: 0, y: 0 }, aim: 0, casting: false };
 const holdF: PlayerIntent = { ...idle, reviving: true };
 const DT = 1 / 60;
+/** Default revive time (s); the tests are written relative to it. */
+const R = DEFAULT_CONFIG.coop.reviveSeconds;
 
 function config(edit: (c: GameConfig) => void = () => {}): GameConfig {
   const c = cloneConfig(DEFAULT_CONFIG);
@@ -87,9 +89,9 @@ describe('going down', () => {
 describe('reviving', () => {
   it('holding F next to the body for the revive time brings them back at half HP with a window of invincibility', () => {
     const { world, a, b } = downedTeammate();
-    let events = run(world, 2.9, { a: holdF });
+    let events = run(world, R - 0.1, { a: holdF });
     expect(b.alive).toBe(false);
-    expect(b.reviveProgress).toBeGreaterThan(2.8);
+    expect(b.reviveProgress).toBeGreaterThan(R - 0.2);
     events = run(world, 0.2, { a: holdF });
     expect(b.alive).toBe(true);
     expect(b.hp).toBe(50);
@@ -104,16 +106,16 @@ describe('reviving', () => {
 
   it('letting go of F resets the progress', () => {
     const { world, b } = downedTeammate();
-    run(world, 2, { a: holdF });
+    run(world, R * 0.6, { a: holdF });
     run(world, DT, { a: idle });
     expect(b.reviveProgress).toBe(0);
-    run(world, 2, { a: holdF });
+    run(world, R * 0.6, { a: holdF });
     expect(b.alive).toBe(false);
   });
 
   it('moving out of reach resets the progress, and F does nothing from far away', () => {
     const { world, a, b } = downedTeammate();
-    run(world, 2, { a: holdF });
+    run(world, R * 0.6, { a: holdF });
     a.x = b.x + 200;
     run(world, DT, { a: holdF });
     expect(b.reviveProgress).toBe(0);
@@ -129,11 +131,11 @@ describe('reviving', () => {
 
     a.stunRemaining = 0;
     a.hitStunRemaining = 0.5;
-    run(world, 1, { a: holdF });
-    expect(b.reviveProgress).toBeGreaterThan(0.9);
+    run(world, R * 0.5, { a: holdF });
+    expect(b.reviveProgress).toBeGreaterThan(R * 0.5 - 0.05);
     a.invulnRemaining = 0;
     (world as unknown as { damagePlayer(p: unknown, n: number, stun?: number): void }).damagePlayer(a, 5, 0.3);
-    run(world, 2.1, { a: holdF });
+    run(world, R * 0.5 + 0.1, { a: holdF });
     expect(b.alive).toBe(true);
   });
 
@@ -145,7 +147,7 @@ describe('reviving', () => {
     c.x = b.x + 40;
     c.y = b.y;
     knockOut(world, 'b');
-    run(world, 2.9, { a: holdF, c: holdF });
+    run(world, R - 0.1, { a: holdF, c: holdF });
     expect(b.alive).toBe(false);
     run(world, 0.2, { a: holdF, c: holdF });
     expect(b.alive).toBe(true);

@@ -11,7 +11,7 @@
     "deploy": "gh-pages -d dist",
     "test": "vitest run",
     "deck:contest": "python scripts/generate_contest_deck.py",
-    "worker:dev": "wrangler d1 migrations apply mathmage --local --config worker/wrangler.toml && wrangler dev --config worker/wrangler.toml --var ALLOWED_ORIGIN:*",
+    "worker:dev": "wrangler d1 migrations apply mathmage --local --config worker/wrangler.toml && wrangler dev --config worker/wrangler.toml --port 8787 --var ALLOWED_ORIGIN:*",
     "worker:migrate": "wrangler d1 migrations apply mathmage --remote --config worker/wrangler.toml",
     "worker:deploy": "wrangler deploy --config worker/wrangler.toml",
     "deploy:all": "npm run worker:migrate && npm run worker:deploy && npm run deploy",
