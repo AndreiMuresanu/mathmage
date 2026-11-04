@@ -187,7 +187,9 @@ Play multiplayer → **Host game** (mode, map, public/private, max players) or *
 
 **Testing locally:** run `npm run worker:dev` (for the open-games list) and `npm run dev`, then open two tabs at `http://localhost:3000/mathmage/?net=local`. `?net=local` connects tabs of the same browser directly (no internet); without it the real WebRTC transport is used (works between any two browsers, including on one machine). Netcode is unit-tested with an in-memory transport (`src/net/netplay.test.ts`).
 
-**Known limitations:** if the host's tab is hidden or minimised, the browser throttles it and the match stalls for everyone; if the host leaves, the match ends; a few strict networks can't connect peer-to-peer until TURN relays are added (phase 6).
+**Hidden host tab:** browsers stop drawing hidden tabs, so while the host's tab is hidden a Web Worker ticker (`src/game/backgroundTicker.ts`) keeps the host's match running (the host's mage stands still). If updates still stop for 1.5 s, clients see "Waiting for the host…". Browsers may slow even that after a long time hidden (Chrome: about 5 minutes), so hosts are reminded to keep the game open.
+
+**Known limitations:** if the host leaves, the match ends; a few strict networks can't connect peer-to-peer until TURN relays are added (phase 6).
 
 ## Online leaderboard (Cloudflare Worker)
 

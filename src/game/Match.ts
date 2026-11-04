@@ -3,6 +3,7 @@ import { DEFAULT_DIFFICULTY, SkillRatings, type AnswerResult } from '../question
 import type { QuestionRegistry } from '../questions/registry';
 import type { PlayerIntent, SimEvent } from '../sim/types';
 import type { World } from '../sim/world';
+import { BackgroundTicker } from './backgroundTicker';
 import type { MatchDriver } from './drivers';
 import { setupLabel, type MatchSetup } from './matchSetup';
 import { configHash } from '../online/configHash';
@@ -19,6 +20,11 @@ import { StunPanel } from '../ui/StunPanel';
 export const QUESTION_KEY = 'Space';
 /** Pause / resume. */
 export const PAUSE_KEYS = ['KeyP', 'Escape'];
+/** Clients show "Waiting for the host…" after this long without an update. */
+const HOST_SILENT_MS = 1500;
+/** Longest step the background ticker takes at once (bigger gaps are split into these). */
+const BACKGROUND_STEP = 1 / 30;
+const IDLE_INTENT: PlayerIntent = { move: { x: 0, y: 0 }, aim: 0, casting: false };
 
 export interface MatchCallbacks {
   /** The answer field gained/lost focus: the scene should stop/resume reading game keys. */
@@ -42,6 +48,9 @@ export class Match {
   private spell = 0;
   private resumeButton: HTMLButtonElement;
   private pauseTitle: HTMLHeadingElement;
+  /** Host only: keeps the match running while this tab is hidden (the render loop stops then). */
+  private ticker = new BackgroundTicker();
+  private lastBackgroundTick = 0;
   private questions: QuestionWindow;
   private stun = new StunPanel(() => this.togglePause());
   private pauseOverlay: HTMLDivElement;
@@ -116,6 +125,39 @@ export class Match {
     root.append(this.layer);
     const start = this.ratings.get('math');
     this.hud.showRating('Math', start.rating, 0);
+    if (driver.multiplayer) {
+      document.addEventListener('visibilitychange', this.onVisibilityChange);
+      if (driver.canPause) this.hud.toast("You're hosting: keep this game open so it runs for everyone.", 4000);
+    }
+  }
+
+  /**
+   * Multiplayer: when the tab is hidden the browser stops drawing it, which would freeze the
+   * host's match for everyone. The host keeps simulating from a background ticker (standing
+   * still); a client tells the host it has stopped moving and casting.
+   */
+  private onVisibilityChange = (): void => {
+    if (!document.hidden) {
+      this.ticker.stop();
+      return;
+    }
+    if (this.driver.canPause) {
+      this.lastBackgroundTick = performance.now();
+      this.ticker.start(() => this.backgroundTick());
+    } else {
+      this.driver.step(0, { ...IDLE_INTENT, spell: this.spell });
+    }
+  };
+
+  private backgroundTick(): void {
+    const now = performance.now();
+    let dt = Math.min(0.25, (now - this.lastBackgroundTick) / 1000);
+    this.lastBackgroundTick = now;
+    while (dt > 1e-6) {
+      const step = Math.min(dt, BACKGROUND_STEP);
+      this.update(step, IDLE_INTENT, true);
+      dt -= step;
+    }
   }
 
   get world(): World {
@@ -190,7 +232,12 @@ export class Match {
     return this.questions.inputFocused;
   }
 
-  update(dt: number, intent: PlayerIntent): SimEvent[] {
+  /**
+   * Advance the match. The scene calls this every frame; while the host's tab is hidden the
+   * background ticker calls it instead (`background`), and stray frame calls are ignored.
+   */
+  update(dt: number, intent: PlayerIntent, background = false): SimEvent[] {
+    if (this.ticker.running && !background) return [];
     if (this._paused) return [];
     const events = this.driver.step(dt, { ...intent, spell: this.spell });
     // The question clock runs in real time (not slow motion), whether or not the window is open.
@@ -207,6 +254,7 @@ export class Match {
       }
       if (e.type === 'gameOver') this.showGameOver();
     }
+    if (this.driver.hostSilentMs) this.hud.setWaitingForHost(!this.world.over && this.driver.hostSilentMs() > HOST_SILENT_MS);
     const p = this.world.player(this.localId);
     if (p && this.stun.visible) this.stun.update(p.stunRemaining);
     this.hud.update(this.world, this.localId, this.questions.pendingTimeLeft);
@@ -276,6 +324,8 @@ export class Match {
   }
 
   destroy(): void {
+    document.removeEventListener('visibilitychange', this.onVisibilityChange);
+    this.ticker.stop();
     this.driver.dispose();
     this.questions.blurInput();
     this.layer.remove();

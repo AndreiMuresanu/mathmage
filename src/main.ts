@@ -282,7 +282,7 @@ function closeRoom(): void {
 
 // Dev-only hook so headless tests can inspect game state (stripped from production builds).
 if (import.meta.env.DEV) {
-  (window as unknown as { __mathmage: object }).__mathmage = { get match() { return match; }, get room() { return room; } };
+  (window as unknown as { __mathmage: object }).__mathmage = { get match() { return match; }, get room() { return room; }, game };
 }
 
 showMenu();

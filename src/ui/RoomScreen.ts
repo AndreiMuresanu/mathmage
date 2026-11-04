@@ -43,7 +43,11 @@ export function createRoomScreen(room: RoomSession, opts: { onStart(): void; onL
     if (room.isHost) {
       const enough = room.players.length >= 2;
       start.disabled = !enough;
-      footer.replaceChildren(start, h('p.muted', {}, enough ? '' : 'Waiting for at least one more player…'));
+      footer.replaceChildren(
+        start,
+        h('p.muted', {}, enough ? '' : 'Waiting for at least one more player…'),
+        h('p.muted.host-note', {}, "You're the host: the match runs in your browser, so keep the game open while you play."),
+      );
     } else {
       footer.replaceChildren(h('p.muted', {}, 'Waiting for the host to start…'));
     }

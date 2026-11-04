@@ -25,6 +25,13 @@ export class Hud {
   private coopText = h('span');
   private coopFill = h('div.hud-coop-fill');
   private coop = h('div.hud-coop', { hidden: true }, this.coopText, h('div.hud-coop-bar', {}, this.coopFill));
+  /** Multiplayer client: shown while no updates arrive from the host. */
+  private waiting = h(
+    'div.hud-waiting',
+    { hidden: true },
+    h('strong', {}, 'Waiting for the host…'),
+    h('span', {}, 'Their connection dropped out, or their game is in a background tab.'),
+  );
   private cache = new Map<string, string>();
 
   constructor(cfg: GameConfig) {
@@ -61,6 +68,7 @@ export class Hud {
       h('div.hud-bars', {}, this.hp.el, this.mana.el),
       this.round,
       this.coop,
+      this.waiting,
       h('div.hud-spells', {}, ...this.spells),
       this.questionHint,
     );
@@ -172,10 +180,14 @@ export class Hud {
   }
 
   /** A short message in the middle of the screen (e.g. "Only the host can pause"). */
-  toast(text: string): void {
-    const el = h('div.hud-toast', {}, text);
+  toast(text: string, ms = 1800): void {
+    const el = h('div.hud-toast', { style: `animation-duration: ${ms}ms` }, text);
     this.el.append(el);
-    setTimeout(() => el.remove(), 1800);
+    setTimeout(() => el.remove(), ms);
+  }
+
+  setWaitingForHost(waiting: boolean): void {
+    this.set('waiting', String(waiting), () => (this.waiting.hidden = !waiting));
   }
 
   showNoMana(): void {

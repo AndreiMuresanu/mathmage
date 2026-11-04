@@ -49,6 +49,8 @@ export interface MatchDriver {
   /** Client: the host (un)paused the match. */
   onRemotePause: ((paused: boolean) => void) | null;
   readonly team?: TeamScoring;
+  /** Client: ms since the last update from the host (to tell the player when it stalls). */
+  hostSilentMs?(): number;
   dispose(): void;
 }
 
@@ -248,6 +250,8 @@ export class ClientDriver implements MatchDriver {
   /** Local clock time until which a wrong answer's stun is assumed (before the host confirms it). */
   private localStunUntil = 0;
   private lastSpell = 0;
+  /** Wall-clock time of the last snapshot (or of the match starting). */
+  private lastHeard = performance.now();
 
   constructor(world: World, room: RoomSession) {
     this.world = world;
@@ -258,6 +262,7 @@ export class ClientDriver implements MatchDriver {
     t.on(CH.snap, (data, from) => {
       if (from !== room.hostId) return;
       const msg = data as SnapMsg;
+      this.lastHeard = performance.now();
       this.receive(msg.s);
       if (msg.events.length) this.eventQueue.push({ t: msg.s.t, events: msg.events });
     });
@@ -358,6 +363,10 @@ export class ClientDriver implements MatchDriver {
   }
 
   setPaused(): void {}
+
+  hostSilentMs(): number {
+    return performance.now() - this.lastHeard;
+  }
 
   dispose(): void {
     const t = this.room.transport;

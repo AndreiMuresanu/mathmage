@@ -303,7 +303,7 @@ Phases 4–5 notes (online co-op):
 - Menus: Play multiplayer (name) → Join game (Worker list refreshed every 5 s + Room ID) / Host game (Ranked co-op, Custom co-op, FFA disabled; map; public/private; 2–4 players) → Game room (Room ID + copy, players + pings, Start). Game over: "Back to room" / "Leave".
 - Worker: `/games` (POST create → secret; heartbeat with secret every 15 s; listings expire after 45 s; DELETE with secret), `worker/src/games.ts`, migration `0003_games.sql`.
 - Ranked co-op: clients send their peak ELO (`peak`), the host submits one team entry, and everyone sees the ranks (`submitted`).
-- Known limitation: the host's tab must stay visible (background tabs are throttled by the browser, which stalls the match).
+- Hidden host tab: `Match` switches the host to a Web Worker ticker (`src/game/backgroundTicker.ts`, ~30 Hz) while `document.hidden`, so the match keeps running with the host standing still; a hidden client sends one idle intent so its mage stops. Clients show "Waiting for the host…" after 1.5 s without a snapshot (`ClientDriver.hostSilentMs`). Hosts see a reminder in the room and at match start. Very long background periods may still be throttled by the browser.
 
 1. **Menus and match setup** (no networking or backend):
    - New main menu.

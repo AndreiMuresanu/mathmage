@@ -1247,3 +1247,33 @@ button.toggle.selected {
 .option-card:disabled {
   opacity: 0.35;
 }
+
+/* Multiplayer client: no updates from the host. */
+.hud-waiting {
+  position: absolute;
+  top: 40%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  flex-direction: column;
+  gap: 0.3em;
+  padding: 0.8em 1.2em;
+  background: rgba(0, 0, 0, 0.75);
+  border: 1px solid #ffb86b;
+  border-radius: 8px;
+  text-align: center;
+  color: #ffd9a8;
+}
+
+.hud-waiting[hidden] {
+  display: none;
+}
+
+.hud-waiting span {
+  font-size: 0.85em;
+  color: var(--muted);
+}
+
+.host-note {
+  font-size: 0.85em;
+}
