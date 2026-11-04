@@ -336,6 +336,13 @@ export class GameScene extends Phaser.Scene {
       g.fillStyle(0x000000, 0.6).fillRect(e.x - w / 2, e.y - e.radius - 9, w, 4);
       g.fillStyle(0xff5c5c, 1).fillRect(e.x - w / 2, e.y - e.radius - 9, (w * Math.max(0, e.hp)) / e.maxHp, 4);
     }
+    // Damaged teammates get a small green bar too (your own health is in the HUD).
+    for (const pl of world.players) {
+      if (pl.id === this.match.localId || !pl.alive || pl.hp >= pl.maxHp) continue;
+      const w = pl.radius * 2;
+      g.fillStyle(0x000000, 0.6).fillRect(pl.x - w / 2, pl.y - pl.radius - 9, w, 4);
+      g.fillStyle(0x7dff9a, 1).fillRect(pl.x - w / 2, pl.y - pl.radius - 9, (w * Math.max(0, pl.hp)) / pl.maxHp, 4);
+    }
     for (const pl of world.players) {
       if (pl.alive && (pl.stunRemaining > 0 || pl.hitStunRemaining > 0)) {
         // Yellow ring for a wrong-answer stun, pink for a projectile hit-stun.
