@@ -294,6 +294,58 @@ code {
   border-radius: 6px;
 }
 
+.hud-toast {
+  position: absolute;
+  top: 38%;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 0.5em 1.1em;
+  background: rgba(0, 0, 0, 0.7);
+  border-radius: 6px;
+  font-weight: 600;
+  animation: toast-fade 1.8s ease forwards;
+}
+
+@keyframes toast-fade {
+  0%, 75% { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+/* Co-op: "Hold F to revive" / "You're down!" with a progress bar, under the round label. */
+.hud-coop {
+  position: absolute;
+  top: 3.6em;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 0.35em 0.9em 0.45em;
+  background: rgba(0, 0, 0, 0.55);
+  border: 1px solid #7dff9a;
+  border-radius: 6px;
+  color: #7dff9a;
+  font-weight: 600;
+  text-align: center;
+  min-width: 14em;
+}
+
+.hud-coop.downed {
+  border-color: #ff7b7b;
+  color: #ffb3b3;
+}
+
+.hud-coop-bar {
+  height: 4px;
+  margin-top: 0.3em;
+  background: rgba(255, 255, 255, 0.12);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.hud-coop-fill {
+  height: 100%;
+  width: 0;
+  background: #7dff9a;
+}
+
 .hud-spells {
   position: absolute;
   bottom: 1em;
@@ -1090,4 +1142,108 @@ button.toggle.selected {
 .score-submit-done {
   margin: 0 0 0.4em;
   color: var(--accent);
+}
+
+.team-scores {
+  list-style: none;
+  margin: 0 0 0.6em;
+  padding: 0;
+}
+
+.team-scores li {
+  padding: 0.15em 0;
+}
+
+/* ---------- Multiplayer screens ---------- */
+
+.notice {
+  padding: 0.5em 0.8em;
+  border: 1px solid #ffb86b;
+  border-radius: 6px;
+  color: #ffd9a8;
+  background: rgba(255, 184, 107, 0.08);
+}
+
+.field-label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3em;
+  text-align: left;
+  margin-top: 0.8em;
+  color: var(--muted);
+}
+
+.name-input.invalid {
+  border-color: #ff6b6b;
+}
+
+.games-table .game-row {
+  cursor: pointer;
+}
+
+.games-table .game-row:hover td {
+  background: rgba(0, 255, 204, 0.08);
+}
+
+.games-table .game-row.full {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+
+.room-code-input {
+  flex: 1;
+  min-width: 8em;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  font-weight: 600;
+}
+
+.room-code {
+  display: flex;
+  align-items: center;
+  gap: 0.7em;
+  margin: 0.4em 0;
+}
+
+.room-code strong {
+  font-size: 1.8em;
+  letter-spacing: 0.18em;
+  color: var(--accent);
+}
+
+.room-players {
+  list-style: none;
+  margin: 0 0 1em;
+  padding: 0;
+}
+
+.room-players li {
+  display: flex;
+  align-items: center;
+  gap: 0.5em;
+  padding: 0.45em 0.6em;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.room-players .spacer {
+  flex: 1;
+}
+
+.room-players .badge {
+  font-size: 0.75em;
+  padding: 0.1em 0.5em;
+  border-radius: 999px;
+  border: 1px solid var(--accent);
+  color: var(--accent);
+}
+
+.room-footer {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4em;
+  text-align: center;
+}
+
+.option-card:disabled {
+  opacity: 0.35;
 }

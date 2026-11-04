@@ -15,6 +15,7 @@ import {
   type SubmitScoreResponse,
 } from '../../src/online/leaderboardTypes';
 import { MAPS } from '../../src/sim/maps';
+import { deleteGame, listGames, upsertGame } from './games';
 
 /** The slice of Cloudflare D1's API this Worker uses (so tests can swap in plain SQLite). */
 export interface Db {
@@ -52,7 +53,7 @@ const ORDER: Record<ScoreSort, string> = {
   elo: 'elo DESC, wave DESC, created_at ASC, id ASC',
 };
 
-class HttpError extends Error {
+export class HttpError extends Error {
   constructor(readonly status: number, message: string) {
     super(message);
   }
@@ -78,6 +79,17 @@ export async function handle(request: Request, env: Env, now = Date.now()): Prom
       const ip = request.headers.get('CF-Connecting-IP') ?? 'unknown';
       return json(await submitScore(env.DB, body, ip, now), 201);
     }
+    if (url.pathname === '/games' && request.method === 'GET') return json(await listGames(env.DB, now));
+    if (url.pathname === '/games' && request.method === 'POST') {
+      const body = await request.json().catch(() => {
+        throw new HttpError(400, 'Body must be JSON.');
+      });
+      const ip = request.headers.get('CF-Connecting-IP') ?? 'unknown';
+      const region = (request as unknown as { cf?: { colo?: string } }).cf?.colo ?? '';
+      return json(await upsertGame(env.DB, body, ip, region, now));
+    }
+    const game = url.pathname.match(/^\/games\/([A-Z0-9]{4,8})$/);
+    if (game && request.method === 'DELETE') return json(await deleteGame(env.DB, game[1], request.headers.get('Authorization')));
     const del = url.pathname.match(/^\/scores\/(\d+)$/);
     if (del && request.method === 'DELETE') {
       if (!env.ADMIN_KEY || request.headers.get('Authorization') !== `Bearer ${env.ADMIN_KEY}`) {
@@ -226,7 +238,7 @@ function clampInt(raw: string | null, min: number, max: number, fallback: number
   return Number.isFinite(n) ? Math.max(min, Math.min(max, n)) : fallback;
 }
 
-async function sha256(text: string): Promise<string> {
+export async function sha256(text: string): Promise<string> {
   const digest = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(text));
   return [...new Uint8Array(digest)].map((b) => b.toString(16).padStart(2, '0')).join('');
 }

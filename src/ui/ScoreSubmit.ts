@@ -1,5 +1,6 @@
 import { leaderboardEnabled, savedPlayerName, savePlayerName, submitScore } from '../online/leaderboard';
 import { NAME_MAX_LENGTH, type SubmitScoreRequest, type SubmitScoreResponse } from '../online/leaderboardTypes';
+import type { TeamScoring } from '../game/drivers';
 import { h } from './dom';
 
 /**
@@ -52,4 +53,77 @@ export function createScoreSubmit(score: Omit<SubmitScoreRequest, 'players'> & {
 function rankText(r: SubmitScoreResponse): string {
   const part = (rank: number | null, by: string) => (rank ? `#${rank} by ${by}` : `not in the top 1000 by ${by}`);
   return `${part(r.rankByWave, 'wave')} · ${part(r.rankByElo, 'ELO')}`;
+}
+
+/**
+ * Ranked co-op game-over box. The host sees every player's name and peak ELO (as they arrive),
+ * submits one team entry, and shares the result; other players see the outcome.
+ */
+export function createTeamScoreSubmit(
+  team: TeamScoring,
+  score: Omit<SubmitScoreRequest, 'players'> & { fallbackElo: number },
+  onViewLeaderboard: () => void,
+): HTMLElement {
+  const box = h('div.score-submit');
+  if (!leaderboardEnabled) {
+    box.append(h('p.muted', {}, 'The leaderboard is offline.'));
+    return box;
+  }
+  const done = (text: string) =>
+    box.replaceChildren(h('p.score-submit-done', {}, text), h('button', { type: 'button', onclick: onViewLeaderboard }, 'View leaderboard'));
+
+  if (!team.isHost) {
+    box.append(h('h3', {}, 'Team score'), h('p.muted', {}, 'Waiting for the host to submit the team score…'));
+    team.onSubmitted = (msg) => {
+      if (msg.result) done(`Submitted by the host! ${rankText(msg.result)}`);
+      else box.replaceChildren(h('p.muted', {}, msg.error ?? 'The host chose not to submit this run.'));
+    };
+    return box;
+  }
+
+  const list = h('ul.team-scores');
+  const submit = h('button.primary', { type: 'button', disabled: true }, 'Submit');
+  const skip = h('button', { type: 'button' }, 'Skip');
+  const message = h('p.score-submit-message', {}, 'Collecting everyone’s scores…');
+  let waited = false;
+  const render = () => {
+    list.replaceChildren(
+      ...team.players.map((p) => {
+        const elo = team.peaks.get(p.id);
+        return h('li', {}, h('strong', {}, p.name), ` — ${elo === undefined ? '…' : `${Math.round(elo)} ELO`}`);
+      }),
+    );
+    const all = team.players.every((p) => team.peaks.has(p.id));
+    submit.disabled = !(all || waited);
+    if (all || waited) message.textContent = all ? '' : 'Some players didn’t report a score; they count as the starting rating.';
+  };
+  team.onPeaksChanged = render;
+  // Don't wait forever for someone who disconnected.
+  setTimeout(() => {
+    waited = true;
+    render();
+  }, 3000);
+  render();
+
+  submit.addEventListener('click', async () => {
+    submit.disabled = skip.disabled = true;
+    message.textContent = 'Submitting…';
+    const players = team.players.map((p) => ({ name: p.name, elo: Math.round(team.peaks.get(p.id) ?? score.fallbackElo) }));
+    const { fallbackElo: _unused, ...request } = score;
+    try {
+      const result = await submitScore({ ...request, players });
+      team.broadcastSubmitted({ result });
+      done(`Submitted! ${rankText(result)}`);
+    } catch (e) {
+      message.textContent = (e as Error).message;
+      submit.disabled = skip.disabled = false;
+    }
+  });
+  skip.addEventListener('click', () => {
+    team.broadcastSubmitted({ result: null });
+    box.replaceChildren(h('p.muted', {}, 'Not submitted.'));
+  });
+
+  box.append(h('h3', {}, 'Submit team score'), list, h('div.button-row', {}, submit, skip), message);
+  return box;
 }

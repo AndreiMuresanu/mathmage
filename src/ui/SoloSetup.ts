@@ -1,9 +1,11 @@
 import { h } from './dom';
 import { mapCards } from './mapCards';
+import { cardLink, optionCards } from './optionCards';
 
 /**
  * Solo match setup: pick a map and a game type — ranked (default settings, for the leaderboard)
- * or custom (your own settings, unranked) — then start. Settings are only reachable from here.
+ * or custom (your own settings, unranked) — then start. Settings are only reachable from here
+ * (and from hosting a multiplayer game).
  */
 export function createSoloSetup(opts: {
   /** Currently selected map id. */
@@ -16,36 +18,14 @@ export function createSoloSetup(opts: {
   onSettings(): void;
   onBack(): void;
 }): HTMLDivElement {
-  const settingsLink = h(
-    'a',
-    {
-      href: '#',
-      onclick: (e: Event) => {
-        e.preventDefault();
-        e.stopPropagation(); // don't also select the card
-        opts.onSettings();
-      },
-    },
-    'Settings…',
+  const gameType = optionCards(
+    [
+      { value: true, title: 'Ranked Game', detail: ['Default settings. Your score can go on the leaderboard.'] },
+      { value: false, title: 'Custom Game', detail: ['Your own settings. Not ranked. ', cardLink('Settings…', opts.onSettings)] },
+    ],
+    opts.ranked,
+    opts.onSelectRanked,
   );
-  const option = (title: string, ...detail: (string | Node)[]) =>
-    h('button.option-card', { type: 'button' }, h('strong', {}, title), h('span.muted', {}, ...detail));
-  const rankedCard = option('Ranked Game', 'Default settings. Your score can go on the leaderboard.');
-  const customCard = option('Custom Game', 'Your own settings. Not ranked. ', settingsLink);
-  const select = (ranked: boolean) => {
-    rankedCard.classList.toggle('selected', ranked);
-    customCard.classList.toggle('selected', !ranked);
-  };
-  select(opts.ranked);
-  rankedCard.addEventListener('click', () => {
-    select(true);
-    opts.onSelectRanked(true);
-  });
-  customCard.addEventListener('click', () => {
-    select(false);
-    opts.onSelectRanked(false);
-  });
-
   return h(
     'div.screen',
     {},
@@ -56,7 +36,7 @@ export function createSoloSetup(opts: {
       h('h3', {}, 'Map'),
       mapCards(opts.map, opts.onSelectMap),
       h('h3', {}, 'Game type'),
-      h('div.setup-choices', {}, rankedCard, customCard),
+      gameType,
       h('button.primary.big.start-game', { onclick: opts.onStart }, 'Start Game'),
     ),
   );

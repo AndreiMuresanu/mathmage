@@ -66,6 +66,17 @@ export const CONFIG_GROUPS: GroupDef[] = [
     ],
   },
   {
+    kind: 'object',
+    title: 'Co-op',
+    path: 'coop',
+    fields: [
+      num('reviveSeconds', 'Revive time (s)', 0, 60, 0.5, 'How long a teammate holds F next to a downed mage to revive them.'),
+      num('reviveInvulnSeconds', 'Invincibility after revive (s)', 0, 30, 0.5),
+      num('reviveHpFraction', 'HP after revive (fraction of max)', 0.05, 1, 0.05),
+      num('reviveRange', 'Revive reach (px)', 0, 300, 2, 'How far beyond touching the body a teammate can revive from.'),
+    ],
+  },
+  {
     kind: 'list',
     title: 'Spells',
     path: 'spells',

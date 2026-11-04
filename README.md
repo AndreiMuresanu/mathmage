@@ -31,6 +31,8 @@ BROWSER=none npx vite --port 3000
 | Select spell | Number keys (1 Spark, 2 Fireball, 3 Laser) |
 | Open / close a question | Space |
 | Pause | P, Esc, or the on-screen button |
+| Revive a downed teammate (co-op) | Hold F next to them |
+| Dev builds only | F2 pathfinding overlay · F3 add a test teammate (to try reviving) |
 
 You must click the answer box before typing. After you submit, the box loses focus so you can move again straight away. Typing `andrei` always counts as correct (a testing shortcut).
 
@@ -79,7 +81,7 @@ src/
     presets.ts           Saving/loading the current config and named presets (localStorage)
   sim/                   Pure game simulation (no Phaser, no DOM)
     world.ts             World.step(): players, enemies, spells, projectiles, explosions,
-                         lasers, heal orbs, waves, damage, stuns
+                         lasers, heal orbs, waves, damage, stuns, co-op downed/revive
     maps.ts              Arena layouts (walls, player start, enemy entry gaps) + wall geometry
     pathfinding.ts       NavGrid flow field: enemies follow it around walls (F2 in dev shows it)
     waves.ts             Wave composition and per-wave scaling / round time limits
@@ -88,6 +90,7 @@ src/
   game/                  Phaser layer
     Match.ts             One match: owns the World, question flow, ratings, HUD, game over
     matchSetup.ts        Game mode + ranked/custom + map; ranked always runs on DEFAULT_CONFIG
+    drivers.ts           How a Match runs its World: LocalDriver (solo), HostDriver, ClientDriver
     GameScene.ts         Renders the World each frame; particles, mana-orb vortex, effects
     MenuScene.ts         Animated backdrop behind menus
     textures.ts          Generated textures (circle, pixel squares for blocky particles)
@@ -115,17 +118,28 @@ src/
     ConfigScreen.ts      Custom game settings, generated from configSchema.ts (opened from match setup)
     LeaderboardScreen.ts Online high scores: map/mode filters, sort by wave or ELO, paging
     ScoreSubmit.ts       Game-over "Submit to leaderboard" box (ranked solo)
-    SoloSetup.ts         Play solo: map cards + Play ranked / Play custom / Settings…
-    MultiplayerScreen.ts Join / host (placeholder until the netcode phases)
+    SoloSetup.ts         Play solo: map cards + Ranked / Custom game + Start
+    MultiplayerScreen.ts Play multiplayer: your name, Join game / Host game
+    JoinScreen.ts        Open games list (from the Worker) + join by Room ID
+    HostSetup.ts         Host game: mode, map, public/private, max players
+    RoomScreen.ts        Game room: Room ID, players + pings, Start (host)
+    optionCards.ts       Selectable option cards shared by the setup screens
     mapCards.ts          Map preview cards shared by setup screens
     MainMenu.ts, GameOverScreen.ts, DeckManager.ts
     markup.ts            Text + $LaTeX$ → HTML via KaTeX (with font preloading)
     dom.ts               Tiny element builder h('div.class', props, ...children)
     ui.css               All UI styling
+  net/                   Multiplayer (see docs/ONLINE_PLAN.md)
+    transport.ts         Transport interface; BroadcastChannel (dev, ?net=local) and in-memory (tests)
+    trysteroTransport.ts The real WebRTC transport (Trystero, Nostr signalling)
+    connect.ts           Picks the transport; room codes
+    protocol.ts          Messages + compact snapshots (encode / apply / interpolate)
+    room.ts              RoomSession: roster, hello / refuse, start, host-left
   online/
     leaderboard.ts       API client (VITE_LEADERBOARD_URL), remembered player name
     leaderboardTypes.ts  Types + limits shared with the Worker
     configHash.ts        Settings fingerprint: ranked = DEFAULT_CONFIG (shared with the Worker)
+    games.ts             Open-games list client + RoomListing (a public room's heartbeat)
   util/rng.ts            Seeded PRNG (mulberry32) + weighted pick
 ```
 
@@ -166,6 +180,14 @@ src/
   - Start the dev server without opening a browser tab (`BROWSER=none`).
   - Drive the game headlessly with Playwright.
   - In dev builds, `window.__mathmage.match` exposes the live `Match` (and its `world`) for inspecting and setting up state. It's stripped from production builds.
+
+## Multiplayer (online co-op)
+
+Play multiplayer → **Host game** (mode, map, public/private, max players) or **Join game** (pick an open game, or type a Room ID). Players connect peer-to-peer over WebRTC (Trystero; signalling via public Nostr relays, no server). The host's browser runs the match; clients send inputs and draw the host's snapshots, predicting their own mage so movement feels instant. Ranked co-op submits one team entry to the leaderboard at game over.
+
+**Testing locally:** run `npm run worker:dev` (for the open-games list) and `npm run dev`, then open two tabs at `http://localhost:3000/mathmage/?net=local`. `?net=local` connects tabs of the same browser directly (no internet); without it the real WebRTC transport is used (works between any two browsers, including on one machine). Netcode is unit-tested with an in-memory transport (`src/net/netplay.test.ts`).
+
+**Known limitations:** if the host's tab is hidden or minimised, the browser throttles it and the match stalls for everyone; if the host leaves, the match ends; a few strict networks can't connect peer-to-peer until TURN relays are added (phase 6).
 
 ## Online leaderboard (Cloudflare Worker)
 

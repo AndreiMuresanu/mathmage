@@ -11,6 +11,10 @@ export interface PlayerIntent {
   aim: number;
   /** True while the cast button is held. */
   casting: boolean;
+  /** True while the revive key (F) is held: revives a downed teammate in range (co-op). */
+  reviving?: boolean;
+  /** Selected spell index; lets remote players switch spells through their intents. */
+  spell?: number;
 }
 
 export interface PlayerState {
@@ -31,7 +35,12 @@ export interface PlayerState {
   /** Short stun from enemy projectiles: rooted only. */
   hitStunRemaining: number;
   invulnRemaining: number;
+  /** False while downed (0 HP). Downed mages stay in the world until revived or the match ends. */
   alive: boolean;
+  /** While downed: seconds of revive progress so far (resets when nobody is reviving). */
+  reviveProgress: number;
+  /** This player's answers, indexed like cfg.questionTypes (the game-over table shows your own). */
+  questionStats: QuestionTypeStats[];
 }
 
 export type EnemyKind = 'chaser' | 'caster';
@@ -114,7 +123,9 @@ export type SimEvent =
   | { type: 'stunned'; playerId: string; seconds: number }
   | { type: 'playerHit'; playerId: string; amount: number }
   | { type: 'hitStunned'; playerId: string; seconds: number }
+  /** The player went down (0 HP). In co-op a teammate can still revive them. */
   | { type: 'playerDied'; playerId: string }
+  | { type: 'revived'; playerId: string; byId: string; x: number; y: number }
   | { type: 'enemyHit'; enemyId: number; x: number; y: number; amount: number }
   | { type: 'enemyDied'; x: number; y: number; kind: EnemyKind }
   | { type: 'healed'; playerId: string; amount: number; x: number; y: number }

@@ -31,6 +31,7 @@ export function createMainMenu(actions: {
         h('div', {}, h('span.key', {}, 'Space'), ' open / close a question (mostly easy, sometimes hard)'),
         h('div', {}, 'Click the answer field to type · ', h('span.key', {}, 'Enter'), ' submit'),
         h('div', {}, h('span.key', {}, 'P'), ' or ', h('span.key', {}, 'Esc'), ' pause'),
+        h('div', {}, 'Hold ', h('span.key', {}, 'F'), ' next to a downed teammate to revive them (co-op)'),
       ),
     ),
   );

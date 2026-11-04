@@ -45,6 +45,11 @@ export class World {
   readonly map: MapDef;
   /** Flow field enemies follow around walls (undefined on maps without walls, or when switched off). */
   readonly nav: NavGrid | undefined;
+  /**
+   * Multiplayer: game time is shared, so a wrong answer never slows the match down for everyone
+   * (a flag rather than a config change, so ranked co-op still uses DEFAULT_CONFIG).
+   */
+  sharedTime = false;
   players: PlayerState[];
   enemies: EnemyState[] = [];
   projectiles: ProjectileState[] = [];
@@ -67,9 +72,24 @@ export class World {
     this.nav = cfg.enemies.pathfinding && map.walls.length > 0
       ? new NavGrid(map.walls, this.width, this.height, NAV_CELL, clearance)
       : undefined;
-    this.players = playerIds.map((id, i) => ({
+    this.players = [];
+    for (const id of playerIds) this.addPlayer(id);
+    this.wave = { round: 0, phase: 'break', timer: cfg.waves.firstWaveDelay, queue: [], roundTimeLeft: Infinity };
+    this.stats = {
+      kills: 0,
+      timeSurvived: 0,
+      manaSpent: 0,
+      damageDealt: 0,
+      questionTypes: cfg.questionTypes.map(() => ({ attempts: 0, correct: 0, manaEarned: 0 })),
+    };
+  }
+
+  /** Add a mage beside the map's spawn point (each new player starts a little further right). */
+  addPlayer(id: string): PlayerState {
+    const cfg = this.cfg;
+    const p: PlayerState = {
       id,
-      x: this.map.playerSpawn.x + i * 60,
+      x: this.map.playerSpawn.x + this.players.length * 60,
       y: this.map.playerSpawn.y,
       radius: cfg.player.radius,
       hp: cfg.player.maxHp,
@@ -83,15 +103,17 @@ export class World {
       hitStunRemaining: 0,
       invulnRemaining: 0,
       alive: true,
-    }));
-    this.wave = { round: 0, phase: 'break', timer: cfg.waves.firstWaveDelay, queue: [], roundTimeLeft: Infinity };
-    this.stats = {
-      kills: 0,
-      timeSurvived: 0,
-      manaSpent: 0,
-      damageDealt: 0,
-      questionTypes: cfg.questionTypes.map(() => ({ attempts: 0, correct: 0, manaEarned: 0 })),
+      reviveProgress: 0,
+      questionStats: cfg.questionTypes.map(() => ({ attempts: 0, correct: 0, manaEarned: 0 })),
     };
+    this.resolveWalls(p);
+    this.players.push(p);
+    return p;
+  }
+
+  /** A player left the match (e.g. disconnected). */
+  removePlayer(id: string): void {
+    this.players = this.players.filter((p) => p.id !== id);
   }
 
   player(id: string): PlayerState | undefined {
@@ -126,7 +148,9 @@ export class World {
     const type = this.cfg.questionTypes[typeIndex];
     if (!p || !type || !this.canAnswer(playerId)) return 0;
     const stats = this.stats.questionTypes[typeIndex];
+    const mine = p.questionStats[typeIndex];
     stats.attempts++;
+    mine.attempts++;
     if (!correct) {
       const seconds = type.stunSeconds * Math.max(0, stunMultiplier);
       p.stunRemaining = seconds;
@@ -134,9 +158,11 @@ export class World {
       return 0;
     }
     stats.correct++;
+    mine.correct++;
     const gained = Math.max(0, Math.min(type.manaReward, p.maxMana - p.mana));
     p.mana += gained;
     stats.manaEarned += gained;
+    mine.manaEarned += gained;
     this.events.push({ type: 'mana', playerId, amount: gained, typeIndex });
     return gained;
   }
@@ -148,6 +174,7 @@ export class World {
    * (In co-op this slows everyone; revisit when co-op lands.)
    */
   timeScale(): number {
+    if (this.sharedTime) return 1;
     const reading = this.players.some((p) => p.alive && p.stunRemaining > 0);
     return reading ? Math.max(0, Math.min(1, this.cfg.stun.slowMotion)) : 1;
   }
@@ -159,6 +186,7 @@ export class World {
     dt *= this.timeScale();
     this.stats.timeSurvived += realDt;
     for (const p of this.players) this.updatePlayer(p, dt, realDt, intents[p.id]);
+    this.updateRevives(dt, intents);
     this.nav?.update(this.players.filter((p) => p.alive));
     this.updateWaves(dt);
     this.assignSurroundSlots();
@@ -181,17 +209,28 @@ export class World {
     for (let i = 0; i < p.cooldowns.length; i++) p.cooldowns[i] = Math.max(0, p.cooldowns[i] - dt);
     if (!intent) return;
     p.aim = intent.aim;
+    if (intent.spell !== undefined && intent.spell >= 0 && intent.spell < this.cfg.spells.length) p.selectedSpell = intent.spell;
     const stunned = p.stunRemaining > 0 || p.hitStunRemaining > 0;
-
-    if (!stunned) {
-      const len = Math.hypot(intent.move.x, intent.move.y);
-      if (len > 0) {
-        const step = this.cfg.player.speed * dt;
-        this.movePlayer(p, (intent.move.x / len) * step, (intent.move.y / len) * step);
-      }
-    }
-
+    if (!stunned) this.applyMove(p, intent, dt);
     if (intent.casting && !(stunned && this.cfg.stun.blocksCasting)) this.tryCast(p);
+  }
+
+  /** Walk in the intent's direction for `dt` seconds (walls and enemies are solid). */
+  private applyMove(p: PlayerState, intent: PlayerIntent, dt: number): void {
+    const len = Math.hypot(intent.move.x, intent.move.y);
+    if (len === 0) return;
+    const step = this.cfg.player.speed * dt;
+    this.movePlayer(p, (intent.move.x / len) * step, (intent.move.y / len) * step);
+  }
+
+  /**
+   * Client-side prediction: move player `id` as the host will, without running anything else.
+   * Used by multiplayer clients for their own mage so movement responds instantly.
+   */
+  predictMove(id: string, intent: PlayerIntent, dt: number): void {
+    const p = this.player(id);
+    if (!p || !p.alive || p.stunRemaining > 0 || p.hitStunRemaining > 0) return;
+    this.applyMove(p, intent, dt);
   }
 
   private tryCast(p: PlayerState): void {
@@ -714,8 +753,52 @@ export class World {
     }
     if (p.hp <= 0) {
       p.alive = false;
+      p.reviveProgress = 0;
+      // Nothing carries over to after a revive.
+      p.stunRemaining = 0;
+      p.hitStunRemaining = 0;
       this.events.push({ type: 'playerDied', playerId: p.id });
     }
+  }
+
+  /**
+   * Co-op revives: a downed mage gains progress while at least one teammate holds the revive key
+   * next to them (several teammates don't make it faster); with nobody reviving, progress resets.
+   * A wrong-answer stun stops a teammate from reviving; getting hit doesn't.
+   */
+  private updateRevives(dt: number, intents: Record<string, PlayerIntent>): void {
+    const { reviveSeconds, reviveInvulnSeconds, reviveHpFraction, reviveRange } = this.cfg.coop;
+    for (const down of this.players) {
+      if (down.alive) continue;
+      const reviver = this.players.find(
+        (p) =>
+          p.alive &&
+          p.stunRemaining <= 0 &&
+          intents[p.id]?.reviving &&
+          Math.hypot(p.x - down.x, p.y - down.y) <= p.radius + down.radius + reviveRange,
+      );
+      if (!reviver) {
+        down.reviveProgress = 0;
+        continue;
+      }
+      down.reviveProgress += dt;
+      if (down.reviveProgress < reviveSeconds) continue;
+      down.alive = true;
+      down.hp = Math.max(1, Math.round(down.maxHp * reviveHpFraction));
+      down.invulnRemaining = reviveInvulnSeconds;
+      down.stunRemaining = 0;
+      down.hitStunRemaining = 0;
+      down.reviveProgress = 0;
+      this.events.push({ type: 'revived', playerId: down.id, byId: reviver.id, x: down.x, y: down.y });
+    }
+  }
+
+  /** The downed teammate `playerId` could revive right now (in reach), if any. */
+  reviveTarget(playerId: string): PlayerState | undefined {
+    const p = this.player(playerId);
+    if (!p || !p.alive || p.stunRemaining > 0) return undefined;
+    const reach = this.cfg.coop.reviveRange;
+    return this.players.find((d) => !d.alive && Math.hypot(p.x - d.x, p.y - d.y) <= p.radius + d.radius + reach);
   }
 }
 

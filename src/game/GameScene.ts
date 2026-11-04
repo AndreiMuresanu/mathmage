@@ -1,9 +1,12 @@
 import Phaser from 'phaser';
-import type { EnemyKind, PickupState, SimEvent } from '../sim/types';
-import { LOCAL_PLAYER, PAUSE_KEYS, type Match } from './Match';
+import type { EnemyKind, PickupState, PlayerState, SimEvent } from '../sim/types';
+import { PAUSE_KEYS, type Match } from './Match';
 import { BLOCK_SIZE, CIRCLE_RADIUS, colorToInt, ensureTextures } from './textures';
 
 const PLAYER_COLOR = 0xb48cff;
+/** Other mages (co-op teammates). */
+const TEAMMATE_COLOR = 0x6ec8ff;
+const REVIVE_COLOR = 0x7dff9a;
 const ENEMY_COLORS: Record<EnemyKind, number> = { chaser: 0xff5c5c, caster: 0xe05cff };
 const HIT_FLASH_MS = 70;
 const WALL_FILL = 0x2a2a50;
@@ -68,13 +71,15 @@ const steppedColors = (colors: number[]) => ({
 /** Cap on the frame delta so a stalled tab doesn't teleport everything. */
 const MAX_DT = 0.05;
 
-type MoveKeys = Record<'W' | 'A' | 'S' | 'D' | 'UP' | 'DOWN' | 'LEFT' | 'RIGHT', Phaser.Input.Keyboard.Key>;
+type MoveKeys = Record<'W' | 'A' | 'S' | 'D' | 'UP' | 'DOWN' | 'LEFT' | 'RIGHT' | 'F', Phaser.Input.Keyboard.Key>;
 
 /** Reads input into intents, steps the match, and renders the sim state with tinted circles. */
 export class GameScene extends Phaser.Scene {
   private match!: Match;
   private keys!: MoveKeys;
   private playerView!: Phaser.GameObjects.Image;
+  /** Every other mage, by player id. */
+  private teammateViews = new Map<string, Phaser.GameObjects.Image>();
   private aimView!: Phaser.GameObjects.Image;
   private overlay!: Phaser.GameObjects.Graphics;
   /** Dev-only F2 overlay showing the pathfinding grid (blocked cells + flow arrows). */
@@ -104,6 +109,7 @@ export class GameScene extends Phaser.Scene {
     this.projectileViews = new Map();
     this.healOrbViews = new Map();
     this.healGlowViews = new Map();
+    this.teammateViews = new Map();
     this.flashUntil = new Map();
     this.burning = [];
     this.orbs = [];
@@ -121,7 +127,8 @@ export class GameScene extends Phaser.Scene {
 
     const kb = this.input.keyboard!;
     // No capture: the answer field must still receive these letters when focused.
-    this.keys = kb.addKeys('W,A,S,D,UP,DOWN,LEFT,RIGHT', false) as MoveKeys;
+    // F: hold to revive a downed teammate (co-op).
+    this.keys = kb.addKeys('W,A,S,D,UP,DOWN,LEFT,RIGHT,F', false) as MoveKeys;
     // Space opens questions; capture it so it doesn't also "click" a focused button.
     kb.addCapture('SPACE');
     kb.on('keydown', (e: KeyboardEvent) => {
@@ -149,10 +156,16 @@ export class GameScene extends Phaser.Scene {
           this.navDebug = this.add.graphics().setDepth(2);
         }
       });
+      // F3 adds a test teammate who stands still, so reviving can be tried without multiplayer.
+      kb.addCapture('F3');
+      let bots = 0;
+      kb.on('keydown-F3', () => {
+        if (!this.match.driver.multiplayer) this.match.world.addPlayer(`bot-${++bots}`);
+      });
     }
     this.input.on('pointerdown', () => this.match.onArenaPointerDown());
 
-    const p = this.match.world.player(LOCAL_PLAYER)!;
+    const p = this.match.world.player(this.match.localId)!;
     this.playerView = this.add.image(p.x, p.y, 'circle').setTint(PLAYER_COLOR).setScale(p.radius / CIRCLE_RADIUS).setDepth(10);
     this.aimView = this.add.image(p.x, p.y, 'circle').setTint(0xffffff).setScale(4 / CIRCLE_RADIUS).setDepth(11);
     this.overlay = this.add.graphics().setDepth(20);
@@ -190,7 +203,7 @@ export class GameScene extends Phaser.Scene {
   update(_time: number, deltaMs: number): void {
     const world = this.match.world;
     if (this.navDebug) this.drawNavDebug(this.navDebug);
-    const p = world.player(LOCAL_PLAYER)!;
+    const p = world.player(this.match.localId)!;
     const pointer = this.input.activePointer;
     const typing = this.match.typing;
     const move = typing
@@ -205,6 +218,7 @@ export class GameScene extends Phaser.Scene {
       // Only presses that started on the arena cast: Phaser also tracks presses on page elements over
       // the canvas (the answer box, panels, buttons), and clicking those shouldn't fire a spell.
       casting: pointer.leftButtonDown() && pointer.downElement === this.game.canvas,
+      reviving: !typing && this.keys.F.isDown,
     });
     for (const e of events) this.handleEvent(e);
     // Effects (bursts, floating text) follow the game speed: frozen when paused, slow during slow motion.
@@ -217,14 +231,18 @@ export class GameScene extends Phaser.Scene {
   }
 
   private handleEvent(e: SimEvent): void {
-    const p = this.match.world.player(LOCAL_PLAYER)!;
+    const world = this.match.world;
+    const p = world.player(this.match.localId)!;
+    /** The mage an event is about (falls back to the local one). */
+    const who = 'playerId' in e ? (world.player(e.playerId) ?? p) : p;
+    const local = who === p;
     switch (e.type) {
       case 'enemyHit':
         this.flashUntil.set(e.enemyId, this.time.now + HIT_FLASH_MS);
         break;
       case 'healed':
         this.burst(e.x, e.y, HEAL_COLOR, 10);
-        this.floatText(p.x, p.y - 30, `+${Math.round(e.amount)} HP`, '#ff5c5c');
+        if (e.amount > 0) this.floatText(who.x, who.y - 30, `+${Math.round(e.amount)} HP`, '#ff5c5c');
         break;
       case 'enemyDied':
         this.burst(e.x, e.y, ENEMY_COLORS[e.kind], 10);
@@ -237,20 +255,27 @@ export class GameScene extends Phaser.Scene {
         for (const t of e.targets) this.setAblaze(t.id, t.x, t.y, t.radius, e.x, e.y);
         break;
       case 'playerHit':
-        this.cameras.main.shake(120, 0.006);
+        if (local) this.cameras.main.shake(120, 0.006);
         break;
       case 'mana':
-        if (e.amount > 0) {
+        if (e.amount > 0 && !local) this.floatText(who.x, who.y - 30, `+${Math.round(e.amount)} mana`, '#7df9ff');
+        if (e.amount > 0 && local) {
           const intensity = this.questionIntensity(e.typeIndex);
           this.floatText(p.x, p.y - 30, `+${Math.round(e.amount)} mana`, intensity >= 0.75 ? '#ffe27a' : '#7df9ff');
           this.manaRestore(p.x, p.y, p.radius, e.amount, intensity);
         }
         break;
       case 'stunned':
-        this.floatText(p.x, p.y - 30, 'Stunned!', '#ffd166');
+        this.floatText(who.x, who.y - 30, 'Stunned!', '#ffd166');
         break;
       case 'playerDied':
-        this.burst(p.x, p.y, PLAYER_COLOR, 24);
+        this.burst(who.x, who.y, local ? PLAYER_COLOR : TEAMMATE_COLOR, 24);
+        if (world.players.length > 1) this.floatText(who.x, who.y - 30, 'Down!', '#ff7b7b');
+        break;
+      case 'revived':
+        this.burst(e.x, e.y, REVIVE_COLOR, 18);
+        this.burst(e.x, e.y, 0xffffff, 8);
+        this.floatText(e.x, e.y - 30, 'Revived!', '#7dff9a');
         break;
       case 'roundStart':
         this.banner(`Round ${e.round}`);
@@ -260,10 +285,25 @@ export class GameScene extends Phaser.Scene {
 
   private render(): void {
     const world = this.match.world;
-    const p = world.player(LOCAL_PLAYER)!;
+    const p = world.player(this.match.localId)!;
 
-    this.playerView.setPosition(p.x, p.y).setVisible(p.alive);
-    this.playerView.setAlpha(p.invulnRemaining > 0 && Math.floor(this.time.now / 60) % 2 === 0 ? 0.4 : 1);
+    // Mages: downed ones stay as faded bodies (co-op: until revived); invulnerability blinks.
+    const blink = Math.floor(this.time.now / 60) % 2 === 0;
+    const seen = new Set<string>();
+    for (const pl of world.players) {
+      seen.add(pl.id);
+      let view = pl.id === this.match.localId ? this.playerView : this.teammateViews.get(pl.id);
+      if (!view) {
+        view = this.add.image(pl.x, pl.y, 'circle').setTint(TEAMMATE_COLOR).setScale(pl.radius / CIRCLE_RADIUS).setDepth(9);
+        this.teammateViews.set(pl.id, view);
+      }
+      view.setPosition(pl.x, pl.y).setAlpha(!pl.alive ? 0.35 : pl.invulnRemaining > 0 && blink ? 0.4 : 1);
+    }
+    for (const [id, view] of this.teammateViews) {
+      if (seen.has(id)) continue;
+      view.destroy();
+      this.teammateViews.delete(id);
+    }
     this.aimView
       .setPosition(p.x + Math.cos(p.aim) * (p.radius + 10), p.y + Math.sin(p.aim) * (p.radius + 10))
       .setVisible(p.alive);
@@ -295,11 +335,30 @@ export class GameScene extends Phaser.Scene {
       g.fillStyle(0x000000, 0.6).fillRect(e.x - w / 2, e.y - e.radius - 9, w, 4);
       g.fillStyle(0xff5c5c, 1).fillRect(e.x - w / 2, e.y - e.radius - 9, (w * Math.max(0, e.hp)) / e.maxHp, 4);
     }
-    if (p.alive && (p.stunRemaining > 0 || p.hitStunRemaining > 0)) {
-      // Yellow ring for a wrong-answer stun, pink for a projectile hit-stun.
-      const pulse = 4 + Math.sin(this.time.now / 80) * 2;
-      const color = p.stunRemaining > 0 ? 0xffd166 : 0xff4d6d;
-      g.lineStyle(3, color, 0.9).strokeCircle(p.x, p.y, p.radius + pulse + 4);
+    for (const pl of world.players) {
+      if (pl.alive && (pl.stunRemaining > 0 || pl.hitStunRemaining > 0)) {
+        // Yellow ring for a wrong-answer stun, pink for a projectile hit-stun.
+        const pulse = 4 + Math.sin(this.time.now / 80) * 2;
+        const color = pl.stunRemaining > 0 ? 0xffd166 : 0xff4d6d;
+        g.lineStyle(3, color, 0.9).strokeCircle(pl.x, pl.y, pl.radius + pulse + 4);
+      }
+      if (!pl.alive && world.players.length > 1) this.drawDowned(g, pl);
+    }
+  }
+
+  /** A downed mage: a cross on the body and a ring that fills as a teammate revives them. */
+  private drawDowned(g: Phaser.GameObjects.Graphics, pl: PlayerState): void {
+    const arm = pl.radius * 0.5;
+    g.lineStyle(3, REVIVE_COLOR, 0.8);
+    g.lineBetween(pl.x - arm, pl.y, pl.x + arm, pl.y);
+    g.lineBetween(pl.x, pl.y - arm, pl.x, pl.y + arm);
+    const r = pl.radius + 8;
+    g.lineStyle(3, 0xffffff, 0.15).strokeCircle(pl.x, pl.y, r);
+    const progress = Math.min(1, pl.reviveProgress / Math.max(1e-6, this.match.world.cfg.coop.reviveSeconds));
+    if (progress > 0) {
+      g.lineStyle(4, REVIVE_COLOR, 1).beginPath();
+      g.arc(pl.x, pl.y, r, -Math.PI / 2, -Math.PI / 2 + progress * Math.PI * 2);
+      g.strokePath();
     }
   }
 
@@ -495,7 +554,7 @@ export class GameScene extends Phaser.Scene {
   /** Advance mana orbs along their pop → vortex → mana-bar path. `dt` is game seconds. */
   private updateManaOrbs(dt: number): void {
     if (this.orbs.length === 0) return;
-    const p = this.match.world.player(LOCAL_PLAYER)!;
+    const p = this.match.world.player(this.match.localId)!;
     const target = this.screenToWorld(this.match.manaBarTarget());
     this.orbs = this.orbs.filter((orb) => {
       orb.age += dt;

@@ -1,5 +1,6 @@
 import type { GameConfig } from '../config/gameConfig';
 import type { World } from '../sim/world';
+import type { PlayerState } from '../sim/types';
 import { h } from './dom';
 
 function bar(kind: string) {
@@ -20,6 +21,10 @@ export class Hud {
   private ratingLine = h('div.slot-rating');
   /** Time left on an unanswered question while its window is closed. */
   private questionTimer = h('span.question-timer');
+  /** Co-op: "You're down" while downed, "Hold F to revive" next to a downed teammate, with progress. */
+  private coopText = h('span');
+  private coopFill = h('div.hud-coop-fill');
+  private coop = h('div.hud-coop', { hidden: true }, this.coopText, h('div.hud-coop-bar', {}, this.coopFill));
   private cache = new Map<string, string>();
 
   constructor(cfg: GameConfig) {
@@ -55,6 +60,7 @@ export class Hud {
       {},
       h('div.hud-bars', {}, this.hp.el, this.mana.el),
       this.round,
+      this.coop,
       h('div.hud-spells', {}, ...this.spells),
       this.questionHint,
     );
@@ -106,8 +112,33 @@ export class Hud {
       });
     });
 
+    this.updateCoop(world, p);
+
     const locked = !world.canAnswer(playerId);
     this.set('questionLocked', String(locked), () => this.questionHint.classList.toggle('locked', locked));
+  }
+
+  private updateCoop(world: World, p: PlayerState): void {
+    const reviveSeconds = Math.max(1e-6, world.cfg.coop.reviveSeconds);
+    let text = '';
+    let progress = 0;
+    if (!p.alive && !world.over) {
+      text = p.reviveProgress > 0 ? 'Being revived…' : "You're down! A teammate can revive you.";
+      progress = p.reviveProgress / reviveSeconds;
+    } else {
+      const target = world.reviveTarget(p.id);
+      if (target) {
+        text = target.reviveProgress > 0 ? 'Reviving…' : 'Hold F to revive';
+        progress = target.reviveProgress / reviveSeconds;
+      }
+    }
+    const state = `${text}|${progress.toFixed(2)}`;
+    this.set('coop', state, () => {
+      this.coop.hidden = !text;
+      this.coop.classList.toggle('downed', !p.alive);
+      this.coopText.textContent = text;
+      this.coopFill.style.width = `${Math.min(1, progress) * 100}%`;
+    });
   }
 
   /** Show a skill rating, e.g. "Math rating 845 ▲33". */
@@ -138,6 +169,13 @@ export class Hud {
     this.mana.el.classList.remove('absorb');
     void this.mana.el.offsetWidth; // restart the animation
     this.mana.el.classList.add('absorb');
+  }
+
+  /** A short message in the middle of the screen (e.g. "Only the host can pause"). */
+  toast(text: string): void {
+    const el = h('div.hud-toast', {}, text);
+    this.el.append(el);
+    setTimeout(() => el.remove(), 1800);
   }
 
   showNoMana(): void {

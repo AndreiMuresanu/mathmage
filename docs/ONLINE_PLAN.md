@@ -275,7 +275,7 @@ A snapshot with 60 enemies is about 3 KB of JSON, so about 60 KB/s per client.
 
 ## Phasing (implemented one at a time)
 
-Status (2026-11-02): **phases 1–2 done** (the Worker is written and tested locally, but not yet deployed; that needs the Cloudflare account); phases 3–7 not started.
+Status (2026-11-02): **phases 1–5 done** (4 and 5 were built together: online co-op with the full menus). Phases 6–7 not started. The phase 4–5 Worker changes (open-games list, migration 0003) need `npm run deploy:all`.
 
 Phase 1 notes:
 - Match setup lives in `src/game/matchSetup.ts` (`MatchSetup`, `matchConfig`).
@@ -287,6 +287,23 @@ Phase 2 notes:
 - Request fields use `players: [{name, elo}]` (stored in the `names` column).
 - Ranked co-op submission (host submits the team) is wired in phase 5; the API already accepts it.
 - Setup and deploy steps are in README → "Online leaderboard".
+
+Phase 3 notes:
+- "Downed" is `PlayerState.alive === false`. Everything that ignores non-alive players (targeting, shots, heal orbs, pathfinding, questions) already treats bodies correctly. Game over = every player down, so solo is unchanged.
+- Reviving: `World.updateRevives`, `PlayerIntent.reviving` (F), `PlayerState.reviveProgress`, `revived` event, `coop` config group. A wrong-answer stun blocks reviving; getting hit doesn't.
+- `World.addPlayer(id)` adds a mage mid-match (the dev F3 test teammate; reusable for multiplayer joins).
+- The renderer draws every player (teammates in blue; downed = faded body with a cross and a revive ring). The HUD shows "Hold F to revive" / "You're down!".
+- Events about other players (stunned, mana, heals, downed) are handled per player, so phase 4 only needs to feed them in.
+- Adding `coop` changed `DEFAULT_CONFIG`, so release with `npm run deploy:all` (the leaderboard checks the default-settings fingerprint).
+
+Phases 4–5 notes (online co-op):
+- `src/net/`: `Transport` (Trystero for real; BroadcastChannel for same-browser tabs with `?net=local` in dev; `MemoryHub` for tests), `protocol.ts` (messages, snapshots), `room.ts` (RoomSession: roster, refuse full / started / version mismatch, host-left).
+- `src/game/drivers.ts`: `Match` runs through a `MatchDriver`. `HostDriver` owns the real World, applies clients' queued intents with the durations they predicted with, and sends snapshot + events every 50 ms. `ClientDriver` mirrors snapshots into a `World` (the renderer is unchanged), draws others 100 ms in the past (interpolated), predicts and reconciles its own mage, and delays events to match what's on screen.
+- `World.sharedTime` disables wrong-answer slow motion in multiplayer (a flag, so ranked co-op still matches `DEFAULT_CONFIG`). Spells travel in intents; question stats are per player.
+- Menus: Play multiplayer (name) → Join game (Worker list refreshed every 5 s + Room ID) / Host game (Ranked co-op, Custom co-op, FFA disabled; map; public/private; 2–4 players) → Game room (Room ID + copy, players + pings, Start). Game over: "Back to room" / "Leave".
+- Worker: `/games` (POST create → secret; heartbeat with secret every 15 s; listings expire after 45 s; DELETE with secret), `worker/src/games.ts`, migration `0003_games.sql`.
+- Ranked co-op: clients send their peak ELO (`peak`), the host submits one team entry, and everyone sees the ranks (`submitted`).
+- Known limitation: the host's tab must stay visible (background tabs are throttled by the browser, which stalls the match).
 
 1. **Menus and match setup** (no networking or backend):
    - New main menu.

@@ -180,3 +180,57 @@ describe('abuse protection', () => {
     expect(res.headers.get('Access-Control-Allow-Origin')).toBe('*');
   });
 });
+
+describe('open games list', () => {
+  const listing = (extra: Record<string, unknown> = {}) => ({ code: 'ROOM42', hostName: 'Hana', mode: 'coop', ranked: true, map: 'mazy', players: 1, maxPlayers: 4, ...extra });
+  function games() {
+    const env: Env = { DB: memoryDb() };
+    const post = (body: unknown, now: number, ip = '1.1.1.1') =>
+      handle(new Request(`${BASE}/games`, { method: 'POST', headers: { 'CF-Connecting-IP': ip }, body: JSON.stringify(body) }), env, now);
+    const list = async (now: number) => ((await (await handle(new Request(`${BASE}/games`), env, now)).json()) as { games: { code: string; players: number; ranked: boolean }[] }).games;
+    const del = (code: string, secret: string, now: number) =>
+      handle(new Request(`${BASE}/games/${code}`, { method: 'DELETE', headers: { Authorization: `Bearer ${secret}` } }), env, now);
+    return { post, list, del };
+  }
+
+  it('a host lists a room, refreshes it with its secret, and removes it', async () => {
+    const { post, list, del } = games();
+    const created = await post(listing(), 1000);
+    expect(created.status).toBe(200);
+    const { secret } = (await created.json()) as { secret: string };
+    expect(secret).toBeTruthy();
+    expect(await list(2000)).toMatchObject([{ code: 'ROOM42', players: 1, ranked: true }]);
+    expect((await post(listing({ players: 3, secret }), 3000)).status).toBe(200);
+    expect((await list(4000))[0].players).toBe(3);
+    expect((await del('ROOM42', 'wrong', 5000)).status).toBe(401);
+    expect((await del('ROOM42', secret, 5000)).status).toBe(200);
+    expect(await list(6000)).toEqual([]);
+  });
+
+  it("nobody else can take over or refresh a listed code", async () => {
+    const { post } = games();
+    await post(listing(), 1000);
+    expect((await post(listing({ hostName: 'Intruder' }), 2000, '2.2.2.2')).status).toBe(409);
+    expect((await post(listing({ secret: 'guess' }), 2000, '2.2.2.2')).status).toBe(409);
+  });
+
+  it('listings vanish 45 s after the last heartbeat (and the code becomes free again)', async () => {
+    const { post, list } = games();
+    await post(listing(), 1000);
+    expect(await list(45_000)).toHaveLength(1);
+    expect(await list(46_001)).toHaveLength(0);
+    expect((await post(listing({ hostName: 'Someone else' }), 47_000, '3.3.3.3')).status).toBe(200);
+  });
+
+  it.each([
+    ['a bad code', { code: 'no' }],
+    ['an unknown mode', { mode: 'solo' }],
+    ['an unknown map', { map: 'atlantis' }],
+    ['max players above 4', { maxPlayers: 5 }],
+    ['more players than the max', { players: 3, maxPlayers: 2 }],
+    ['a blank host name', { hostName: '  ' }],
+  ])('rejects %s', async (_label, change) => {
+    const { post } = games();
+    expect((await post(listing(change), 1000)).status).toBe(400);
+  });
+});

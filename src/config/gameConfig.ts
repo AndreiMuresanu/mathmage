@@ -115,6 +115,17 @@ export interface AlgebraTricksConfig {
   rearranging: boolean;
 }
 
+export interface CoopConfig {
+  /** Seconds a teammate must hold the revive key next to a downed mage. */
+  reviveSeconds: number;
+  /** Invincibility after being revived, in seconds. */
+  reviveInvulnSeconds: number;
+  /** HP after being revived, as a fraction of max HP. */
+  reviveHpFraction: number;
+  /** How far (px) beyond touching the body a teammate can revive from. */
+  reviveRange: number;
+}
+
 export interface ChaserConfig {
   hp: number;
   speed: number;
@@ -160,6 +171,8 @@ export interface GameConfig {
   questionSources: SlotSource[];
   /** Arena layout id (see sim/maps.ts): 'empty', 'boxy' or 'buttons'. */
   map: string;
+  /** Co-op PvE: reviving downed teammates. */
+  coop: CoopConfig;
   adaptive: AdaptiveConfig;
   medium: MediumConfig;
   algebraTricks: AlgebraTricksConfig;
@@ -266,6 +279,12 @@ export const DEFAULT_CONFIG: GameConfig = {
     },
   ],
   map: 'empty',
+  coop: {
+    reviveSeconds: 3,
+    reviveInvulnSeconds: 3,
+    reviveHpFraction: 0.5,
+    reviveRange: 24,
+  },
   questionSources: [
     { sourceId: 'arithmetic', weight: 1 },
     { sourceId: 'medium', weight: 1 },
