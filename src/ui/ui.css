@@ -1277,3 +1277,83 @@ button.toggle.selected {
 .host-note {
   font-size: 0.85em;
 }
+
+/* ---------- Character picker ---------- */
+
+.character-picker {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1em;
+  margin: 0.4em 0 0.6em;
+}
+
+.character-arrow {
+  width: 2.4em;
+  height: 2.4em;
+  padding: 0;
+  font-size: 1.2em;
+  font-weight: 700;
+  border-radius: 50%;
+}
+
+.character-stage {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.35em;
+  min-width: 7em;
+}
+
+/* Stand-in for the character sprite: a glowing mage in the character's colour. */
+.character-preview {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: var(--character-color);
+  box-shadow: 0 0 18px var(--character-color);
+}
+
+.character-name {
+  font-weight: 600;
+  color: var(--text);
+}
+
+.character-dots {
+  display: flex;
+  gap: 0.35em;
+}
+
+.character-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.25);
+}
+
+.character-dot.selected {
+  background: var(--accent);
+}
+
+.character-chip {
+  width: 0.9em;
+  height: 0.9em;
+  border-radius: 50%;
+  flex: none;
+}
+
+/* Multiplayer ping readout (top right). */
+.hud-ping {
+  position: absolute;
+  top: 1em;
+  right: 1em;
+  padding: 0.25em 0.7em;
+  background: rgba(0, 0, 0, 0.45);
+  border-radius: 6px;
+  font-size: 0.85em;
+  color: var(--muted);
+}
+
+.hud-ping[data-level='good'] { color: #7dff9a; }
+.hud-ping[data-level='ok'] { color: #ffd166; }
+.hud-ping[data-level='bad'] { color: #ff7b7b; }

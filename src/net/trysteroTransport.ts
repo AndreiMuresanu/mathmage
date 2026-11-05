@@ -24,8 +24,9 @@ export class TrysteroTransport implements Transport {
   private action: EnvelopeAction;
   private handlers = new Map<string, MessageHandler>();
 
-  constructor(roomCode: string) {
-    this.room = joinRoom({ appId: APP_ID }, roomCode);
+  /** `turnConfig`: relay servers for peers that can't connect directly (see online/turn.ts). */
+  constructor(roomCode: string, turnConfig?: { urls: string | string[]; username?: string; credential?: string }[]) {
+    this.room = joinRoom({ appId: APP_ID, ...(turnConfig?.length ? { turnConfig } : {}) }, roomCode);
     this.action = this.room.makeAction('mm') as unknown as EnvelopeAction;
     this.action.onMessage = (data, ctx) => this.handlers.get(data.c)?.(data.d, ctx.peerId);
     this.room.onPeerJoin = (id) => this.onPeerJoin?.(id);

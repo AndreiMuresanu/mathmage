@@ -194,6 +194,32 @@ export class MemoryHub {
     return this.members.find((m) => m.selfId === id);
   }
 
+  /** Cut the connection between `id` and everyone else (messages are lost) without them leaving. */
+  disconnect(id: string): void {
+    const t = this.member(id);
+    if (!t) return;
+    for (const other of this.members) {
+      if (other === t) continue;
+      other.connected.delete(id);
+      t.connected.delete(other.selfId);
+      this.schedule(other, () => other.onPeerLeave?.(id));
+      this.schedule(t, () => t.onPeerLeave?.(other.selfId));
+    }
+  }
+
+  /** Restore `id`'s connections after disconnect(). */
+  reconnect(id: string): void {
+    const t = this.member(id);
+    if (!t) return;
+    for (const other of this.members) {
+      if (other === t) continue;
+      other.connected.add(id);
+      t.connected.add(other.selfId);
+      this.schedule(other, () => other.onPeerJoin?.(id));
+      this.schedule(t, () => t.onPeerJoin?.(other.selfId));
+    }
+  }
+
   /** @internal */
   remove(t: MemoryTransport): void {
     this.members = this.members.filter((m) => m !== t);

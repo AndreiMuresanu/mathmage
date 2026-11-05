@@ -255,6 +255,7 @@ export class Match {
       if (e.type === 'gameOver') this.showGameOver();
     }
     if (this.driver.hostSilentMs) this.hud.setWaitingForHost(!this.world.over && this.driver.hostSilentMs() > HOST_SILENT_MS);
+    if (this.driver.pingMs) this.hud.setPing(this.driver.pingMs(), this.driver.canPause);
     const p = this.world.player(this.localId);
     if (p && this.stun.visible) this.stun.update(p.stunRemaining);
     this.hud.update(this.world, this.localId, this.questions.pendingTimeLeft);

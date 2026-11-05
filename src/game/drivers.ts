@@ -1,6 +1,7 @@
-import { applySnapshot, CH, encodeSnapshot, interpolateSnapshots, type AnswerMsg, type IntentMsg, type PauseMsg, type PeakMsg, type RoomPlayer, type SnapMsg, type Snapshot, type SubmittedMsg } from '../net/protocol';
+import { applySnapshot, CH, decodeProjectiles, encodeSnapshot, interpolateSnapshots, type AnswerMsg, type IntentMsg, type PauseMsg, type PeakMsg, type RoomPlayer, type SnapMsg, type Snapshot, type SubmittedMsg } from '../net/protocol';
 import type { RoomSession } from '../net/room';
-import type { PlayerIntent, SimEvent } from '../sim/types';
+import { circleRectPush } from '../sim/maps';
+import type { PlayerIntent, ProjectileState, SimEvent } from '../sim/types';
 import type { World } from '../sim/world';
 
 /** The local player's id in solo matches. Multiplayer uses each peer's network id. */
@@ -14,6 +15,43 @@ const CORRECTION_FADE_S = 0.1;
 /** The host ignores client intent durations longer than this (s), and caps the total per frame. */
 const MAX_INTENT_DT = 0.1;
 const MAX_CATCHUP_DT = 0.25;
+/** Projectiles are drawn moved forward from the newest snapshot by at most this much (s). */
+const MAX_EXTRAPOLATION_S = 0.25;
+/** A client's instant "ghost" projectile disappears after this long if the real one never shows up. */
+const GHOST_LIFETIME_S = 0.6;
+/** How often round-trip times are measured. */
+const PING_INTERVAL_MS = 2000;
+
+/** Measures round-trip times to some peers every PING_INTERVAL_MS (smoothed). */
+class PingMeter {
+  readonly rtt = new Map<string, number>();
+  private timer: ReturnType<typeof setInterval>;
+
+  constructor(room: RoomSession, targets: () => string[]) {
+    const measure = () => {
+      for (const id of targets()) {
+        room.transport
+          .ping(id)
+          .then((ms) => {
+            const old = this.rtt.get(id);
+            this.rtt.set(id, old === undefined ? ms : old * 0.6 + ms * 0.4);
+          })
+          .catch(() => {});
+      }
+    };
+    measure();
+    this.timer = setInterval(measure, PING_INTERVAL_MS);
+  }
+
+  /** The highest round-trip time among the targets, if any was measured. */
+  worst(): number | undefined {
+    return this.rtt.size ? Math.max(...this.rtt.values()) : undefined;
+  }
+
+  stop(): void {
+    clearInterval(this.timer);
+  }
+}
 
 /** Ranked co-op: gathering each player's peak ELO and sharing the team's submission result. */
 export interface TeamScoring {
@@ -51,6 +89,8 @@ export interface MatchDriver {
   readonly team?: TeamScoring;
   /** Client: ms since the last update from the host (to tell the player when it stalls). */
   hostSilentMs?(): number;
+  /** Multiplayer: round-trip time in ms (client: to the host; host: the slowest client), if measured. */
+  pingMs?(): number | undefined;
   dispose(): void;
 }
 
@@ -140,6 +180,8 @@ export class HostDriver implements MatchDriver {
   private lastSnap = -Infinity;
   private sentOver = false;
   private unlisten: () => void;
+  private unlistenAway: () => void;
+  private pings: PingMeter;
 
   constructor(world: World, room: RoomSession) {
     this.world = world;
@@ -161,8 +203,19 @@ export class HostDriver implements MatchDriver {
       this.world.removePlayer(id);
       this.queued.delete(id);
       this.latest.delete(id);
+      this.pings.rtt.delete(id);
+    });
+    // A dropped player's mage stands still (and stops casting) while we wait for them to reconnect.
+    this.unlistenAway = room.addPeerAwayListener((id) => {
+      this.queued.delete(id);
+      this.latest.delete(id);
     });
     this.team = teamScoring(room);
+    this.pings = new PingMeter(room, () => this.world.players.map((p) => p.id).filter((id) => id !== this.localId && !room.isAway(id)));
+  }
+
+  pingMs(): number | undefined {
+    return this.pings.worst();
   }
 
   step(dt: number, intent: PlayerIntent): SimEvent[] {
@@ -214,6 +267,8 @@ export class HostDriver implements MatchDriver {
     const t = this.room.transport;
     for (const ch of [CH.intent, CH.answer, CH.peak]) t.on(ch, () => {});
     this.unlisten();
+    this.unlistenAway();
+    this.pings.stop();
   }
 }
 
@@ -250,6 +305,15 @@ export class ClientDriver implements MatchDriver {
   /** Local clock time until which a wrong answer's stun is assumed (before the host confirms it). */
   private localStunUntil = 0;
   private lastSpell = 0;
+  /** Instant cosmetic projectiles for our own casts, until the host's real ones arrive. */
+  private ghosts: (ProjectileState & { age: number })[] = [];
+  private nextGhostId = -1;
+  /** Our own projectile ids in the newest snapshot (to spot newly arrived ones). */
+  private ownShotIds = new Set<number>();
+  private ownShotsFrom: Snapshot | undefined;
+  /** Predicted spell cooldowns, so ghosts appear at the same rate the host will cast. */
+  private localCooldowns: number[] = [];
+  private pings: PingMeter;
   /** Wall-clock time of the last snapshot (or of the match starting). */
   private lastHeard = performance.now();
 
@@ -270,6 +334,11 @@ export class ClientDriver implements MatchDriver {
       if (from === room.hostId) this.onRemotePause?.((data as PauseMsg).paused);
     });
     this.team = teamScoring(room);
+    this.pings = new PingMeter(room, () => [room.hostId]);
+  }
+
+  pingMs(): number | undefined {
+    return this.pings.worst();
   }
 
   private receive(s: Snapshot): void {
@@ -292,10 +361,86 @@ export class ClientDriver implements MatchDriver {
       this.world.predictMove(this.localId, intent, dt);
       return [];
     }
-    const renderTime = this.localTime + this.clockOffset - INTERPOLATION_DELAY_MS;
+    const hostNow = this.localTime + this.clockOffset;
+    const renderTime = hostNow - INTERPOLATION_DELAY_MS;
     applySnapshot(this.world, this.snapshotAt(renderTime));
     this.predictSelf(dt, intent);
-    return this.releaseEvents(renderTime);
+    const events = this.releaseEvents(renderTime).filter((e) => !(e.type === 'beam' && e.playerId === this.localId));
+    this.drawProjectilesNow(hostNow);
+    this.predictCast(dt, intent, events);
+    this.updateGhosts(dt);
+    return events;
+  }
+
+  /**
+   * Projectiles fly in straight lines, so instead of showing them 100 ms in the past (like
+   * everything else) draw them where they are now: newest snapshot, moved along their velocity.
+   * You see enemy shots where they really are, and your own spells leave your hand sooner.
+   */
+  private drawProjectilesNow(hostNow: number): void {
+    const latest = this.snaps[this.snaps.length - 1];
+    const age = Math.max(0, Math.min(MAX_EXTRAPOLATION_S, (hostNow - latest.t) / 1000));
+    // Our own shots were launched on the host half a round trip after we cast them; move them on by
+    // that much more so they line up with the instant ghost that stood in for them.
+    const ownLead = Math.min(MAX_EXTRAPOLATION_S, (this.pingMs() ?? 0) / 2000);
+    this.world.projectiles = decodeProjectiles(latest).map((p) => {
+      const t = age + (p.ownerId === this.localId ? ownLead : 0);
+      return { ...p, x: p.x + p.vx * t, y: p.y + p.vy * t };
+    });
+    // A real projectile of ours appearing for the first time replaces the oldest ghost.
+    if (this.ownShotsFrom !== latest) {
+      this.ownShotsFrom = latest;
+      const ids = new Set(this.world.projectiles.filter((p) => p.ownerId === this.localId).map((p) => p.id));
+      for (const id of ids) if (!this.ownShotIds.has(id)) this.ghosts.shift();
+      this.ownShotIds = ids;
+    }
+  }
+
+  /** Our own cast, shown instantly: a ghost projectile, or the laser beam right away. */
+  private predictCast(dt: number, intent: PlayerIntent, events: SimEvent[]): void {
+    for (let i = 0; i < this.localCooldowns.length; i++) this.localCooldowns[i] = Math.max(0, this.localCooldowns[i] - dt);
+    const me = this.world.player(this.localId);
+    const cfg = this.world.cfg;
+    if (!me || !me.alive || !intent.casting) return;
+    if ((me.stunRemaining > 0 || me.hitStunRemaining > 0) && cfg.stun.blocksCasting) return;
+    const index = intent.spell ?? this.lastSpell;
+    const spell = cfg.spells[index];
+    if (!spell || (this.localCooldowns[index] ?? 0) > 0 || me.mana < spell.manaCost) return;
+    this.localCooldowns[index] = spell.cooldown;
+    const dx = Math.cos(intent.aim);
+    const dy = Math.sin(intent.aim);
+    if (spell.kind === 'laser') {
+      const beam = this.world.beamFrom(me, spell, dx, dy);
+      events.push({ type: 'beam', playerId: this.localId, ...beam, width: spell.radius * 2, color: spell.color });
+      return;
+    }
+    this.ghosts.push({
+      id: this.nextGhostId--,
+      team: 'player',
+      ownerId: this.localId,
+      x: me.x + dx * (me.radius + spell.radius),
+      y: me.y + dy * (me.radius + spell.radius),
+      vx: dx * spell.projectileSpeed,
+      vy: dy * spell.projectileSpeed,
+      radius: spell.radius,
+      damage: 0,
+      stun: 0,
+      explosionRadius: 0,
+      ttl: GHOST_LIFETIME_S,
+      color: spell.color,
+      age: 0,
+    });
+  }
+
+  private updateGhosts(dt: number): void {
+    const walls = this.world.map.walls;
+    this.ghosts = this.ghosts.filter((g) => {
+      g.age += dt;
+      g.x += g.vx * dt;
+      g.y += g.vy * dt;
+      return g.age < GHOST_LIFETIME_S && !walls.some((w) => circleRectPush(g, w)) && !this.world.enemies.some((e) => Math.hypot(e.x - g.x, e.y - g.y) < e.radius + g.radius);
+    });
+    this.world.projectiles.push(...this.ghosts);
   }
 
   /** The (interpolated) snapshot to draw at `t`. */
@@ -371,5 +516,6 @@ export class ClientDriver implements MatchDriver {
   dispose(): void {
     const t = this.room.transport;
     for (const ch of [CH.snap, CH.pause, CH.submitted]) t.on(ch, () => {});
+    this.pings.stop();
   }
 }

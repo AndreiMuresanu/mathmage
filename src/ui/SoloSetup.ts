@@ -1,3 +1,4 @@
+import { createCharacterPicker } from './CharacterPicker';
 import { h } from './dom';
 import { mapCards } from './mapCards';
 import { cardLink, optionCards } from './optionCards';
@@ -12,6 +13,8 @@ export function createSoloSetup(opts: {
   map: string;
   /** Currently selected game type. */
   ranked: boolean;
+  character: string;
+  onSelectCharacter(id: string): void;
   onSelectMap(id: string): void;
   onSelectRanked(ranked: boolean): void;
   onStart(): void;
@@ -33,6 +36,8 @@ export function createSoloSetup(opts: {
       'div.panel.screen-panel.setup',
       {},
       h('div.screen-header', {}, h('h1', {}, 'Play solo'), h('button', { onclick: opts.onBack }, 'Back')),
+      h('h3', {}, 'Character'),
+      createCharacterPicker(opts.character, opts.onSelectCharacter),
       h('h3', {}, 'Map'),
       mapCards(opts.map, opts.onSelectMap),
       h('h3', {}, 'Game type'),

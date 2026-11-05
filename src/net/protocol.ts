@@ -1,11 +1,11 @@
 import type { GameConfig } from '../config/gameConfig';
 import type { MatchSetup } from '../game/matchSetup';
 import type { SubmitScoreResponse } from '../online/leaderboardTypes';
-import type { EnemyKind, MatchStats, PlayerIntent, PlayerState, SimEvent, WaveState } from '../sim/types';
+import type { EnemyKind, MatchStats, PlayerIntent, PlayerState, ProjectileState, SimEvent, WaveState } from '../sim/types';
 import type { World } from '../sim/world';
 
 /** Bump whenever messages change shape; peers with different versions refuse to play together. */
-export const PROTOCOL_VERSION = 1;
+export const PROTOCOL_VERSION = 2;
 
 /** Channel names (see Transport.send / on). */
 export const CH = {
@@ -19,17 +19,22 @@ export const CH = {
   pause: 'pause',
   peak: 'peak',
   submitted: 'submitted',
+  /** "I'm leaving on purpose" (so the others don't wait for a reconnect). */
+  bye: 'bye',
 } as const;
 
 export interface RoomPlayer {
   id: string;
   name: string;
+  /** Character id (cosmetic). */
+  character?: string;
 }
 
 export interface HelloMsg {
   v: number;
   game: string;
   name: string;
+  character?: string;
 }
 
 /** Host → everyone: who's in the room and what will be played. */
@@ -91,8 +96,8 @@ export interface SubmittedMsg {
 
 /** [id, kind (0 chaser / 1 caster), x, y, radius, hp, maxHp] */
 type EnemyTuple = [number, number, number, number, number, number, number];
-/** [id, team (0 player / 1 enemy), x, y, radius, color] */
-type ProjectileTuple = [number, number, number, number, number, string];
+/** [id, team (0 player / 1 enemy), x, y, radius, color, vx, vy, owner (index into players, -1 = enemy)] */
+type ProjectileTuple = [number, number, number, number, number, string, number, number, number];
 /** [id, x, y, radius, ttl (null = forever), heal] */
 type PickupTuple = [number, number, number, number, number | null, number];
 
@@ -134,7 +139,17 @@ export function encodeSnapshot(world: World, t: number, acks: Record<string, num
       questionStats: p.questionStats.map((q) => ({ ...q })),
     })),
     enemies: world.enemies.map((e) => [e.id, KINDS.indexOf(e.kind), r1(e.x), r1(e.y), e.radius, r1(e.hp), r1(e.maxHp)]),
-    projectiles: world.projectiles.map((p) => [p.id, p.team === 'player' ? 0 : 1, r1(p.x), r1(p.y), p.radius, p.color]),
+    projectiles: world.projectiles.map((p) => [
+      p.id,
+      p.team === 'player' ? 0 : 1,
+      r1(p.x),
+      r1(p.y),
+      p.radius,
+      p.color,
+      r1(p.vx),
+      r1(p.vy),
+      p.team === 'player' ? world.players.findIndex((q) => q.id === p.ownerId) : -1,
+    ]),
     pickups: world.pickups.map((o) => [o.id, r1(o.x), r1(o.y), o.radius, Number.isFinite(o.ttl) ? r2(o.ttl) : null, o.heal]),
     wave: {
       round: world.wave.round,
@@ -146,6 +161,25 @@ export function encodeSnapshot(world: World, t: number, acks: Record<string, num
     stats: { ...world.stats, questionTypes: world.stats.questionTypes.map((q) => ({ ...q })) },
     over: world.over,
   };
+}
+
+/** A snapshot's projectiles as ProjectileStates (positions as of the snapshot). */
+export function decodeProjectiles(s: Snapshot): ProjectileState[] {
+  return s.projectiles.map(([id, team, x, y, radius, color, vx, vy, owner]) => ({
+    id,
+    team: team === 0 ? 'player' : 'enemy',
+    ownerId: owner >= 0 ? (s.players[owner]?.id ?? '') : '',
+    x,
+    y,
+    vx,
+    vy,
+    radius,
+    damage: 0,
+    stun: 0,
+    explosionRadius: 0,
+    ttl: 1,
+    color,
+  }));
 }
 
 /** Overwrite a client's mirror World with a snapshot (the renderer then draws it as usual). */
@@ -164,21 +198,7 @@ export function applySnapshot(world: World, s: Snapshot): void {
     attackTimer: 0,
     strafe: 1,
   }));
-  world.projectiles = s.projectiles.map(([id, team, x, y, radius, color]) => ({
-    id,
-    team: team === 0 ? 'player' : 'enemy',
-    ownerId: '',
-    x,
-    y,
-    vx: 0,
-    vy: 0,
-    radius,
-    damage: 0,
-    stun: 0,
-    explosionRadius: 0,
-    ttl: 1,
-    color,
-  }));
+  world.projectiles = decodeProjectiles(s);
   world.pickups = s.pickups.map(([id, x, y, radius, ttl, heal]) => ({ id, x, y, radius, ttl: ttl ?? Infinity, heal }));
   world.wave = {
     round: s.wave.round,
@@ -215,7 +235,7 @@ export function interpolateSnapshots(a: Snapshot, b: Snapshot, alpha: number): S
     }),
     projectiles: b.projectiles.map((p) => {
       const o = oldShots.get(p[0]);
-      return o ? ([p[0], p[1], lerp(o[2], p[2]), lerp(o[3], p[3]), p[4], p[5]] as ProjectileTuple) : p;
+      return o ? ([p[0], p[1], lerp(o[2], p[2]), lerp(o[3], p[3]), p[4], p[5], p[6], p[7], p[8]] as ProjectileTuple) : p;
     }),
   };
 }

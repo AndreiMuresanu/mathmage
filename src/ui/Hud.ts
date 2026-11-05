@@ -25,6 +25,8 @@ export class Hud {
   private coopText = h('span');
   private coopFill = h('div.hud-coop-fill');
   private coop = h('div.hud-coop', { hidden: true }, this.coopText, h('div.hud-coop-bar', {}, this.coopFill));
+  /** Multiplayer: round-trip time readout under the round label. */
+  private ping = h('div.hud-ping', { hidden: true });
   /** Multiplayer client: shown while no updates arrive from the host. */
   private waiting = h(
     'div.hud-waiting',
@@ -69,6 +71,7 @@ export class Hud {
       this.round,
       this.coop,
       this.waiting,
+      this.ping,
       h('div.hud-spells', {}, ...this.spells),
       this.questionHint,
     );
@@ -184,6 +187,17 @@ export class Hud {
     const el = h('div.hud-toast', { style: `animation-duration: ${ms}ms` }, text);
     this.el.append(el);
     setTimeout(() => el.remove(), ms);
+  }
+
+  /** Show the round-trip time (`host` = this player hosts, so it's the slowest teammate's). */
+  setPing(ms: number | undefined, host: boolean): void {
+    const text = ms === undefined ? '' : `${host ? 'Hosting · ' : ''}Ping ${Math.round(ms)} ms`;
+    const level = ms === undefined ? '' : ms < 80 ? 'good' : ms < 160 ? 'ok' : 'bad';
+    this.set('ping', `${text}|${level}`, () => {
+      this.ping.hidden = !text;
+      this.ping.textContent = text;
+      this.ping.dataset.level = level;
+    });
   }
 
   setWaitingForHost(waiting: boolean): void {

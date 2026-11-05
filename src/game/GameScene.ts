@@ -1,11 +1,9 @@
 import Phaser from 'phaser';
 import type { EnemyKind, PickupState, PlayerState, SimEvent } from '../sim/types';
+import { getCharacter } from './characters';
 import { PAUSE_KEYS, type Match } from './Match';
 import { BLOCK_SIZE, CIRCLE_RADIUS, colorToInt, ensureTextures } from './textures';
 
-const PLAYER_COLOR = 0xb48cff;
-/** Other mages (co-op teammates). */
-const TEAMMATE_COLOR = 0x6ec8ff;
 const REVIVE_COLOR = 0x7dff9a;
 const ENEMY_COLORS: Record<EnemyKind, number> = { chaser: 0xff5c5c, caster: 0xe05cff };
 const HIT_FLASH_MS = 70;
@@ -166,7 +164,7 @@ export class GameScene extends Phaser.Scene {
     this.input.on('pointerdown', () => this.match.onArenaPointerDown());
 
     const p = this.match.world.player(this.match.localId)!;
-    this.playerView = this.add.image(p.x, p.y, 'circle').setTint(PLAYER_COLOR).setScale(p.radius / CIRCLE_RADIUS).setDepth(10);
+    this.playerView = this.add.image(p.x, p.y, 'circle').setTint(getCharacter(p.character).color).setScale(p.radius / CIRCLE_RADIUS).setDepth(10);
     this.aimView = this.add.image(p.x, p.y, 'circle').setTint(0xffffff).setScale(4 / CIRCLE_RADIUS).setDepth(11);
     this.overlay = this.add.graphics().setDepth(20);
     this.createFireEmitters();
@@ -269,7 +267,7 @@ export class GameScene extends Phaser.Scene {
         this.floatText(who.x, who.y - 30, 'Stunned!', '#ffd166');
         break;
       case 'playerDied':
-        this.burst(who.x, who.y, local ? PLAYER_COLOR : TEAMMATE_COLOR, 24);
+        this.burst(who.x, who.y, getCharacter(who.character).color, 24);
         if (world.players.length > 1) this.floatText(who.x, who.y - 30, 'Down!', '#ff7b7b');
         break;
       case 'revived':
@@ -294,9 +292,10 @@ export class GameScene extends Phaser.Scene {
       seen.add(pl.id);
       let view = pl.id === this.match.localId ? this.playerView : this.teammateViews.get(pl.id);
       if (!view) {
-        view = this.add.image(pl.x, pl.y, 'circle').setTint(TEAMMATE_COLOR).setScale(pl.radius / CIRCLE_RADIUS).setDepth(9);
+        view = this.add.image(pl.x, pl.y, 'circle').setScale(pl.radius / CIRCLE_RADIUS).setDepth(9);
         this.teammateViews.set(pl.id, view);
       }
+      view.setTint(getCharacter(pl.character).color);
       // Downed mages only fade slightly, so they still read as a player (the cross and ring mark them).
       view.setPosition(pl.x, pl.y).setAlpha(!pl.alive ? 0.8 : pl.invulnRemaining > 0 && blink ? 0.4 : 1);
     }

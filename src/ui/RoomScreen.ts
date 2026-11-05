@@ -1,3 +1,4 @@
+import { characterCss, getCharacter } from '../game/characters';
 import { setupLabel } from '../game/matchSetup';
 import type { RoomSession } from '../net/room';
 import { getMap } from '../sim/maps';
@@ -32,6 +33,7 @@ export function createRoomScreen(room: RoomSession, opts: { onStart(): void; onL
         return h(
           'li',
           {},
+          h('span.character-chip', { style: `background:${characterCss(getCharacter(p.character))}`, title: getCharacter(p.character).name }),
           h('strong', {}, p.name),
           p.id === room.hostId ? h('span.badge', {}, 'host') : null,
           p.id === room.selfId ? h('span.muted', {}, ' (you)') : null,

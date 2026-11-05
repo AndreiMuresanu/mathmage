@@ -71,6 +71,7 @@ public/                  Static assets (favicon, icons)
 worker/                  Online API: Cloudflare Worker + D1 (leaderboard; matchmaking later)
   src/api.ts             Routes, validation, rate limit, top-1000 trimming (tested in worker/test/)
   migrations/            D1 schema (applied with npm run worker:migrate / worker:dev)
+  src/games.ts, turn.ts  Open-games list; TURN relay credentials
   wrangler.toml          Worker + database config (put your D1 database_id here)
 shots/                   Screenshots from headless test runs (not part of the game)
 src/
@@ -91,6 +92,7 @@ src/
     Match.ts             One match: owns the World, question flow, ratings, HUD, game over
     matchSetup.ts        Game mode + ranked/custom + map; ranked always runs on DEFAULT_CONFIG
     drivers.ts           How a Match runs its World: LocalDriver (solo), HostDriver, ClientDriver
+    characters.ts        The 4 playable characters (colours now, sprites later); remembered choice
     GameScene.ts         Renders the World each frame; particles, mana-orb vortex, effects
     MenuScene.ts         Animated backdrop behind menus
     textures.ts          Generated textures (circle, pixel squares for blocky particles)
@@ -124,6 +126,7 @@ src/
     HostSetup.ts         Host game: mode, map, public/private, max players
     RoomScreen.ts        Game room: Room ID, players + pings, Start (host)
     optionCards.ts       Selectable option cards shared by the setup screens
+    CharacterPicker.ts   "<" preview ">" character selector (solo setup + Play multiplayer)
     mapCards.ts          Map preview cards shared by setup screens
     MainMenu.ts, GameOverScreen.ts, DeckManager.ts
     markup.ts            Text + $LaTeX$ → HTML via KaTeX (with font preloading)
@@ -189,7 +192,15 @@ Play multiplayer → **Host game** (mode, map, public/private, max players) or *
 
 **Hidden host tab:** browsers stop drawing hidden tabs, so while the host's tab is hidden a Web Worker ticker (`src/game/backgroundTicker.ts`) keeps the host's match running (the host's mage stands still). If updates still stop for 1.5 s, clients see "Waiting for the host…". Browsers may slow even that after a long time hidden (Chrome: about 5 minutes), so hosts are reminded to keep the game open.
 
-**Known limitations:** if the host leaves, the match ends; a few strict networks can't connect peer-to-peer until TURN relays are added (phase 6).
+**Connection drops:** mid-match, a player (or the host) whose connection drops gets 20 s to come back; their mage stands still meanwhile. Clicking Leave is immediate.
+
+**TURN relay (optional, recommended):** some networks can't connect players directly (strict NATs, school/office networks, or two different browsers on one PC). With a Cloudflare TURN key configured, the Worker hands out short-lived relay credentials (`GET /turn`) and traffic goes through the relay only when a direct connection fails. Setup (free tier, 1,000 GB/month):
+1. Cloudflare dashboard → **Realtime** → **TURN Server** → **Create TURN key**. Copy the **Key ID** and **API token**.
+2. `npx wrangler secret put TURN_KEY_ID --config worker/wrangler.toml` and `npx wrangler secret put TURN_KEY_API_TOKEN --config worker/wrangler.toml`.
+3. `npm run deploy:all`.
+4. Optional, for local testing: create `worker/.dev.vars` (git-ignored) with `TURN_KEY_ID=...` and `TURN_KEY_API_TOKEN=...` lines, then restart `npm run worker:dev`.
+
+**Known limitations:** if the host leaves for good, the match ends; a few strict networks can't connect peer-to-peer until TURN relays are added (phase 6).
 
 ## Online leaderboard (Cloudflare Worker)
 

@@ -85,7 +85,7 @@ export class World {
   }
 
   /** Add a mage beside the map's spawn point (each new player starts a little further right). */
-  addPlayer(id: string): PlayerState {
+  addPlayer(id: string, character = 'violet'): PlayerState {
     const cfg = this.cfg;
     const p: PlayerState = {
       id,
@@ -105,6 +105,7 @@ export class World {
       alive: true,
       reviveProgress: 0,
       questionStats: cfg.questionTypes.map(() => ({ attempts: 0, correct: 0, manaEarned: 0 })),
+      character,
     };
     this.resolveWalls(p);
     this.players.push(p);
@@ -270,15 +271,18 @@ export class World {
   }
 
   /** Instant beam: damages every enemy the line touches, out to the beam length. */
-  private fireLaser(p: PlayerState, spell: SpellConfig, dx: number, dy: number): void {
+  /** Where a laser fired by `p` along (dx, dy) starts and ends (it stops at the first wall). */
+  beamFrom(p: { x: number; y: number; radius: number }, spell: SpellConfig, dx: number, dy: number): { x1: number; y1: number; x2: number; y2: number } {
     const x1 = p.x + dx * p.radius;
     const y1 = p.y + dy * p.radius;
-    // The beam stops at the first wall it reaches.
     const reach = this.map.walls.reduce((t, w) => Math.min(t, segmentRectHit(x1, y1, x1 + dx * spell.beamLength, y1 + dy * spell.beamLength, w) ?? 1), 1);
-    const x2 = x1 + dx * spell.beamLength * reach;
-    const y2 = y1 + dy * spell.beamLength * reach;
+    return { x1, y1, x2: x1 + dx * spell.beamLength * reach, y2: y1 + dy * spell.beamLength * reach };
+  }
+
+  private fireLaser(p: PlayerState, spell: SpellConfig, dx: number, dy: number): void {
+    const { x1, y1, x2, y2 } = this.beamFrom(p, spell, dx, dy);
     const halfWidth = spell.radius;
-    this.events.push({ type: 'beam', x1, y1, x2, y2, width: halfWidth * 2, color: spell.color });
+    this.events.push({ type: 'beam', playerId: p.id, x1, y1, x2, y2, width: halfWidth * 2, color: spell.color });
     const damage = spell.damage * this.cfg.player.damageDealtMult;
     const hit = this.enemies.filter((e) => distanceToSegment(e.x, e.y, x1, y1, x2, y2) <= e.radius + halfWidth);
     for (const e of hit) this.damageEnemy(e, damage);

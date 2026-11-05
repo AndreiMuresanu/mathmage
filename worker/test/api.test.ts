@@ -234,3 +234,47 @@ describe('open games list', () => {
     expect((await post(listing(change), 1000)).status).toBe(400);
   });
 });
+
+describe('TURN relay credentials', () => {
+  const get = (env: Env, fetchFn: typeof fetch) => handle(new Request(`${BASE}/turn`), env, Date.now(), fetchFn);
+  const reply = (status: number, body: unknown) => new Response(JSON.stringify(body), { status });
+  const secrets = { TURN_KEY_ID: 'key123', TURN_KEY_API_TOKEN: 'secret-token' };
+
+  it('is "not configured" (404) without a TURN key, so the game connects without a relay', async () => {
+    const res = await get({ DB: memoryDb() }, () => Promise.reject(new Error('should not be called')));
+    expect(res.status).toBe(404);
+  });
+
+  it('mints credentials with the server-side token and returns only relay servers', async () => {
+    const calls: { url: string; auth: string | null }[] = [];
+    const fake = (async (url: string, init: RequestInit) => {
+      calls.push({ url, auth: new Headers(init.headers).get('Authorization') });
+      return reply(201, {
+        iceServers: [
+          { urls: ['stun:stun.cloudflare.com:3478'] },
+          { urls: ['turn:turn.cloudflare.com:3478?transport=udp', 'turns:turn.cloudflare.com:443?transport=tcp'], username: 'u', credential: 'c' },
+        ],
+      });
+    }) as unknown as typeof fetch;
+    const res = await get({ DB: memoryDb(), ...secrets }, fake);
+    expect(res.status).toBe(200);
+    const body = (await res.json()) as { iceServers: { urls: string[]; username: string }[] };
+    expect(body.iceServers).toEqual([
+      { urls: ['turn:turn.cloudflare.com:3478?transport=udp', 'turns:turn.cloudflare.com:443?transport=tcp'], username: 'u', credential: 'c' },
+    ]);
+    expect(calls[0].url).toContain('/turn/keys/key123/credentials/generate-ice-servers');
+    expect(calls[0].auth).toBe('Bearer secret-token');
+    expect(JSON.stringify(body)).not.toContain('secret-token');
+  });
+
+  it('falls back to the older endpoint shape, and reports upstream failures as 502', async () => {
+    const older = (async (url: string) =>
+      url.endsWith('generate-ice-servers')
+        ? reply(404, {})
+        : reply(201, { iceServers: { urls: ['turn:turn.cloudflare.com:3478'], username: 'u2', credential: 'c2' } })) as unknown as typeof fetch;
+    const ok = (await (await get({ DB: memoryDb(), ...secrets }, older)).json()) as { iceServers: { username: string }[] };
+    expect(ok.iceServers[0].username).toBe('u2');
+    const down = (async () => reply(500, {})) as unknown as typeof fetch;
+    expect((await get({ DB: memoryDb(), ...secrets }, down)).status).toBe(502);
+  });
+});

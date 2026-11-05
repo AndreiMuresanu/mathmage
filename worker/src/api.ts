@@ -16,6 +16,7 @@ import {
 } from '../../src/online/leaderboardTypes';
 import { MAPS } from '../../src/sim/maps';
 import { deleteGame, listGames, upsertGame } from './games';
+import { turnCredentials } from './turn';
 
 /** The slice of Cloudflare D1's API this Worker uses (so tests can swap in plain SQLite). */
 export interface Db {
@@ -34,6 +35,9 @@ export interface Env {
   ADMIN_KEY?: string;
   /** Value for Access-Control-Allow-Origin, e.g. the GitHub Pages origin. Defaults to '*'. */
   ALLOWED_ORIGIN?: string;
+  /** Cloudflare TURN key (Realtime → TURN Server); both set with `wrangler secret put`. Optional. */
+  TURN_KEY_ID?: string;
+  TURN_KEY_API_TOKEN?: string;
 }
 
 /** Submissions allowed per IP per hour. */
@@ -59,7 +63,7 @@ export class HttpError extends Error {
   }
 }
 
-export async function handle(request: Request, env: Env, now = Date.now()): Promise<Response> {
+export async function handle(request: Request, env: Env, now = Date.now(), fetchFn: typeof fetch = fetch): Promise<Response> {
   const cors = {
     'Access-Control-Allow-Origin': env.ALLOWED_ORIGIN || '*',
     'Access-Control-Allow-Methods': 'GET, POST, DELETE, OPTIONS',
@@ -80,6 +84,7 @@ export async function handle(request: Request, env: Env, now = Date.now()): Prom
       return json(await submitScore(env.DB, body, ip, now), 201);
     }
     if (url.pathname === '/games' && request.method === 'GET') return json(await listGames(env.DB, now));
+    if (url.pathname === '/turn' && request.method === 'GET') return json(await turnCredentials(env, fetchFn));
     if (url.pathname === '/games' && request.method === 'POST') {
       const body = await request.json().catch(() => {
         throw new HttpError(400, 'Body must be JSON.');

@@ -276,7 +276,7 @@ A snapshot with 60 enemies is about 3 KB of JSON, so about 60 KB/s per client.
 
 ## Phasing (implemented one at a time)
 
-Status (2026-11-02): **phases 1–5 done** (4 and 5 were built together: online co-op with the full menus). Phases 6–7 not started. The phase 4–5 Worker changes (open-games list, migration 0003) need `npm run deploy:all`.
+Status (2026-11-04): **phases 1–6 done** (4 and 5 were built together). Phase 7 (FFA PvP rules) and host migration not started. Worker changes from phases 4–6 need `npm run deploy:all`; the TURN relay also needs a Cloudflare TURN key (README → Multiplayer).
 
 Phase 1 notes:
 - Match setup lives in `src/game/matchSetup.ts` (`MatchSetup`, `matchConfig`).
@@ -304,6 +304,13 @@ Phases 4–5 notes (online co-op):
 - Menus: Play multiplayer (name) → Join game (Worker list refreshed every 5 s + Room ID) / Host game (Ranked co-op, Custom co-op, FFA disabled; map; public/private; 2–4 players) → Game room (Room ID + copy, players + pings, Start). Game over: "Back to room" / "Leave".
 - Worker: `/games` (POST create → secret; heartbeat with secret every 15 s; listings expire after 45 s; DELETE with secret), `worker/src/games.ts`, migration `0003_games.sql`.
 - Ranked co-op: clients send their peak ELO (`peak`), the host submits one team entry, and everyone sees the ranks (`submitted`).
+Phase 6 notes (polish):
+- Projectiles are drawn from the newest snapshot moved along their velocity (not 100 ms behind); snapshot projectile tuples now carry velocity + owner (PROTOCOL_VERSION 2).
+- Instant casts: a client shows a cosmetic "ghost" projectile (or its laser beam) the moment it casts, using predicted cooldowns; the host's real projectile replaces the ghost, lined up using half the measured ping. Own beam events from the host are skipped.
+- Ping: `PingMeter` measures round trips every 2 s; the HUD shows "Ping N ms" (host: "Hosting · Ping" = the slowest client), coloured green / yellow / red.
+- Reconnects: `RoomSession.reconnectGraceMs` (20 s). Mid-match, a dropped player stays (standing still) and the host's mage stays for clients; if they reconnect in time play continues, otherwise they're removed / the room closes. A deliberate Leave sends `bye` so nobody waits.
+- TURN: Worker `GET /turn` (worker/src/turn.ts) mints Cloudflare TURN credentials from the `TURN_KEY_ID` / `TURN_KEY_API_TOKEN` secrets; the client fetches them (3 s timeout, cached 1 h) and passes them to Trystero as `turnConfig`. Without the secrets it returns 404 and the game connects as before.
+
 - Hidden host tab: `Match` switches the host to a Web Worker ticker (`src/game/backgroundTicker.ts`, ~30 Hz) while `document.hidden`, so the match keeps running with the host standing still; a hidden client sends one idle intent so its mage stops. Clients show "Waiting for the host…" after 1.5 s without a snapshot (`ClientDriver.hostSilentMs`). Hosts see a reminder in the room and at match start. Very long background periods may still be throttled by the browser.
 
 1. **Menus and match setup** (no networking or backend):

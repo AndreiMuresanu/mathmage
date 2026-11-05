@@ -9,6 +9,7 @@ export const JOIN_TIMEOUT_MS = 15_000;
 export interface HostOptions {
   code: string;
   name: string;
+  character?: string;
   setup: MatchSetup;
   maxPlayers: number;
   /** Listed on the Worker's open-games list (the host's UI handles the heartbeat). */
@@ -21,6 +22,12 @@ export interface HostOptions {
  * this session) outlives individual matches, so a team can play again without re-joining.
  */
 export class RoomSession {
+  /**
+   * During a match, a player (or the host) whose connection drops gets this long to come back
+   * before they're treated as gone. Their mage stays, standing still, meanwhile.
+   */
+  static reconnectGraceMs = 20_000;
+
   readonly transport: Transport;
   readonly code: string;
   readonly isHost: boolean;
@@ -37,6 +44,9 @@ export class RoomSession {
   /** The room is gone for us (host left, refused, ...). */
   onClosed: ((reason: string) => void) | null = null;
   private leaveListeners = new Set<(peerId: string) => void>();
+  private awayListeners = new Set<(peerId: string) => void>();
+  /** Players (or, for a client, the host) who dropped mid-match and might come back. */
+  private away = new Map<string, ReturnType<typeof setTimeout>>();
   private closed = false;
 
   private constructor(transport: Transport, code: string, isHost: boolean, setup: MatchSetup, maxPlayers: number, isPublic: boolean) {
@@ -48,6 +58,7 @@ export class RoomSession {
     this.maxPlayers = maxPlayers;
     this.isPublic = isPublic;
     transport.onPeerLeave = (id) => this.peerLeft(id);
+    transport.on(CH.bye, (_data, from) => this.peerBye(from));
     transport.on(CH.start, (data, from) => {
       if (from !== this.hostId || this.isHost) return;
       this.started = true;
@@ -58,18 +69,21 @@ export class RoomSession {
   /** Open a room as its host. */
   static host(transport: Transport, opts: HostOptions): RoomSession {
     const room = new RoomSession(transport, opts.code, true, opts.setup, opts.maxPlayers, opts.isPublic);
-    room.players = [{ id: transport.selfId, name: opts.name }];
+    room.players = [{ id: transport.selfId, name: opts.name, character: opts.character }];
     transport.on(CH.hello, (data, from) => room.hostHandleHello(data as HelloMsg, from));
     // Re-send the roster when anyone connects, so late connections still learn it.
-    transport.onPeerJoin = () => room.broadcastRoster();
+    transport.onPeerJoin = (id) => {
+      room.peerBack(id);
+      room.broadcastRoster();
+    };
     return room;
   }
 
   /** Join someone's room; resolves once the host has accepted us. */
-  static join(transport: Transport, code: string, name: string, timeoutMs = JOIN_TIMEOUT_MS): Promise<RoomSession> {
+  static join(transport: Transport, code: string, name: string, timeoutMs = JOIN_TIMEOUT_MS, character?: string): Promise<RoomSession> {
     const placeholder: MatchSetup = { mode: 'coop', ranked: false, map: 'empty' };
     const room = new RoomSession(transport, code, false, placeholder, 4, false);
-    const hello: HelloMsg = { v: PROTOCOL_VERSION, game: GAME_VERSION, name };
+    const hello: HelloMsg = { v: PROTOCOL_VERSION, game: GAME_VERSION, name, character };
     return new Promise((resolve, reject) => {
       let accepted = false;
       const timer = setTimeout(() => {
@@ -99,7 +113,10 @@ export class RoomSession {
         reject(new Error((data as RefuseMsg).reason));
       });
       // Say hello to everyone already here and to anyone who connects later (the host replies).
-      transport.onPeerJoin = (id) => transport.send(CH.hello, hello, id);
+      transport.onPeerJoin = (id) => {
+        room.peerBack(id);
+        transport.send(CH.hello, hello, id);
+      };
       transport.send(CH.hello, hello);
     });
   }
@@ -135,16 +152,31 @@ export class RoomSession {
     this.broadcastRoster();
   }
 
-  /** Register a callback for peers leaving (drivers use this to drop disconnected mages). */
+  /** Register a callback for peers leaving for good (drivers use this to drop their mages). */
   addPeerLeaveListener(fn: (peerId: string) => void): () => void {
     this.leaveListeners.add(fn);
     return () => this.leaveListeners.delete(fn);
   }
 
+  /** Register a callback for a peer's connection dropping mid-match (they may still come back). */
+  addPeerAwayListener(fn: (peerId: string) => void): () => void {
+    this.awayListeners.add(fn);
+    return () => this.awayListeners.delete(fn);
+  }
+
+  /** Whether `id` dropped out and we're waiting to see if they come back. */
+  isAway(id: string): boolean {
+    return this.away.has(id);
+  }
+
   leave(): void {
     if (this.closed) return;
     this.closed = true;
-    this.transport.leave();
+    for (const timer of this.away.values()) clearTimeout(timer);
+    this.away.clear();
+    // Say goodbye first so nobody waits for us to reconnect, and give it a moment to go out.
+    this.transport.send(CH.bye, {});
+    setTimeout(() => this.transport.leave(), 150);
   }
 
   // ---- internals
@@ -158,7 +190,8 @@ export class RoomSession {
     if (this.started) return refuse('That game has already started.');
     if (this.players.length >= this.maxPlayers) return refuse('That room is full.');
     const name = String(hello.name ?? '').trim().slice(0, 20) || `Mage ${this.players.length + 1}`;
-    this.players.push({ id: from, name });
+    const character = typeof hello.character === 'string' ? hello.character.slice(0, 20) : undefined;
+    this.players.push({ id: from, name, character });
     this.broadcastRoster();
   }
 
@@ -185,6 +218,43 @@ export class RoomSession {
   }
 
   private peerLeft(id: string): void {
+    const matters = this.isHost ? this.players.some((p) => p.id === id) : id === this.hostId;
+    if (!matters) return;
+    // Mid-match, a dropped connection might come back (a network blip): wait a little first.
+    if (this.started && !this.away.has(id)) {
+      for (const fn of this.awayListeners) fn(id);
+      this.away.set(
+        id,
+        setTimeout(() => {
+          this.away.delete(id);
+          this.gone(id);
+        }, RoomSession.reconnectGraceMs),
+      );
+      return;
+    }
+    this.gone(id);
+  }
+
+  /** A peer left on purpose: no reconnect grace. */
+  private peerBye(id: string): void {
+    const timer = this.away.get(id);
+    if (timer !== undefined) clearTimeout(timer);
+    this.away.delete(id);
+    const matters = this.isHost ? this.players.some((p) => p.id === id) : id === this.hostId;
+    if (matters) this.gone(id);
+  }
+
+  /** A peer that dropped mid-match reconnected in time. */
+  private peerBack(id: string): void {
+    const timer = this.away.get(id);
+    if (timer === undefined) return;
+    clearTimeout(timer);
+    this.away.delete(id);
+  }
+
+  /** A peer has left for good. */
+  private gone(id: string): void {
+    if (this.closed) return;
     for (const fn of this.leaveListeners) fn(id);
     if (!this.isHost && id === this.hostId) {
       this.leave();

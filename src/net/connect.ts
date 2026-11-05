@@ -1,3 +1,4 @@
+import { fetchTurnServers } from '../online/turn';
 import { BroadcastChannelTransport, type Transport } from './transport';
 
 /**
@@ -8,9 +9,10 @@ export async function connectToRoom(roomCode: string): Promise<Transport> {
   if (import.meta.env.DEV && new URLSearchParams(location.search).get('net') === 'local') {
     return new BroadcastChannelTransport(roomCode);
   }
-  // Loaded on demand so solo players never download the WebRTC stack.
-  const { TrysteroTransport } = await import('./trysteroTransport');
-  return new TrysteroTransport(roomCode);
+  // Loaded on demand so solo players never download the WebRTC stack. Relay (TURN) servers are
+  // optional: without them most players still connect directly.
+  const [{ TrysteroTransport }, turn] = await Promise.all([import('./trysteroTransport'), fetchTurnServers()]);
+  return new TrysteroTransport(roomCode, turn);
 }
 
 /** Room codes: 6 characters without look-alikes (no O/0, I/1/L). */

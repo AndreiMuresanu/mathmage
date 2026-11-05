@@ -41,6 +41,8 @@ export interface PlayerState {
   reviveProgress: number;
   /** This player's answers, indexed like cfg.questionTypes (the game-over table shows your own). */
   questionStats: QuestionTypeStats[];
+  /** Cosmetic character id (see game/characters.ts); doesn't affect the simulation. */
+  character: string;
 }
 
 export type EnemyKind = 'chaser' | 'caster';
@@ -130,7 +132,7 @@ export type SimEvent =
   | { type: 'enemyDied'; x: number; y: number; kind: EnemyKind }
   | { type: 'healed'; playerId: string; amount: number; x: number; y: number }
   | { type: 'explosion'; x: number; y: number; radius: number; color: string; targets: { id: number; x: number; y: number; radius: number }[] }
-  | { type: 'beam'; x1: number; y1: number; x2: number; y2: number; width: number; color: string }
+  | { type: 'beam'; playerId: string; x1: number; y1: number; x2: number; y2: number; width: number; color: string }
   | { type: 'roundStart'; round: number }
   | { type: 'roundCleared'; round: number }
   | { type: 'gameOver' };

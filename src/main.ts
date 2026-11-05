@@ -21,6 +21,7 @@ import { RoomSession } from './net/room';
 import { RoomListing } from './online/games';
 import { savedPlayerName, savePlayerName } from './online/leaderboard';
 import { World } from './sim/world';
+import { saveCharacter, savedCharacter } from './game/characters';
 import { createHostSetup, type HostChoices } from './ui/HostSetup';
 import { createJoinScreen } from './ui/JoinScreen';
 import { createRoomScreen } from './ui/RoomScreen';
@@ -84,12 +85,20 @@ function showMenu(): void {
 
 /** Ranked or custom, as last chosen on the solo setup screen. */
 let soloRanked = true;
+/** The player's character (remembered between visits). */
+let character = savedCharacter();
+const selectCharacter = (id: string) => {
+  character = id;
+  saveCharacter(id);
+};
 
 function showSoloSetup(): void {
   showScreen(
     createSoloSetup({
       map: config.map,
       ranked: soloRanked,
+      character,
+      onSelectCharacter: selectCharacter,
       onSelectMap: (id) => {
         config = { ...config, map: id };
         saveCurrentConfig(config);
@@ -144,7 +153,9 @@ function showDecks(): void {
 /** Start a solo match. */
 function startMatch(setup: MatchSetup): void {
   const cfg = matchConfig(setup, config);
-  runMatch(cfg, setup, new LocalDriver(new World(cfg)), {
+  const world = new World(cfg);
+  world.players[0].character = character;
+  runMatch(cfg, setup, new LocalDriver(world), {
     playAgain: () => startMatch(setup),
     exitToMenu: showMenu,
     viewLeaderboard: () => showLeaderboard({ map: setup.map, mode: 'solo' }),
@@ -176,6 +187,8 @@ function showMultiplayer(message?: string): void {
     createMultiplayerScreen({
       name: playerName,
       message,
+      character,
+      onSelectCharacter: selectCharacter,
       onNameChange: (name) => {
         playerName = name;
         if (name) savePlayerName(name);
@@ -192,7 +205,7 @@ function showJoin(): void {
     createJoinScreen({
       onJoin: async (code) => {
         const transport = await connectToRoom(code);
-        enterRoom(await RoomSession.join(transport, code, playerName));
+        enterRoom(await RoomSession.join(transport, code, playerName, undefined, character));
       },
       onBack: () => showMultiplayer(),
     }),
@@ -211,7 +224,7 @@ function showHostSetup(): void {
         const code = newRoomCode();
         const setup: MatchSetup = { mode: hostChoices.mode === 'ffa' ? 'ffa' : 'coop', ranked: hostChoices.mode === 'coop-ranked', map: hostChoices.map };
         const transport = await connectToRoom(code);
-        const hosted = RoomSession.host(transport, { code, name: playerName, setup, maxPlayers: hostChoices.maxPlayers, isPublic: hostChoices.isPublic });
+        const hosted = RoomSession.host(transport, { code, name: playerName, character, setup, maxPlayers: hostChoices.maxPlayers, isPublic: hostChoices.isPublic });
         if (hostChoices.isPublic) {
           listing = new RoomListing({ code, hostName: playerName, mode: setup.mode === 'ffa' ? 'ffa' : 'coop', ranked: setup.ranked, map: setup.map, players: 1, maxPlayers: hostChoices.maxPlayers });
           listing.start();
@@ -253,6 +266,10 @@ function startNetMatch(session: RoomSession, msg: StartMsg): void {
   listing?.stop();
   roomScreen = null;
   const world = new World(msg.config, msg.seed, msg.players.map((p) => p.id));
+  for (const p of msg.players) {
+    const mage = world.player(p.id);
+    if (mage && p.character) mage.character = p.character;
+  }
   const driver = session.isHost ? new HostDriver(world, session) : new ClientDriver(world, session);
   runMatch(msg.config, msg.setup, driver, {
     playAgain: () => {

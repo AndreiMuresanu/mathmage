@@ -1,10 +1,13 @@
 import { NAME_MAX_LENGTH } from '../online/leaderboardTypes';
+import { createCharacterPicker } from './CharacterPicker';
 import { h } from './dom';
 
 /** Play multiplayer: your name, then join an open game or host one. */
 export function createMultiplayerScreen(opts: {
   name: string;
   onNameChange(name: string): void;
+  character: string;
+  onSelectCharacter(id: string): void;
   onJoin(): void;
   onHost(): void;
   onBack(): void;
@@ -31,6 +34,7 @@ export function createMultiplayerScreen(opts: {
       h('div.screen-header', {}, h('h1', {}, 'Multiplayer'), h('button', { onclick: opts.onBack }, 'Back')),
       opts.message ? h('p.notice', {}, opts.message) : null,
       h('label.field-label', {}, 'Your name', nameInput),
+      h('div.field-label', {}, 'Your character', createCharacterPicker(opts.character, opts.onSelectCharacter)),
       h(
         'div.menu-buttons',
         {},
