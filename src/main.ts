@@ -16,7 +16,7 @@ import { createLeaderboardScreen, type LeaderboardView } from './ui/LeaderboardS
 import { matchConfig, type MatchSetup } from './game/matchSetup';
 import { ClientDriver, HostDriver, LocalDriver, type MatchDriver } from './game/drivers';
 import { connectToRoom, newRoomCode } from './net/connect';
-import type { StartMsg } from './net/protocol';
+import type { RoomPlayer, StartMsg } from './net/protocol';
 import { RoomSession } from './net/room';
 import { RoomListing } from './online/games';
 import { savedPlayerName, savePlayerName } from './online/leaderboard';
@@ -162,11 +162,17 @@ function startMatch(setup: MatchSetup): void {
   });
 }
 
-function runMatch(cfg: GameConfig, setup: MatchSetup, driver: MatchDriver, callbacks: Omit<ConstructorParameters<typeof Match>[4], 'onTypingChange'>): void {
+function runMatch(
+  cfg: GameConfig,
+  setup: MatchSetup,
+  driver: MatchDriver,
+  callbacks: Omit<ConstructorParameters<typeof Match>[4], 'onTypingChange'>,
+  players: RoomPlayer[] = [],
+): void {
   endMatch();
   showScreen(null);
   const gameScene = game.scene.getScene('game') as GameScene;
-  match = new Match(cfg, setup, registry, uiRoot, { ...callbacks, onTypingChange: (typing) => gameScene.setTyping(typing) }, driver);
+  match = new Match(cfg, setup, registry, uiRoot, { ...callbacks, onTypingChange: (typing) => gameScene.setTyping(typing) }, driver, players);
   game.scene.stop('menu');
   game.scene.start('game', { match });
 }
@@ -219,6 +225,11 @@ function showHostSetup(): void {
       onChange: (c) => {
         hostChoices = c;
       },
+      ffa: config.ffa,
+      onFfaChange: (ffa) => {
+        config = { ...config, ffa };
+        saveCurrentConfig(config);
+      },
       onSettings: () => showSettings(showHostSetup),
       onCreate: async () => {
         const code = newRoomCode();
@@ -270,6 +281,10 @@ function startNetMatch(session: RoomSession, msg: StartMsg): void {
     const mage = world.player(p.id);
     if (mage && p.character) mage.character = p.character;
   }
+  if (msg.setup.mode === 'ffa') {
+    world.pvp = true;
+    if (session.isHost) world.placeForPvp(); // clients get the positions from snapshots
+  }
   const driver = session.isHost ? new HostDriver(world, session) : new ClientDriver(world, session);
   runMatch(msg.config, msg.setup, driver, {
     playAgain: () => {
@@ -282,7 +297,7 @@ function startNetMatch(session: RoomSession, msg: StartMsg): void {
     },
     exitToMenu: () => showMultiplayer(),
     viewLeaderboard: () => showLeaderboard({ map: msg.setup.map, mode: 'coop' }),
-  });
+  }, msg.players);
 }
 
 /** Leave the current room, if any (and take its public listing down). */

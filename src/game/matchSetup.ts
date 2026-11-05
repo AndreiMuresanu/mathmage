@@ -22,6 +22,7 @@ const MODE_IN_LABEL: Record<GameMode, string> = { solo: 'solo', coop: 'co-op PvE
 
 /** "Ranked solo", "Custom co-op PvE", ... */
 export function setupLabel(setup: MatchSetup): string {
+  if (setup.mode === 'ffa') return 'FFA PvP'; // always played on the host's settings, never ranked
   return `${setup.ranked ? 'Ranked' : 'Custom'} ${MODE_IN_LABEL[setup.mode]}`;
 }
 

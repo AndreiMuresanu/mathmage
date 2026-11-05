@@ -12,7 +12,7 @@ export const LISTING_TTL_MS = 45_000;
 /** How often a host refreshes its listing. */
 export const LISTING_HEARTBEAT_MS = 15_000;
 export const MIN_ROOM_PLAYERS = 2;
-export const MAX_ROOM_PLAYERS = 4;
+export const MAX_ROOM_PLAYERS = 10;
 
 export interface GameListing {
   code: string;

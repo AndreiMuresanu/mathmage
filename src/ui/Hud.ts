@@ -2,6 +2,7 @@ import type { GameConfig } from '../config/gameConfig';
 import type { World } from '../sim/world';
 import type { PlayerState } from '../sim/types';
 import { h } from './dom';
+import { goalText, KillBoard } from './pvp';
 
 function bar(kind: string) {
   const fill = h('div.bar-fill');
@@ -35,6 +36,9 @@ export class Hud {
     h('span', {}, 'Their connection dropped out, or their game is in a background tab.'),
   );
   private cache = new Map<string, string>();
+  /** FFA PvP: kills per player, under the bars. */
+  private killboard = new KillBoard();
+  private nameOf: (id: string) => string = () => 'Mage';
 
   constructor(cfg: GameConfig) {
     this.spells = cfg.spells.map((s, i) =>
@@ -67,7 +71,7 @@ export class Hud {
     this.el = h(
       'div.hud',
       {},
-      h('div.hud-bars', {}, this.hp.el, this.mana.el),
+      h('div.hud-bars', {}, this.hp.el, this.mana.el, this.killboard.el),
       this.round,
       this.coop,
       this.waiting,
@@ -103,8 +107,9 @@ export class Hud {
     });
 
     const w = world.wave;
-    const roundText =
-      w.phase === 'break'
+    const roundText = world.pvp
+      ? goalText(world) + (world.cfg.ffa.enemies && w.round > 0 ? ` · Round ${w.round}` : '')
+      : w.phase === 'break'
         ? w.round === 0
           ? `First wave in ${Math.ceil(w.timer)}`
           : `Round ${w.round} cleared! Next in ${Math.ceil(w.timer)}`
@@ -123,7 +128,8 @@ export class Hud {
       });
     });
 
-    this.updateCoop(world, p);
+    if (world.pvp) this.killboard.update(world, this.nameOf, playerId);
+    else this.updateCoop(world, p);
 
     const locked = !world.canAnswer(playerId);
     this.set('questionLocked', String(locked), () => this.questionHint.classList.toggle('locked', locked));
@@ -180,6 +186,11 @@ export class Hud {
     this.mana.el.classList.remove('absorb');
     void this.mana.el.offsetWidth; // restart the animation
     this.mana.el.classList.add('absorb');
+  }
+
+  /** How to name players (multiplayer: from the room's roster). */
+  setNames(nameOf: (id: string) => string): void {
+    this.nameOf = nameOf;
   }
 
   /** A short message in the middle of the screen (e.g. "Only the host can pause"). */

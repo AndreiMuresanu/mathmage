@@ -78,6 +78,29 @@ export const CONFIG_GROUPS: GroupDef[] = [
     ],
   },
   {
+    kind: 'object',
+    title: 'FFA PvP',
+    path: 'ffa',
+    fields: [
+      {
+        key: 'winCondition',
+        label: 'Win condition',
+        type: 'select',
+        options: [
+          ['kills', 'First to N kills'],
+          ['time', 'Time limit (most kills)'],
+          ['endless', 'Endless'],
+        ],
+      },
+      num('killTarget', 'Kills to win', 1, 100, 1),
+      num('timeLimitMinutes', 'Time limit (minutes)', 1, 60, 1),
+      num('respawnSeconds', 'Respawn delay (s)', 0, 30, 0.5),
+      num('spawnProtectionSeconds', 'Spawn protection (s)', 0, 10, 0.5, 'Invincibility right after respawning.'),
+      bool('enemies', 'Enemies', 'Enemy waves spawn too, so players fight monsters and each other.'),
+      num('enemyAmount', 'Enemy amount ×', 0.25, 5, 0.25, 'Wave size multiplier when enemies are on.'),
+    ],
+  },
+  {
     kind: 'list',
     title: 'Spells',
     path: 'spells',

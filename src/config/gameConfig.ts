@@ -115,6 +115,23 @@ export interface AlgebraTricksConfig {
   rearranging: boolean;
 }
 
+export type FfaWinCondition = 'kills' | 'time' | 'endless';
+
+export interface FfaConfig {
+  /** 'kills': first to `killTarget`; 'time': most kills after `timeLimitMinutes`; 'endless': no winner. */
+  winCondition: FfaWinCondition;
+  killTarget: number;
+  timeLimitMinutes: number;
+  /** Seconds between dying and respawning (the death screen shows meanwhile). */
+  respawnSeconds: number;
+  /** Invincibility right after respawning, in seconds. */
+  spawnProtectionSeconds: number;
+  /** Whether enemy waves spawn too (players fight monsters and each other). */
+  enemies: boolean;
+  /** Wave size multiplier when enemies are on (1 = as in co-op). */
+  enemyAmount: number;
+}
+
 export interface CoopConfig {
   /** Seconds a teammate must hold the revive key next to a downed mage. */
   reviveSeconds: number;
@@ -178,6 +195,8 @@ export interface GameConfig {
   map: string;
   /** Co-op PvE: reviving downed teammates. */
   coop: CoopConfig;
+  /** FFA PvP: respawning, win condition, optional enemies. */
+  ffa: FfaConfig;
   adaptive: AdaptiveConfig;
   medium: MediumConfig;
   algebraTricks: AlgebraTricksConfig;
@@ -284,6 +303,15 @@ export const DEFAULT_CONFIG: GameConfig = {
     },
   ],
   map: 'empty',
+  ffa: {
+    winCondition: 'kills',
+    killTarget: 5,
+    timeLimitMinutes: 5,
+    respawnSeconds: 3,
+    spawnProtectionSeconds: 2,
+    enemies: false,
+    enemyAmount: 1,
+  },
   coop: {
     reviveSeconds: 1.5,
     reviveInvulnSeconds: 3,

@@ -226,7 +226,7 @@ describe('open games list', () => {
     ['a bad code', { code: 'no' }],
     ['an unknown mode', { mode: 'solo' }],
     ['an unknown map', { map: 'atlantis' }],
-    ['max players above 4', { maxPlayers: 5 }],
+    ['max players above 10', { maxPlayers: 11 }],
     ['more players than the max', { players: 3, maxPlayers: 2 }],
     ['a blank host name', { hostName: '  ' }],
   ])('rejects %s', async (_label, change) => {

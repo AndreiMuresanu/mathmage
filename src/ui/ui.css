@@ -1357,3 +1357,143 @@ button.toggle.selected {
 .hud-ping[data-level='good'] { color: #7dff9a; }
 .hud-ping[data-level='ok'] { color: #ffd166; }
 .hud-ping[data-level='bad'] { color: #ff7b7b; }
+
+/* ---------- FFA PvP ---------- */
+
+.hud-killboard {
+  margin-top: 0.3em;
+  padding: 0.3em 0.5em;
+  background: rgba(0, 0, 0, 0.5);
+  border-radius: 6px;
+  width: 13em;
+  font-size: 0.85em;
+}
+
+.killboard-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-weight: 600;
+  color: var(--muted);
+}
+
+.killboard-toggle {
+  pointer-events: auto;
+  width: 1.6em;
+  height: 1.6em;
+  padding: 0;
+  line-height: 1;
+  font-weight: 700;
+}
+
+.kill-rows[hidden] {
+  display: none;
+}
+
+.kill-row {
+  display: flex;
+  align-items: center;
+  gap: 0.45em;
+  padding: 0.12em 0;
+}
+
+.kill-row.me .kill-name {
+  color: var(--accent);
+  font-weight: 600;
+}
+
+.kill-name {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.kill-count {
+  font-weight: 700;
+  min-width: 1.5em;
+  text-align: right;
+}
+
+.kill-deaths {
+  color: var(--muted);
+  font-size: 0.9em;
+}
+
+/* Death screen: a panel over the arena, which stays visible around it. */
+.death-panel {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: min(22em, 80%);
+  padding: 0.9em 1.1em;
+  background: rgba(10, 10, 24, 0.78);
+  border: 1px solid rgba(255, 123, 123, 0.6);
+  border-radius: 10px;
+  text-align: center;
+  pointer-events: none;
+}
+
+.death-panel[hidden] {
+  display: none;
+}
+
+.death-panel h2 {
+  margin: 0 0 0.2em;
+  color: #ff9b9b;
+  font-size: 1.25em;
+}
+
+.death-panel .respawn {
+  color: var(--muted);
+  margin-bottom: 0.6em;
+}
+
+.death-panel .kill-rows {
+  text-align: left;
+}
+
+/* Number with "<" and ">" either side. */
+.stepper {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6em;
+}
+
+.stepper-arrow {
+  width: 2em;
+  height: 2em;
+  padding: 0;
+  border-radius: 50%;
+  font-weight: 700;
+}
+
+.stepper-value {
+  min-width: 3.5em;
+  text-align: center;
+  font-weight: 600;
+}
+
+.host-options {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.8em 1.4em;
+  margin: 0.3em 0;
+}
+
+.host-options label {
+  display: flex;
+  align-items: center;
+  gap: 0.6em;
+  color: var(--muted);
+}
+
+.pvp-results-title {
+  color: var(--accent);
+}
+
+.pvp-options[hidden] {
+  display: none;
+}

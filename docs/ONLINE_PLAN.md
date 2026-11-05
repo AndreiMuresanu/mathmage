@@ -276,7 +276,7 @@ A snapshot with 60 enemies is about 3 KB of JSON, so about 60 KB/s per client.
 
 ## Phasing (implemented one at a time)
 
-Status (2026-11-04): **phases 1–6 done** (4 and 5 were built together). Phase 7 (FFA PvP rules) and host migration not started. Worker changes from phases 4–6 need `npm run deploy:all`; the TURN relay also needs a Cloudflare TURN key (README → Multiplayer).
+Status (2026-11-05): **phases 1–7 done** (4 and 5 were built together). Host migration not started. Worker changes from phases 4–6 need `npm run deploy:all`; the TURN relay also needs a Cloudflare TURN key (README → Multiplayer).
 
 Phase 1 notes:
 - Match setup lives in `src/game/matchSetup.ts` (`MatchSetup`, `matchConfig`).
@@ -304,6 +304,12 @@ Phases 4–5 notes (online co-op):
 - Menus: Play multiplayer (name) → Join game (Worker list refreshed every 5 s + Room ID) / Host game (Ranked co-op, Custom co-op, FFA disabled; map; public/private; 2–4 players) → Game room (Room ID + copy, players + pings, Start). Game over: "Back to room" / "Leave".
 - Worker: `/games` (POST create → secret; heartbeat with secret every 15 s; listings expire after 45 s; DELETE with secret), `worker/src/games.ts`, migration `0003_games.sql`.
 - Ranked co-op: clients send their peak ELO (`peak`), the host submits one team entry, and everyone sees the ranks (`submitted`).
+Phase 7 notes (FFA PvP):
+- `World.pvp`: other players are opponents (full damage; never yourself), kills are credited to the last player who hit you within 10 s (`PlayerState.kills/deaths/lastHit`), no revives, and dead players respawn after `ffa.respawnSeconds` at the open spot farthest from everyone, with `ffa.spawnProtectionSeconds` of invincibility. Events: `killed` (victim, killer, cause = spell index or enemy kind), `respawned`.
+- Win condition (`ffa.winCondition`): first to `killTarget` kills (default 5), most kills after `timeLimitMinutes`, or endless (the host can End match from the pause menu). `World.winnerIds` = everyone tied for the most kills.
+- Enemies off by default (`ffa.enemies`); when on, waves are scaled by `ffa.enemyAmount`.
+- UI: kills leaderboard under the bars (− / + to collapse, remembered), goal line in place of the round label, death panel ("Hana vaporized you." — laser: vaporized you; fireball / explosive: turned you into tiny pieces; spark / other: made you ✨disappear✨), respawn countdown and standings, results screen. Host setup: FFA mode with Settings…, win condition + kill target / time stepper, enemies on/off + amount stepper; max players is a 2–10 stepper (rooms and co-op team scores now allow up to 10).
+
 Phase 6 notes (polish):
 - Projectiles are drawn from the newest snapshot moved along their velocity (not 100 ms behind); snapshot projectile tuples now carry velocity + owner (PROTOCOL_VERSION 2).
 - Instant casts: a client shows a cosmetic "ghost" projectile (or its laser beam) the moment it casts, using predicted cooldowns; the host's real projectile replaces the ghost, lined up using half the measured ping. Own beam events from the host are skipped.

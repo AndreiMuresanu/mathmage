@@ -3,9 +3,10 @@ import { createRng, type Rng } from '../util/rng';
 import type {
   EnemyKind,
   EnemyState,
+  KillCause,
   MatchStats,
-  PlayerIntent,
   PickupState,
+  PlayerIntent,
   PlayerState,
   ProjectileState,
   SimEvent,
@@ -50,6 +51,13 @@ export class World {
    * (a flag rather than a config change, so ranked co-op still uses DEFAULT_CONFIG).
    */
   sharedTime = false;
+  /**
+   * FFA PvP: every other player is an opponent (full damage), dead players respawn after a delay
+   * instead of waiting for a revive, kills are counted, and the match ends by cfg.ffa.winCondition.
+   */
+  pvp = false;
+  /** Who won (FFA PvP), once the match is over: everyone tied for the most kills. */
+  winnerIds: string[] = [];
   players: PlayerState[];
   enemies: EnemyState[] = [];
   projectiles: ProjectileState[] = [];
@@ -106,10 +114,28 @@ export class World {
       reviveProgress: 0,
       questionStats: cfg.questionTypes.map(() => ({ attempts: 0, correct: 0, manaEarned: 0 })),
       character,
+      kills: 0,
+      deaths: 0,
+      respawnIn: 0,
     };
     this.resolveWalls(p);
     this.players.push(p);
     return p;
+  }
+
+  /** FFA PvP: spread every player out over the map (call once at the start). */
+  placeForPvp(): void {
+    const placed: PlayerState[] = [];
+    for (const p of this.players) {
+      Object.assign(p, this.spawnPoint(p, placed));
+      placed.push(p);
+    }
+  }
+
+  /** End the match now (e.g. the host ends an endless FFA game). */
+  endMatch(): void {
+    if (this.over) return;
+    this.finish();
   }
 
   /** A player left the match (e.g. disconnected). */
@@ -187,23 +213,46 @@ export class World {
     dt *= this.timeScale();
     this.stats.timeSurvived += realDt;
     for (const p of this.players) this.updatePlayer(p, dt, realDt, intents[p.id]);
-    this.updateRevives(dt, intents);
+    if (!this.pvp) this.updateRevives(dt, intents);
     this.nav?.update(this.players.filter((p) => p.alive));
-    this.updateWaves(dt);
+    if (!this.pvp || this.cfg.ffa.enemies) this.updateWaves(dt);
     this.assignSurroundSlots();
     for (const e of this.enemies) this.updateEnemy(e, dt);
     this.separateEnemies();
     this.pushEnemiesOutOfPlayers();
     this.updateProjectiles(dt);
     this.updatePickups(dt);
-    if (this.players.every((p) => !p.alive)) {
+    if (this.pvp) this.checkPvpEnd();
+    else if (this.players.every((p) => !p.alive)) {
       this.over = true;
       this.events.push({ type: 'gameOver' });
     }
   }
 
+  /** FFA PvP: first to the kill target, or the time is up. */
+  private checkPvpEnd(): void {
+    const ffa = this.cfg.ffa;
+    const done =
+      (ffa.winCondition === 'kills' && this.players.some((p) => p.kills >= ffa.killTarget)) ||
+      (ffa.winCondition === 'time' && this.stats.timeSurvived >= ffa.timeLimitMinutes * 60);
+    if (done) this.finish();
+  }
+
+  private finish(): void {
+    this.over = true;
+    const best = Math.max(0, ...this.players.map((p) => p.kills));
+    this.winnerIds = this.pvp ? this.players.filter((p) => p.kills === best).map((p) => p.id) : [];
+    this.events.push({ type: 'gameOver' });
+  }
+
   private updatePlayer(p: PlayerState, dt: number, realDt: number, intent: PlayerIntent | undefined): void {
-    if (!p.alive) return;
+    if (!p.alive) {
+      if (this.pvp) {
+        p.respawnIn = Math.max(0, p.respawnIn - dt);
+        if (p.respawnIn <= 0) this.respawn(p);
+      }
+      return;
+    }
     p.stunRemaining = Math.max(0, p.stunRemaining - realDt);
     p.hitStunRemaining = Math.max(0, p.hitStunRemaining - dt);
     p.invulnRemaining = Math.max(0, p.invulnRemaining - dt);
@@ -250,7 +299,7 @@ export class World {
     const dy = Math.sin(p.aim);
     this.events.push({ type: 'cast', playerId: p.id, spell: index });
     if (spell.kind === 'laser') {
-      this.fireLaser(p, spell, dx, dy);
+      this.fireLaser(p, spell, index, dx, dy);
       return;
     }
     this.projectiles.push({
@@ -267,6 +316,7 @@ export class World {
       explosionRadius: spell.explosionRadius,
       ttl: PROJECTILE_TTL,
       color: spell.color,
+      spell: index,
     });
   }
 
@@ -279,7 +329,7 @@ export class World {
     return { x1, y1, x2: x1 + dx * spell.beamLength * reach, y2: y1 + dy * spell.beamLength * reach };
   }
 
-  private fireLaser(p: PlayerState, spell: SpellConfig, dx: number, dy: number): void {
+  private fireLaser(p: PlayerState, spell: SpellConfig, spellIndex: number, dx: number, dy: number): void {
     const { x1, y1, x2, y2 } = this.beamFrom(p, spell, dx, dy);
     const halfWidth = spell.radius;
     this.events.push({ type: 'beam', playerId: p.id, x1, y1, x2, y2, width: halfWidth * 2, color: spell.color });
@@ -287,19 +337,23 @@ export class World {
     const hit = this.enemies.filter((e) => distanceToSegment(e.x, e.y, x1, y1, x2, y2) <= e.radius + halfWidth);
     for (const e of hit) this.damageEnemy(e, damage);
     for (const mate of this.teammatesOf(p.id)) {
-      if (distanceToSegment(mate.x, mate.y, x1, y1, x2, y2) <= mate.radius + halfWidth) this.friendlyHit(mate, damage);
+      if (distanceToSegment(mate.x, mate.y, x1, y1, x2, y2) <= mate.radius + halfWidth) this.friendlyHit(mate, damage, p.id, spellIndex);
     }
   }
 
-  /** Other players who can currently be hit by `ownerId`'s spells (none with friendly fire off). */
+  /**
+   * Other players `ownerId`'s spells can hit: opponents in FFA PvP; teammates in co-op only with
+   * friendly fire on. Never the caster.
+   */
   private teammatesOf(ownerId: string | number): PlayerState[] {
-    if (this.cfg.coop.friendlyFire <= 0) return [];
+    if (!this.pvp && this.cfg.coop.friendlyFire <= 0) return [];
     return this.players.filter((p) => p.alive && p.id !== ownerId);
   }
 
-  /** A player's spell hit another player: friendly fire scales the damage. */
-  private friendlyHit(p: PlayerState, damage: number): void {
-    this.damagePlayer(p, damage * this.cfg.coop.friendlyFire);
+  /** A player's spell hit another player: full damage in PvP; co-op friendly fire scales it. */
+  private friendlyHit(p: PlayerState, damage: number, attackerId: string, spell: number): void {
+    const scale = this.pvp ? 1 : this.cfg.coop.friendlyFire;
+    this.damagePlayer(p, damage * scale, 0, { by: attackerId, cause: { kind: 'spell', spell } });
   }
 
   private updateWaves(dt: number): void {
@@ -332,7 +386,13 @@ export class World {
     w.round++;
     w.phase = 'active';
     // Unspawned enemies from a timed-out round still come, after the new wave's.
-    w.queue = [...w.queue, ...buildWaveQueue(this.cfg, w.round, this.rng)];
+    let wave = buildWaveQueue(this.cfg, w.round, this.rng);
+    if (this.pvp) {
+      // FFA PvP with enemies: scale the wave by the host's "enemy amount".
+      const n = Math.max(1, Math.round(wave.length * this.cfg.ffa.enemyAmount));
+      wave = Array.from({ length: n }, (_, i) => wave[i % wave.length]);
+    }
+    w.queue = [...w.queue, ...wave];
     w.timer = 0;
     w.roundTimeLeft = roundTimeLimit(this.cfg, w.round);
     this.events.push({ type: 'roundStart', round: w.round });
@@ -412,7 +472,7 @@ export class World {
         this.moveEnemy(e, ux * stepLen, uy * stepLen);
       }
       if (dist <= reach + 2 && e.attackTimer <= 0) {
-        this.damagePlayer(target, e.damage);
+        this.damagePlayer(target, e.damage, 0, { by: null, cause: { kind: 'enemy', enemy: 'chaser' } });
         e.attackTimer = this.cfg.enemies.chaser.attackCooldown;
       }
     } else {
@@ -675,7 +735,7 @@ export class World {
     const mate = this.teammatesOf(pr.ownerId).find((p) => overlaps(pr, p));
     if (!mate) return false;
     if (pr.explosionRadius > 0) this.explode(pr, pr.x, pr.y, undefined, mate);
-    else this.friendlyHit(mate, pr.damage);
+    else this.friendlyHit(mate, pr.damage, String(pr.ownerId), pr.spell ?? 0);
     return true;
   }
 
@@ -693,7 +753,7 @@ export class World {
     for (const e of caught) this.damageEnemy(e, pr.damage);
     if (pr.team !== 'player') return;
     for (const mate of this.teammatesOf(pr.ownerId)) {
-      if (mate === struckMate || (overlaps(blast, mate) && this.blastReaches(blast, mate))) this.friendlyHit(mate, pr.damage);
+      if (mate === struckMate || (overlaps(blast, mate) && this.blastReaches(blast, mate))) this.friendlyHit(mate, pr.damage, String(pr.ownerId), pr.spell ?? 0);
     }
   }
 
@@ -769,12 +829,13 @@ export class World {
   private hitPlayer(pr: ProjectileState): boolean {
     const target = this.players.find((p) => p.alive && overlaps(pr, p));
     if (!target) return false;
-    this.damagePlayer(target, pr.damage, pr.stun);
+    this.damagePlayer(target, pr.damage, pr.stun, { by: null, cause: { kind: 'enemy', enemy: 'caster' } });
     return true;
   }
 
-  private damagePlayer(p: PlayerState, rawDamage: number, stunSeconds = 0): void {
+  private damagePlayer(p: PlayerState, rawDamage: number, stunSeconds = 0, source?: { by: string | null; cause: KillCause }): void {
     if (!p.alive || p.invulnRemaining > 0) return;
+    if (source) p.lastHit = { ...source, at: this.stats.timeSurvived };
     const amount = rawDamage * this.cfg.player.damageTakenMult;
     p.hp = Math.max(0, p.hp - amount);
     p.invulnRemaining = this.cfg.player.invulnAfterHit;
@@ -790,7 +851,62 @@ export class World {
       p.stunRemaining = 0;
       p.hitStunRemaining = 0;
       this.events.push({ type: 'playerDied', playerId: p.id });
+      if (this.pvp) this.recordKill(p);
     }
+  }
+
+  /** How long after being hit by someone they still get credit for the kill (s). */
+  private static readonly KILL_CREDIT_S = 10;
+
+  /** FFA PvP: credit the kill, schedule the respawn, and tell everyone who did it and how. */
+  private recordKill(victim: PlayerState): void {
+    victim.deaths++;
+    victim.respawnIn = this.cfg.ffa.respawnSeconds;
+    const hit = victim.lastHit;
+    const recent = hit && this.stats.timeSurvived - hit.at <= World.KILL_CREDIT_S;
+    const killer = recent && hit.by ? this.player(hit.by) : undefined;
+    if (killer && killer !== victim) killer.kills++;
+    this.events.push({
+      type: 'killed',
+      victimId: victim.id,
+      killerId: killer && killer !== victim ? killer.id : null,
+      cause: recent ? hit.cause : { kind: 'spell', spell: 0 },
+      x: victim.x,
+      y: victim.y,
+    });
+  }
+
+  /** FFA PvP: bring a dead player back at a spawn point away from everyone, briefly invincible. */
+  private respawn(p: PlayerState): void {
+    Object.assign(p, this.spawnPoint(p, this.players.filter((q) => q !== p && q.alive)));
+    p.alive = true;
+    p.hp = p.maxHp;
+    p.invulnRemaining = this.cfg.ffa.spawnProtectionSeconds;
+    p.stunRemaining = 0;
+    p.hitStunRemaining = 0;
+    p.respawnIn = 0;
+    p.lastHit = undefined;
+    for (let i = 0; i < p.cooldowns.length; i++) p.cooldowns[i] = 0;
+    this.events.push({ type: 'respawned', playerId: p.id });
+  }
+
+  /** A clear spot for `p`, as far as possible from `others` (and from enemies). */
+  private spawnPoint(p: PlayerState, others: { x: number; y: number }[]): { x: number; y: number } {
+    const margin = p.radius + 30;
+    let best = { x: this.map.playerSpawn.x, y: this.map.playerSpawn.y };
+    let bestScore = -Infinity;
+    const threats = [...others, ...this.enemies];
+    for (let i = 0; i < 40; i++) {
+      const c = { x: margin + this.rng.next() * (this.width - 2 * margin), y: margin + this.rng.next() * (this.height - 2 * margin), radius: p.radius + 6 };
+      if (this.map.walls.some((w) => circleRectPush(c, w))) continue;
+      if (this.nav && this.nav.blocked[this.nav.cellAt(c.x, c.y)]) continue;
+      const score = threats.length ? Math.min(...threats.map((t) => Math.hypot(t.x - c.x, t.y - c.y))) : this.rng.next();
+      if (score > bestScore) {
+        bestScore = score;
+        best = { x: c.x, y: c.y };
+      }
+    }
+    return best;
   }
 
   /**

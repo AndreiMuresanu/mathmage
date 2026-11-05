@@ -322,3 +322,26 @@ describe('reconnecting', () => {
     RoomSession.reconnectGraceMs = 20_000;
   });
 });
+
+describe('FFA PvP over the network', () => {
+  it("the victim's screen learns who killed them and with what, sees the score, and then respawns", async () => {
+    const LASER = DEFAULT_CONFIG.spells.findIndex((s) => s.name === 'Laser');
+    const { host, clients, run, events } = await startMatch(1, { edit: (c) => (c.player.startMana = 100) });
+    host.world.pvp = true;
+    clients[0].world.pvp = true;
+    const h = host.world.player('host')!;
+    const c = host.world.player('c0')!;
+    c.x = h.x + 120;
+    c.y = h.y;
+    c.hp = 1;
+    run(DT, { host: { ...idle, casting: true, spell: LASER } });
+    run(0.4);
+    expect(events.clients[0].find((e) => e.type === 'killed')).toMatchObject({ victimId: 'c0', killerId: 'host', cause: { kind: 'spell', spell: LASER } });
+    const mine = clients[0].world.player('c0')!;
+    expect(mine.alive).toBe(false);
+    expect(clients[0].world.player('host')!.kills).toBe(1);
+    run(DEFAULT_CONFIG.ffa.respawnSeconds + 0.3);
+    expect(clients[0].world.player('c0')!.alive).toBe(true);
+    expect(events.clients[0].some((e) => e.type === 'respawned' && e.playerId === 'c0')).toBe(true);
+  });
+});

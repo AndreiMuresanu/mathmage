@@ -17,7 +17,7 @@ export const ALL_MAPS = 'all';
 /** Each board (map + mode) keeps entries that are in its top BOARD_SIZE by wave or by ELO. */
 export const BOARD_SIZE = 1000;
 export const NAME_MAX_LENGTH = 20;
-export const MAX_TEAM_SIZE = 4;
+export const MAX_TEAM_SIZE = 10;
 /** Most rows one GET /scores returns. */
 export const MAX_PAGE_SIZE = 100;
 

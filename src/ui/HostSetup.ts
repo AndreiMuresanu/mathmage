@@ -1,7 +1,9 @@
+import type { FfaConfig, FfaWinCondition } from '../config/gameConfig';
 import { MAX_ROOM_PLAYERS, MIN_ROOM_PLAYERS } from '../online/gamesTypes';
 import { h } from './dom';
 import { mapCards } from './mapCards';
 import { cardLink, optionCards } from './optionCards';
+import { createStepper } from './pvp';
 
 export type HostedMode = 'coop-ranked' | 'coop-custom' | 'ffa';
 
@@ -12,19 +14,33 @@ export interface HostChoices {
   maxPlayers: number;
 }
 
-/** Host game: pick the mode, map, visibility and size, then create the room. */
+/**
+ * Host game: pick the mode, map, visibility and size, then create the room. FFA PvP adds its own
+ * options (win condition, enemies); custom co-op and FFA use the host's custom settings.
+ */
 export function createHostSetup(opts: {
   choices: HostChoices;
   onChange(choices: HostChoices): void;
+  /** The host's FFA options (part of their custom settings). */
+  ffa: FfaConfig;
+  onFfaChange(ffa: FfaConfig): void;
   onSettings(): void;
   onCreate(): Promise<void>;
   onBack(): void;
 }): HTMLDivElement {
   const choices = { ...opts.choices };
+  const ffa = { ...opts.ffa };
   const change = (c: Partial<HostChoices>) => {
     Object.assign(choices, c);
     opts.onChange({ ...choices });
+    pvpSection.hidden = choices.mode !== 'ffa';
   };
+  const changeFfa = (c: Partial<FfaConfig>) => {
+    Object.assign(ffa, c);
+    opts.onFfaChange({ ...ffa });
+    renderPvpDetails();
+  };
+
   const message = h('p.score-submit-message');
   const create = h('button.primary.big.start-game', { type: 'button' }, 'Create room');
   create.addEventListener('click', async () => {
@@ -38,17 +54,49 @@ export function createHostSetup(opts: {
     }
   });
 
-  const sizes = [];
-  for (let n = MIN_ROOM_PLAYERS; n <= MAX_ROOM_PLAYERS; n++) sizes.push(n);
-  const sizeButtons = sizes.map((n) => {
-    const b = h('button.toggle', { type: 'button' }, `${n} players`);
-    b.classList.toggle('selected', n === choices.maxPlayers);
-    b.addEventListener('click', () => {
-      for (const other of sizeButtons) other.classList.toggle('selected', other === b);
-      change({ maxPlayers: n });
-    });
-    return b;
-  });
+  // ---- FFA PvP options
+  const winDetail = h('div.host-options');
+  const enemyDetail = h('div.host-options');
+  const renderPvpDetails = () => {
+    winDetail.replaceChildren(
+      ffa.winCondition === 'kills'
+        ? h('label', {}, 'Kills to win', createStepper({ value: ffa.killTarget, min: 1, max: 50, onChange: (n) => changeFfa({ killTarget: n }) }))
+        : ffa.winCondition === 'time'
+          ? h('label', {}, 'Time limit', createStepper({ value: ffa.timeLimitMinutes, min: 1, max: 30, format: (n) => `${n} min`, onChange: (n) => changeFfa({ timeLimitMinutes: n }) }))
+          : h('span.muted', {}, 'No winner: play until the host ends the match (pause menu → End match).'),
+    );
+    enemyDetail.replaceChildren(
+      ffa.enemies
+        ? h('label', {}, 'Enemy amount', createStepper({ value: ffa.enemyAmount, min: 0.25, max: 5, step: 0.25, format: (n) => `×${n}`, onChange: (n) => changeFfa({ enemyAmount: n }) }))
+        : h('span.muted', {}, 'Only players in the arena.'),
+    );
+  };
+  renderPvpDetails();
+  const pvpSection = h(
+    'div.pvp-options',
+    { hidden: choices.mode !== 'ffa' },
+    h('h3', {}, 'Win condition'),
+    optionCards<FfaWinCondition>(
+      [
+        { value: 'kills', title: 'Kills', detail: ['First to the kill target wins.'] },
+        { value: 'time', title: 'Time limit', detail: ['Most kills when time runs out.'] },
+        { value: 'endless', title: 'Endless', detail: ['No winner.'] },
+      ],
+      ffa.winCondition,
+      (winCondition) => changeFfa({ winCondition }),
+    ),
+    winDetail,
+    h('h3', {}, 'Enemies'),
+    optionCards(
+      [
+        { value: false, title: 'Off', detail: ['Players only.'] },
+        { value: true, title: 'On', detail: ['Enemy waves spawn too.'] },
+      ],
+      ffa.enemies,
+      (enemies) => changeFfa({ enemies }),
+    ),
+    enemyDetail,
+  );
 
   return h(
     'div.screen',
@@ -62,11 +110,12 @@ export function createHostSetup(opts: {
         [
           { value: 'coop-ranked', title: 'Ranked co-op PvE', detail: ['Default settings. The team score can go on the leaderboard.'] },
           { value: 'coop-custom', title: 'Custom co-op PvE', detail: ['Your own settings. Not ranked. ', cardLink('Settings…', opts.onSettings)] },
-          { value: 'ffa', title: 'FFA PvP', detail: ['Free-for-all. Coming soon.'], disabled: true },
+          { value: 'ffa', title: 'FFA PvP', detail: ['Free-for-all: everyone for themselves. ', cardLink('Settings…', opts.onSettings)] },
         ],
         choices.mode,
         (mode) => change({ mode }),
       ),
+      pvpSection,
       h('h3', {}, 'Map'),
       mapCards(choices.map, (map) => change({ map })),
       h('h3', {}, 'Who can join'),
@@ -78,8 +127,16 @@ export function createHostSetup(opts: {
         choices.isPublic,
         (isPublic) => change({ isPublic }),
       ),
-      h('h3', {}, 'Max players'),
-      h('div.button-row', {}, ...sizeButtons),
+      h(
+        'div.host-options',
+        {},
+        h(
+          'label',
+          {},
+          'Max players',
+          createStepper({ value: choices.maxPlayers, min: MIN_ROOM_PLAYERS, max: MAX_ROOM_PLAYERS, onChange: (maxPlayers) => change({ maxPlayers }) }),
+        ),
+      ),
       create,
       message,
     ),

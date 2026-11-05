@@ -9,6 +9,10 @@ import { setupLabel, type MatchSetup } from './matchSetup';
 import { configHash } from '../online/configHash';
 import { GAME_VERSION } from '../online/leaderboard';
 import { createScoreSubmit, createTeamScoreSubmit } from '../ui/ScoreSubmit';
+import type { RoomPlayer } from '../net/protocol';
+import { createPvpResults } from '../ui/PvpResults';
+import { deathLine, killRows } from '../ui/pvp';
+import type { KillCause } from '../sim/types';
 import { createRng } from '../util/rng';
 import { createGameOverScreen } from '../ui/GameOverScreen';
 import { Hud } from '../ui/Hud';
@@ -48,6 +52,12 @@ export class Match {
   private spell = 0;
   private resumeButton: HTMLButtonElement;
   private pauseTitle: HTMLHeadingElement;
+  /** Multiplayer names by player id (from the room). */
+  private names = new Map<string, string>();
+  /** FFA PvP: the panel shown while you're dead, and what killed you last. */
+  private deathPanel = h('div.death-panel', { hidden: true });
+  private lastDeath: { killerId: string | null; cause: KillCause } | undefined;
+  private deathKey = '';
   /** Host only: keeps the match running while this tab is hidden (the render loop stops then). */
   private ticker = new BackgroundTicker();
   private lastBackgroundTick = 0;
@@ -65,8 +75,17 @@ export class Match {
   /** Mode, ranked/custom and map this match was started with. */
   readonly setup: MatchSetup;
 
-  constructor(cfg: GameConfig, setup: MatchSetup, registry: QuestionRegistry, root: HTMLElement, callbacks: MatchCallbacks, driver: MatchDriver) {
+  constructor(
+    cfg: GameConfig,
+    setup: MatchSetup,
+    registry: QuestionRegistry,
+    root: HTMLElement,
+    callbacks: MatchCallbacks,
+    driver: MatchDriver,
+    players: RoomPlayer[] = [],
+  ) {
     this.driver = driver;
+    for (const p of players) this.names.set(p.id, p.name);
     this.setup = setup;
     driver.onRemotePause = (paused) => this.applyPause(paused);
     this.callbacks = callbacks;
@@ -114,6 +133,8 @@ export class Match {
           'div.button-row',
           {},
           this.resumeButton,
+          // FFA host: end the match now (e.g. an endless game), with the current standings.
+          driver.world.pvp && driver.canPause ? h('button', { onclick: () => this.endPvpMatch() }, 'End match') : null,
           h('button', { onclick: () => callbacks.exitToMenu() }, driver.multiplayer ? 'Leave game' : 'Main menu'),
         ),
       ),
@@ -121,7 +142,8 @@ export class Match {
     this.layer = document.createElement('div');
     this.layer.className = 'match-layer';
     // The stun panel sits above the pause overlay so the solution stays readable while paused.
-    this.layer.append(this.hud.el, this.questions.el, this.pauseOverlay, this.stun.el);
+    this.layer.append(this.hud.el, this.deathPanel, this.questions.el, this.pauseOverlay, this.stun.el);
+    this.hud.setNames((id) => this.nameOf(id));
     root.append(this.layer);
     const start = this.ratings.get('math');
     this.hud.showRating('Math', start.rating, 0);
@@ -162,6 +184,20 @@ export class Match {
 
   get world(): World {
     return this.driver.world;
+  }
+
+  /** A player's name (multiplayer), or a generic one. */
+  nameOf(id: string): string {
+    return this.names.get(id) ?? (id === this.localId ? 'You' : 'Mage');
+  }
+
+  /** FFA host: stop the match now (unpausing first so the result reaches everyone). */
+  private endPvpMatch(): void {
+    if (this._paused) {
+      this.applyPause(false);
+      this.driver.setPaused(false);
+    }
+    this.world.endMatch();
   }
 
   /** Id of the player this machine controls. */
@@ -252,8 +288,10 @@ export class Match {
         this.questions.close();
         this.stun.update(0);
       }
+      if (e.type === 'killed' && e.victimId === this.localId) this.lastDeath = { killerId: e.killerId, cause: e.cause };
       if (e.type === 'gameOver') this.showGameOver();
     }
+    if (this.world.pvp) this.updateDeathPanel();
     if (this.driver.hostSilentMs) this.hud.setWaitingForHost(!this.world.over && this.driver.hostSilentMs() > HOST_SILENT_MS);
     if (this.driver.pingMs) this.hud.setPing(this.driver.pingMs(), this.driver.canPause);
     const p = this.world.player(this.localId);
@@ -262,11 +300,40 @@ export class Match {
     return events;
   }
 
+  /** FFA PvP: while dead, who got you and how, the respawn countdown, and the standings. */
+  private updateDeathPanel(): void {
+    const me = this.world.player(this.localId);
+    const show = !!me && !me.alive && !this.world.over;
+    this.deathPanel.hidden = !show;
+    if (!show || !me) return;
+    const killer = this.lastDeath?.killerId ? this.nameOf(this.lastDeath.killerId) : undefined;
+    const line = deathLine(killer, this.lastDeath?.cause, this.world.cfg);
+    const respawn = `Respawning in ${Math.max(0, me.respawnIn).toFixed(1)} s`;
+    const key = `${line}|${respawn}|${this.world.players.map((p) => `${p.id}:${p.kills}:${p.deaths}`).join(',')}`;
+    if (key === this.deathKey) return;
+    this.deathKey = key;
+    this.deathPanel.replaceChildren(
+      h('h2', {}, line),
+      h('div.respawn', {}, respawn),
+      h('div.kill-rows', {}, ...killRows(this.world.players, (id) => this.nameOf(id), this.localId, true)),
+    );
+  }
+
   private showGameOver(): void {
     if (this.gameOverShown) return;
     this.gameOverShown = true;
     this.questions.close();
     this.stun.update(0);
+    this.deathPanel.hidden = true;
+    if (this.world.pvp) {
+      this.layer.append(
+        createPvpResults(this.world, (id) => this.nameOf(id), this.localId, {
+          back: () => this.callbacks.playAgain(),
+          leave: () => this.callbacks.exitToMenu(),
+        }),
+      );
+      return;
+    }
     const multiplayer = this.driver.multiplayer;
     this.layer.append(
       createGameOverScreen(

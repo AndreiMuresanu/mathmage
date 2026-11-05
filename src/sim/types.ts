@@ -43,7 +43,17 @@ export interface PlayerState {
   questionStats: QuestionTypeStats[];
   /** Cosmetic character id (see game/characters.ts); doesn't affect the simulation. */
   character: string;
+  /** FFA PvP: players defeated / times defeated. */
+  kills: number;
+  deaths: number;
+  /** FFA PvP: seconds until a dead player respawns. */
+  respawnIn: number;
+  /** The last thing that hurt this player (for kill credit and the death screen). */
+  lastHit?: { by: string | null; cause: KillCause; at: number };
 }
+
+/** What finished a player off (the death screen describes it). */
+export type KillCause = { kind: 'spell'; spell: number } | { kind: 'enemy'; enemy: EnemyKind };
 
 export type EnemyKind = 'chaser' | 'caster';
 
@@ -79,6 +89,8 @@ export interface ProjectileState {
   explosionRadius: number;
   ttl: number;
   color: string;
+  /** For players' projectiles: the spell index (who killed whom, and with what). */
+  spell?: number;
 }
 
 /** A heal orb dropped by a defeated enemy. */
@@ -128,6 +140,9 @@ export type SimEvent =
   /** The player went down (0 HP). In co-op a teammate can still revive them. */
   | { type: 'playerDied'; playerId: string }
   | { type: 'revived'; playerId: string; byId: string; x: number; y: number }
+  /** FFA PvP: a player was killed (`killerId` null = not by another player, e.g. an enemy). */
+  | { type: 'killed'; victimId: string; killerId: string | null; cause: KillCause; x: number; y: number }
+  | { type: 'respawned'; playerId: string }
   | { type: 'enemyHit'; enemyId: number; x: number; y: number; amount: number }
   | { type: 'enemyDied'; x: number; y: number; kind: EnemyKind }
   | { type: 'healed'; playerId: string; amount: number; x: number; y: number }

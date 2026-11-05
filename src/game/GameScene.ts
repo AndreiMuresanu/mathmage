@@ -268,7 +268,10 @@ export class GameScene extends Phaser.Scene {
         break;
       case 'playerDied':
         this.burst(who.x, who.y, getCharacter(who.character).color, 24);
-        if (world.players.length > 1) this.floatText(who.x, who.y - 30, 'Down!', '#ff7b7b');
+        if (world.players.length > 1 && !world.pvp) this.floatText(who.x, who.y - 30, 'Down!', '#ff7b7b');
+        break;
+      case 'respawned':
+        this.burst(who.x, who.y, 0xffffff, 14);
         break;
       case 'revived':
         this.burst(e.x, e.y, REVIVE_COLOR, 18);
@@ -297,7 +300,7 @@ export class GameScene extends Phaser.Scene {
       }
       view.setTint(getCharacter(pl.character).color);
       // Downed mages only fade slightly, so they still read as a player (the cross and ring mark them).
-      view.setPosition(pl.x, pl.y).setAlpha(!pl.alive ? 0.8 : pl.invulnRemaining > 0 && blink ? 0.4 : 1);
+      view.setPosition(pl.x, pl.y).setAlpha(!pl.alive ? 0.8 : pl.invulnRemaining > 0 && blink ? 0.4 : 1).setVisible(pl.alive || !world.pvp);
     }
     for (const [id, view] of this.teammateViews) {
       if (seen.has(id)) continue;
@@ -349,7 +352,7 @@ export class GameScene extends Phaser.Scene {
         const color = pl.stunRemaining > 0 ? 0xffd166 : 0xff4d6d;
         g.lineStyle(3, color, 0.9).strokeCircle(pl.x, pl.y, pl.radius + pulse + 4);
       }
-      if (!pl.alive && world.players.length > 1) this.drawDowned(g, pl);
+      if (!pl.alive && world.players.length > 1 && !world.pvp) this.drawDowned(g, pl);
     }
   }
 
