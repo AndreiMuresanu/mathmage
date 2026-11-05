@@ -12,7 +12,10 @@ export async function connectToRoom(roomCode: string): Promise<Transport> {
   // Loaded on demand so solo players never download the WebRTC stack. Relay (TURN) servers are
   // optional: without them most players still connect directly.
   const [{ TrysteroTransport }, turn] = await Promise.all([import('./trysteroTransport'), fetchTurnServers()]);
-  return new TrysteroTransport(roomCode, turn);
+  // `?relay=only` (testing): force every connection through the relay.
+  const relayOnly = new URLSearchParams(location.search).get('relay') === 'only';
+  if (relayOnly && !turn?.length) throw new Error('Relay-only test mode, but no relay (TURN) servers are available.');
+  return new TrysteroTransport(roomCode, turn, relayOnly);
 }
 
 /** Room codes: 6 characters without look-alikes (no O/0, I/1/L). */
