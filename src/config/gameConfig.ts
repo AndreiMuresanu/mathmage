@@ -251,7 +251,7 @@ export interface GameConfig {
 }
 
 /** Bump when saved configs need migrating (see migrateSavedConfig). */
-export const CONFIG_VERSION = 3;
+export const CONFIG_VERSION = 4;
 
 export const ARENA_WIDTH = 1280;
 export const ARENA_HEIGHT = 720;
@@ -269,9 +269,9 @@ export const DEFAULT_CONFIG: GameConfig = {
     invulnAfterHit: 0.2,
   },
   spells: [
-    { name: 'Spark', kind: 'projectile', manaCost: 1, damage: 10, projectileSpeed: 650, cooldown: 0.2, radius: 5, color: '#7df9ff', explosionRadius: 0, beamLength: 0, bounceDamagePercent: 0 },
+    { name: 'Star', kind: 'projectile', manaCost: 1, damage: 10, projectileSpeed: 650, cooldown: 0.2, radius: 6, color: '#7df9ff', explosionRadius: 0, beamLength: 0, bounceDamagePercent: 0 },
     { name: 'Fireball', kind: 'projectile', manaCost: 3, damage: 55, projectileSpeed: 300, cooldown: 0.6, radius: 10, color: '#ff7b3a', explosionRadius: 150, beamLength: 0, bounceDamagePercent: 0 },
-    { name: 'Laser', kind: 'laser', manaCost: 3, damage: 30, projectileSpeed: 0, cooldown: 0.8, radius: 6, color: '#b6ff3a', explosionRadius: 0, beamLength: 1500, bounceDamagePercent: 25 },
+    { name: 'Laser', kind: 'laser', manaCost: 3, damage: 25, projectileSpeed: 0, cooldown: 0.8, radius: 4, color: '#b6ff3a', explosionRadius: 0, beamLength: 1500, bounceDamagePercent: 25 },
   ],
   // Tiers target a 90% / 70% / 50% chance of success; the weights make ~85% of questions
   // answered correctly overall once the rating has settled (0.80·90% + 0.15·70% + 0.05·50% = 85%).
@@ -445,6 +445,10 @@ function migrateSavedConfig(raw: unknown): unknown {
   // Version 3 turned multi-digit multiplication off by default (it's pure mental math).
   if (version < 3 && cfg.medium && typeof cfg.medium === 'object') {
     cfg.medium = { ...(cfg.medium as Record<string, unknown>), bigMultiplication: false };
+  }
+  // Version 4 renamed the Spark spell to Star.
+  if (version < 4 && Array.isArray(cfg.spells)) {
+    cfg.spells = cfg.spells.map((s) => (s && typeof s === 'object' && (s as Record<string, unknown>).name === 'Spark' ? { ...s, name: 'Star' } : s));
   }
   cfg.version = CONFIG_VERSION;
   return cfg;

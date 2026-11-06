@@ -5,7 +5,7 @@ import { World } from './world';
 
 const DT = 1 / 60;
 const idle: PlayerIntent = { move: { x: 0, y: 0 }, aim: 0, casting: false };
-const SPARK = DEFAULT_CONFIG.spells.findIndex((s) => s.name === 'Spark');
+const STAR = DEFAULT_CONFIG.spells.findIndex((s) => s.name === 'Star');
 const FIREBALL = DEFAULT_CONFIG.spells.findIndex((s) => s.name === 'Fireball');
 const LASER = DEFAULT_CONFIG.spells.findIndex((s) => s.name === 'Laser');
 
@@ -29,20 +29,20 @@ const chaser = (x: number, y: number): EnemyState =>
   ({ id: 50, kind: 'chaser', x, y, radius: 14, hp: 1000, maxHp: 1000, speed: 0, damage: 0, attackTimer: 1e9, strafe: 1 });
 
 describe('friendly fire', () => {
-  const spark = DEFAULT_CONFIG.spells[SPARK].damage;
+  const star = DEFAULT_CONFIG.spells[STAR].damage;
   const fireball = DEFAULT_CONFIG.spells[FIREBALL].damage;
   const laser = DEFAULT_CONFIG.spells[LASER].damage;
 
-  it('a spark that hits a teammate hurts them and stops there', () => {
-    const { world, a, b } = cast(SPARK, 150);
-    expect(b.hp).toBe(100 - spark);
+  it('a star that hits a teammate hurts them and stops there', () => {
+    const { world, a, b } = cast(STAR, 150);
+    expect(b.hp).toBe(100 - star);
     expect(a.hp).toBe(100);
     expect(world.projectiles).toHaveLength(0);
   });
 
   it('can be scaled down or switched off', () => {
-    expect(cast(SPARK, 150, (c) => (c.coop.friendlyFire = 0.5)).b.hp).toBe(100 - spark * 0.5);
-    const off = cast(SPARK, 150, (c) => (c.coop.friendlyFire = 0));
+    expect(cast(STAR, 150, (c) => (c.coop.friendlyFire = 0.5)).b.hp).toBe(100 - star * 0.5);
+    const off = cast(STAR, 150, (c) => (c.coop.friendlyFire = 0));
     expect(off.b.hp).toBe(100);
   });
 
@@ -64,7 +64,7 @@ describe('friendly fire', () => {
   });
 
   it('downed teammates are not hit', () => {
-    const downed = cast(SPARK, 150, () => {}, (w) => {
+    const downed = cast(STAR, 150, () => {}, (w) => {
       const b = w.player('b')!;
       b.alive = false;
       b.hp = 0;

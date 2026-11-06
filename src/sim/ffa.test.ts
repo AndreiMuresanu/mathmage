@@ -6,7 +6,7 @@ import { World } from './world';
 
 const DT = 1 / 60;
 const idle: PlayerIntent = { move: { x: 0, y: 0 }, aim: 0, casting: false };
-const SPARK = DEFAULT_CONFIG.spells.findIndex((s) => s.name === 'Spark');
+const STAR = DEFAULT_CONFIG.spells.findIndex((s) => s.name === 'Star');
 const LASER = DEFAULT_CONFIG.spells.findIndex((s) => s.name === 'Laser');
 const FFA = DEFAULT_CONFIG.ffa;
 
@@ -49,9 +49,9 @@ describe('FFA PvP', () => {
     const [a, b] = world.players;
     b.x = a.x + 150;
     b.y = a.y;
-    run(world, DT, { a: { ...idle, casting: true, spell: SPARK } });
+    run(world, DT, { a: { ...idle, casting: true, spell: STAR } });
     run(world, 1);
-    expect(b.hp).toBe(100 - DEFAULT_CONFIG.spells[SPARK].damage);
+    expect(b.hp).toBe(100 - DEFAULT_CONFIG.spells[STAR].damage);
   });
 
   it('a kill is credited to the attacker, with the spell that did it', () => {

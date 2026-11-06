@@ -28,7 +28,7 @@ BROWSER=none npx vite --port 3000
 |---|---|
 | Move | WASD or arrow keys |
 | Aim / cast | Mouse / left click |
-| Select spell | Number keys (1 Spark, 2 Fireball, 3 Laser) |
+| Select spell | Number keys (1 Star, 2 Fireball, 3 Laser) |
 | Open / close a question | Space |
 | Pause | P, Esc, or the on-screen button |
 | Revive a downed teammate (co-op) | Hold F next to them |

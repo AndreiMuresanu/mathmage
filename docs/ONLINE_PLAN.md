@@ -180,7 +180,7 @@ INDEX (board, wave DESC, elo DESC), INDEX (board, elo DESC, wave DESC)
   - Several teammates at once don't speed it up.
 - **After a revive:** the mage is back with `coop.reviveHp` (default 50% of max HP) and `coop.reviveInvulnSeconds` (default **3**) of invincibility, blinking. This uses the existing `invulnRemaining`.
 - **Game over** happens when every mage is downed at the same time. Solo is unchanged: down means game over.
-- **Friendly fire:** players' sparks, fireball blasts and lasers also hurt teammates, scaled by `coop.friendlyFire` (default 1 = full damage; 0 = off). A caster never hits themselves, and downed mages can't be hit.
+- **Friendly fire:** players' stars, fireball blasts and lasers also hurt teammates, scaled by `coop.friendlyFire` (default 1 = full damage; 0 = off). A caster never hits themselves, and downed mages can't be hit.
 - **Implementation:**
   - `PlayerIntent.reviving`, `PlayerState.downed` and `PlayerState.reviveProgress`.
   - Events: `downed` and `revived`.
@@ -308,7 +308,7 @@ Phase 7 notes (FFA PvP):
 - `World.pvp`: other players are opponents (full damage; never yourself), kills are credited to the last player who hit you within 10 s (`PlayerState.kills/deaths/lastHit`), no revives, and dead players respawn after `ffa.respawnSeconds` at the open spot farthest from everyone, with `ffa.spawnProtectionSeconds` of invincibility. Events: `killed` (victim, killer, cause = spell index or enemy kind), `respawned`.
 - Win condition (`ffa.winCondition`): first to `killTarget` kills (default 5), most kills after `timeLimitMinutes`, or endless (the host can End match from the pause menu). `World.winnerIds` = everyone tied for the most kills.
 - Enemies off by default (`ffa.enemies`); when on, waves are scaled by `ffa.enemyAmount`.
-- UI: kills leaderboard under the bars (− / + to collapse, remembered), goal line in place of the round label, death panel ("Hana vaporized you." — laser: vaporized you; fireball / explosive: turned you into tiny pieces; spark / other: made you ✨disappear✨), respawn countdown and standings, results screen. Host setup: FFA mode with Settings…, win condition + kill target / time stepper, enemies on/off + amount stepper; max players is a 2–10 stepper (rooms and co-op team scores now allow up to 10).
+- UI: kills leaderboard under the bars (− / + to collapse, remembered), goal line in place of the round label, death panel ("Hana vaporized you." — laser: vaporized you; fireball / explosive: turned you into tiny pieces; star / other: made you ✨disappear✨), respawn countdown and standings, results screen. Host setup: FFA mode with Settings…, win condition + kill target / time stepper, enemies on/off + amount stepper; max players is a 2–10 stepper (rooms and co-op team scores now allow up to 10).
 
 Phase 6 notes (polish):
 - Projectiles are drawn from the newest snapshot moved along their velocity (not 100 ms behind); snapshot projectile tuples now carry velocity + owner (PROTOCOL_VERSION 2).

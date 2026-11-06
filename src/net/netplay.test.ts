@@ -234,14 +234,14 @@ describe('characters', () => {
 });
 
 describe('responsive casting', () => {
-  const SPARK = DEFAULT_CONFIG.spells.findIndex((s) => s.name === 'Spark');
+  const STAR = DEFAULT_CONFIG.spells.findIndex((s) => s.name === 'Star');
   const LASER = DEFAULT_CONFIG.spells.findIndex((s) => s.name === 'Laser');
   const fire = (spell: number): PlayerIntent => ({ ...idle, casting: true, spell });
 
-  it("a client's spark appears on its own screen instantly, then hands over to the host's real one", async () => {
+  it("a client's star appears on its own screen instantly, then hands over to the host's real one", async () => {
     const { host, clients, run } = await startMatch(1, { edit: (c) => (c.player.startMana = 100) });
     run(0.3); // let snapshots (and mana) flow
-    run(DT, { c0: fire(SPARK) });
+    run(DT, { c0: fire(STAR) });
     const mine = () => clients[0].world.projectiles.filter((p) => p.ownerId === 'c0');
     expect(mine()).toHaveLength(1); // the instant ghost
     expect(mine()[0].id).toBeLessThan(0);
@@ -268,7 +268,7 @@ describe('responsive casting', () => {
   it('other players see the shot too (as the real projectile)', async () => {
     const { host, clients, run } = await startMatch(1, { edit: (c) => (c.player.startMana = 100) });
     run(0.3);
-    run(DT, { host: { ...fire(SPARK), aim: -Math.PI / 2 } }); // upwards, away from the teammate (friendly fire)
+    run(DT, { host: { ...fire(STAR), aim: -Math.PI / 2 } }); // upwards, away from the teammate (friendly fire)
     run(0.2);
     expect(clients[0].world.projectiles.filter((p) => p.ownerId === 'host')).toHaveLength(1);
     expect(host.world.projectiles).toHaveLength(1);
