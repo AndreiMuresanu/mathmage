@@ -147,7 +147,8 @@ export type SimEvent =
   | { type: 'enemyDied'; x: number; y: number; kind: EnemyKind }
   | { type: 'healed'; playerId: string; amount: number; x: number; y: number }
   | { type: 'explosion'; x: number; y: number; radius: number; color: string; targets: { id: number; x: number; y: number; radius: number }[] }
-  | { type: 'beam'; playerId: string; x1: number; y1: number; x2: number; y2: number; width: number; color: string }
+  /** A laser: the path it took (one segment per bounce), first point at the caster. */
+  | { type: 'beam'; playerId: string; points: { x: number; y: number }[]; width: number; color: string }
   | { type: 'roundStart'; round: number }
   | { type: 'roundCleared'; round: number }
   | { type: 'gameOver' };

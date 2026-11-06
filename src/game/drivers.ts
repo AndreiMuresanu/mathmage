@@ -410,8 +410,9 @@ export class ClientDriver implements MatchDriver {
     const dx = Math.cos(intent.aim);
     const dy = Math.sin(intent.aim);
     if (spell.kind === 'laser') {
-      const beam = this.world.beamFrom(me, spell, dx, dy);
-      events.push({ type: 'beam', playerId: this.localId, ...beam, width: spell.radius * 2, color: spell.color });
+      const path = this.world.beamPath(me, spell, dx, dy);
+      const points = [{ x: path[0].x1, y: path[0].y1 }, ...path.map((s) => ({ x: s.x2, y: s.y2 }))];
+      events.push({ type: 'beam', playerId: this.localId, points, width: spell.radius * 2, color: spell.color });
       return;
     }
     this.ghosts.push({

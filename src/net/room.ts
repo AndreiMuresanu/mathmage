@@ -136,6 +136,16 @@ export class RoomSession {
     this.broadcastRoster();
   }
 
+  /** Host, between matches: change the mode / map, room size or visibility; everyone sees it. */
+  updateSettings(settings: { setup: MatchSetup; maxPlayers: number; isPublic: boolean }): void {
+    if (!this.isHost) return;
+    this.setup = settings.setup;
+    // Never below the players already here.
+    this.maxPlayers = Math.max(settings.maxPlayers, this.players.length);
+    this.isPublic = settings.isPublic;
+    this.broadcastRoster();
+  }
+
   /** Host: begin a match for everyone in the room. */
   start(msg: StartMsg): void {
     if (!this.isHost) return;

@@ -18,8 +18,10 @@ export interface SpellConfig {
   color: string;
   /** On hitting the first enemy, damage every enemy within this radius of the impact (0 = single target). */
   explosionRadius: number;
-  /** Laser only: how far the beam reaches. */
+  /** Laser only: the beam's maximum path length, bounces included. */
   beamLength: number;
+  /** Laser only: lasers bounce off walls; each bounce multiplies the damage by (1 + this / 100). */
+  bounceDamagePercent: number;
 }
 
 export interface SlotSource {
@@ -267,9 +269,9 @@ export const DEFAULT_CONFIG: GameConfig = {
     invulnAfterHit: 0.2,
   },
   spells: [
-    { name: 'Spark', kind: 'projectile', manaCost: 1, damage: 10, projectileSpeed: 650, cooldown: 0.2, radius: 5, color: '#7df9ff', explosionRadius: 0, beamLength: 0 },
-    { name: 'Fireball', kind: 'projectile', manaCost: 3, damage: 55, projectileSpeed: 450, cooldown: 0.6, radius: 10, color: '#ff7b3a', explosionRadius: 150, beamLength: 0 },
-    { name: 'Laser', kind: 'laser', manaCost: 3, damage: 30, projectileSpeed: 0, cooldown: 0.8, radius: 12, color: '#b6ff3a', explosionRadius: 0, beamLength: 900 },
+    { name: 'Spark', kind: 'projectile', manaCost: 1, damage: 10, projectileSpeed: 650, cooldown: 0.2, radius: 5, color: '#7df9ff', explosionRadius: 0, beamLength: 0, bounceDamagePercent: 0 },
+    { name: 'Fireball', kind: 'projectile', manaCost: 3, damage: 55, projectileSpeed: 300, cooldown: 0.6, radius: 10, color: '#ff7b3a', explosionRadius: 150, beamLength: 0, bounceDamagePercent: 0 },
+    { name: 'Laser', kind: 'laser', manaCost: 3, damage: 30, projectileSpeed: 0, cooldown: 0.8, radius: 6, color: '#b6ff3a', explosionRadius: 0, beamLength: 1500, bounceDamagePercent: 25 },
   ],
   // Tiers target a 90% / 70% / 50% chance of success; the weights make ~85% of questions
   // answered correctly overall once the rating has settled (0.80·90% + 0.15·70% + 0.05·50% = 85%).

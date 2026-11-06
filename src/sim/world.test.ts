@@ -321,7 +321,7 @@ describe('mergeWithDefaults for lists', () => {
 describe('lasers', () => {
   function laserWorld() {
     const world = new World(config((c) => {
-      c.spells = [{ name: 'Laser', kind: 'laser', manaCost: 8, damage: 30, projectileSpeed: 0, cooldown: 0.8, radius: 6, color: '#0f0', explosionRadius: 0, beamLength: 500 }];
+      c.spells = [{ name: 'Laser', kind: 'laser', manaCost: 8, damage: 30, projectileSpeed: 0, cooldown: 0.8, radius: 6, color: '#0f0', explosionRadius: 0, beamLength: 500, bounceDamagePercent: 25 }];
       c.player.startMana = 100;
     }), 1);
     const p = world.players[0];
@@ -527,18 +527,22 @@ describe('maps and walls', () => {
     expect(world.enemies[0].hp).toBe(70);
   });
 
-  it('a laser stops at the first wall it reaches', () => {
+  it('a laser bounces off the first wall it reaches, hitting harder on the way back', () => {
     const world = mapWorld('buttons', (c) => {
-      c.spells = [{ name: 'Laser', kind: 'laser', manaCost: 1, damage: 30, projectileSpeed: 0, cooldown: 0.8, radius: 6, color: '#0f0', explosionRadius: 0, beamLength: 500 }];
+      c.spells = [{ name: 'Laser', kind: 'laser', manaCost: 1, damage: 30, projectileSpeed: 0, cooldown: 0.8, radius: 6, color: '#0f0', explosionRadius: 0, beamLength: 500, bounceDamagePercent: 25 }];
     });
     const p = world.players[0];
     p.x = 700;
     p.y = 360; // level with the middle row of pillars; the next one spans x 864-936
-    world.enemies.push(still(1, 800, 360), still(2, 1000, 360));
+    world.enemies.push({ ...still(1, 800, 360), hp: 1000, maxHp: 1000 }, still(2, 1000, 360));
     world.step(1 / 60, { local: { ...idle, aim: 0, casting: true } });
-    expect(world.enemies.map((e) => e.hp)).toEqual([70, 100]);
+    // The beam bounces between this pillar and the middle one (x 604-676), passing through enemy 1
+    // three times (0, 1 and 2 bounces): every pass counts. Enemy 2 is behind the pillar.
+    expect(world.enemies.map((e) => e.hp)).toEqual([1000 - (30 + 30 * 1.25 + 30 * 1.25 ** 2), 100]);
     const beam = world.drainEvents().find((e) => e.type === 'beam');
-    expect(beam && 'x2' in beam ? beam.x2 : 0).toBeCloseTo(864, 3);
+    const points = beam && 'points' in beam ? beam.points : [];
+    expect(points[1].x).toBeCloseTo(864, 3);
+    expect(points[2].x).toBeCloseTo(676, 3); // back left to the middle pillar
   });
 
   describe('fireball blasts and cover', () => {
@@ -594,5 +598,57 @@ describe('maps and walls', () => {
     run(world, 6);
     const e = world.enemies[0];
     expect(Math.hypot(p.x - e.x, p.y - e.y)).toBeLessThan(p.radius + e.radius + 3);
+  });
+});
+
+describe('bouncing lasers', () => {
+  const laser = (extra: Partial<GameConfig['spells'][number]> = {}) => ({
+    name: 'Laser', kind: 'laser' as const, manaCost: 1, damage: 40, projectileSpeed: 0, cooldown: 0.8, radius: 6, color: '#0f0',
+    explosionRadius: 0, beamLength: 2000, bounceDamagePercent: 50, ...extra,
+  });
+  const length = (path: { x1: number; y1: number; x2: number; y2: number }[]) => path.reduce((sum, s) => sum + Math.hypot(s.x2 - s.x1, s.y2 - s.y1), 0);
+
+  it('the whole path (bounces included) is the max path length', () => {
+    const world = new World(config((c) => { c.map = 'boxy'; c.spells = [laser({ beamLength: 3000 })]; }), 1);
+    const p = world.players[0];
+    const path = world.beamPath(p, world.cfg.spells[0], Math.cos(0.3), Math.sin(0.3));
+    expect(path.length).toBeGreaterThan(2);
+    expect(length(path)).toBeCloseTo(3000, 0);
+  });
+
+  it('reflects like a mirror: hitting a horizontal wall flips only the vertical direction', () => {
+    const world = new World(config((c) => { c.map = 'boxy'; c.spells = [laser()]; }), 1);
+    const p = world.players[0];
+    const [first, second] = world.beamPath(p, world.cfg.spells[0], Math.cos(-1), Math.sin(-1)); // up and to the right
+    const d1 = { x: first.x2 - first.x1, y: first.y2 - first.y1 };
+    const d2 = { x: second.x2 - second.x1, y: second.y2 - second.y1 };
+    expect(first.y2).toBeCloseTo(20, 3); // the top wall's face
+    expect(Math.sign(d2.x)).toBe(Math.sign(d1.x));
+    expect(Math.sign(d2.y)).toBe(-Math.sign(d1.y));
+    expect(d2.x / Math.hypot(d2.x, d2.y)).toBeCloseTo(d1.x / Math.hypot(d1.x, d1.y), 6);
+  });
+
+  it('each bounce raises the damage by the configured percentage (and 0% means no increase)', () => {
+    const hitAfterOneBounce = (percent: number) => {
+      const world = new World(config((c) => { c.map = 'boxy'; c.spells = [laser({ bounceDamagePercent: percent, beamLength: 934 })]; c.player.startMana = 100; }), 1);
+      const p = world.players[0];
+      p.x = 300; // under solid wall (Boxy's top gap is in the middle)
+      p.y = 360;
+      // Aim straight up at the top wall; the beam comes straight back down through an enemy below
+      // (the path is just long enough to reach it, not the floor, so it's crossed once after one bounce).
+      world.enemies.push({ id: 1, kind: 'chaser', x: 300, y: 600, radius: 14, hp: 1000, maxHp: 1000, speed: 0, damage: 0, attackTimer: 1e9, strafe: 1 });
+      world.step(1 / 60, { local: { ...idle, aim: -Math.PI / 2, casting: true } });
+      return 1000 - world.enemies[0].hp;
+    };
+    expect(hitAfterOneBounce(50)).toBeCloseTo(40 * 1.5, 6);
+    expect(hitAfterOneBounce(100)).toBeCloseTo(80, 6);
+    expect(hitAfterOneBounce(0)).toBeCloseTo(40, 6);
+  });
+
+  it('no walls, no bounces: one straight beam', () => {
+    const world = new World(config((c) => { c.spells = [laser({ beamLength: 500 })]; }), 1);
+    const path = world.beamPath(world.players[0], world.cfg.spells[0], 1, 0);
+    expect(path).toHaveLength(1);
+    expect(length(path)).toBeCloseTo(500, 6);
   });
 });

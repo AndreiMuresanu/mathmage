@@ -27,6 +27,8 @@ export function createHostSetup(opts: {
   onSettings(): void;
   onCreate(): Promise<void>;
   onBack(): void;
+  /** Editing an open room's settings (instead of creating one); max players can't go below `minPlayers`. */
+  editing?: { minPlayers: number };
 }): HTMLDivElement {
   const choices = { ...opts.choices };
   const ffa = { ...opts.ffa };
@@ -42,10 +44,10 @@ export function createHostSetup(opts: {
   };
 
   const message = h('p.score-submit-message');
-  const create = h('button.primary.big.start-game', { type: 'button' }, 'Create room');
+  const create = h('button.primary.big.start-game', { type: 'button' }, opts.editing ? 'Save' : 'Create room');
   create.addEventListener('click', async () => {
     create.disabled = true;
-    message.textContent = 'Opening the room…';
+    message.textContent = opts.editing ? 'Saving…' : 'Opening the room…';
     try {
       await opts.onCreate();
     } catch (e) {
@@ -104,7 +106,7 @@ export function createHostSetup(opts: {
     h(
       'div.panel.screen-panel.setup',
       {},
-      h('div.screen-header', {}, h('h1', {}, 'Host game'), h('button', { onclick: opts.onBack }, 'Back')),
+      h('div.screen-header', {}, h('h1', {}, opts.editing ? 'Room settings' : 'Host game'), h('button', { onclick: opts.onBack }, opts.editing ? 'Cancel' : 'Back')),
       h('h3', {}, 'Mode'),
       optionCards<HostedMode>(
         [
@@ -134,7 +136,12 @@ export function createHostSetup(opts: {
           'label',
           {},
           'Max players',
-          createStepper({ value: choices.maxPlayers, min: MIN_ROOM_PLAYERS, max: MAX_ROOM_PLAYERS, onChange: (maxPlayers) => change({ maxPlayers }) }),
+          createStepper({
+            value: Math.max(choices.maxPlayers, opts.editing?.minPlayers ?? MIN_ROOM_PLAYERS),
+            min: Math.max(MIN_ROOM_PLAYERS, opts.editing?.minPlayers ?? MIN_ROOM_PLAYERS),
+            max: MAX_ROOM_PLAYERS,
+            onChange: (maxPlayers) => change({ maxPlayers }),
+          }),
         ),
       ),
       create,

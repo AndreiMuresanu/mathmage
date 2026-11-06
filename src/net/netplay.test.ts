@@ -345,3 +345,23 @@ describe('FFA PvP over the network', () => {
     expect(events.clients[0].some((e) => e.type === 'respawned' && e.playerId === 'c0')).toBe(true);
   });
 });
+
+describe('editing room settings', () => {
+  it("the host's changes reach everyone in the lobby, and max players never drops below who's there", async () => {
+    const hub = new MemoryHub(20);
+    const host = RoomSession.host(hub.join('host'), { code: 'EDIT22', name: 'H', setup: SETUP, maxPlayers: 4, isPublic: true });
+    const joining = RoomSession.join(hub.join('c0'), 'EDIT22', 'C');
+    hub.advance(200);
+    const client = await joining;
+    let changes = 0;
+    client.onChange = () => changes++;
+    host.updateSettings({ setup: { mode: 'ffa', ranked: false, map: 'mazy' }, maxPlayers: 8, isPublic: false });
+    hub.advance(100);
+    expect(client.setup).toEqual({ mode: 'ffa', ranked: false, map: 'mazy' });
+    expect(client.maxPlayers).toBe(8);
+    expect(changes).toBeGreaterThan(0);
+    host.updateSettings({ setup: SETUP, maxPlayers: 1, isPublic: false });
+    hub.advance(100);
+    expect(client.maxPlayers).toBe(2);
+  });
+});

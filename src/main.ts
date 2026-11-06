@@ -269,8 +269,54 @@ function showRoom(): void {
       session.start({ setup: session.setup, config: cfg, seed: (Math.random() * 2 ** 32) >>> 0, players: session.players });
     },
     onLeave: () => showMultiplayer(),
+    onEditSettings: () => showRoomSettings(session),
   });
   showScreen(roomScreen.el);
+}
+
+/** Host, in the game room: the Host game screen, editing this room instead of creating one. */
+function showRoomSettings(session: RoomSession): void {
+  const s = session.setup;
+  hostChoices = {
+    mode: s.mode === 'ffa' ? 'ffa' : s.ranked ? 'coop-ranked' : 'coop-custom',
+    map: s.map,
+    isPublic: session.isPublic,
+    maxPlayers: session.maxPlayers,
+  };
+  roomScreen = null;
+  showScreen(
+    createHostSetup({
+      choices: hostChoices,
+      editing: { minPlayers: session.players.length },
+      onChange: (c) => {
+        hostChoices = c;
+      },
+      ffa: config.ffa,
+      onFfaChange: (ffa) => {
+        config = { ...config, ffa };
+        saveCurrentConfig(config);
+      },
+      onSettings: () => showSettings(() => showRoomSettings(session)),
+      onCreate: async () => {
+        if (room !== session) return showMultiplayer(); // the room closed meanwhile
+        const setup: MatchSetup = { mode: hostChoices.mode === 'ffa' ? 'ffa' : 'coop', ranked: hostChoices.mode === 'coop-ranked', map: hostChoices.map };
+        session.updateSettings({ setup, maxPlayers: hostChoices.maxPlayers, isPublic: hostChoices.isPublic });
+        // Keep the open-games list in step: list, unlist, or update the room.
+        const info = { mode: setup.mode === 'ffa' ? ('ffa' as const) : ('coop' as const), ranked: setup.ranked, map: setup.map, maxPlayers: session.maxPlayers };
+        if (session.isPublic && !listing) {
+          listing = new RoomListing({ code: session.code, hostName: playerName, players: session.players.length, ...info });
+          listing.start();
+        } else if (!session.isPublic && listing) {
+          listing.stop();
+          listing = null;
+        } else {
+          listing?.update(info);
+        }
+        showRoom();
+      },
+      onBack: showRoom,
+    }),
+  );
 }
 
 function startNetMatch(session: RoomSession, msg: StartMsg): void {

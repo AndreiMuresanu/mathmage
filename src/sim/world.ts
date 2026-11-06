@@ -320,24 +320,69 @@ export class World {
     });
   }
 
-  /** Instant beam: damages every enemy the line touches, out to the beam length. */
-  /** Where a laser fired by `p` along (dx, dy) starts and ends (it stops at the first wall). */
-  beamFrom(p: { x: number; y: number; radius: number }, spell: SpellConfig, dx: number, dy: number): { x1: number; y1: number; x2: number; y2: number } {
-    const x1 = p.x + dx * p.radius;
-    const y1 = p.y + dy * p.radius;
-    const reach = this.map.walls.reduce((t, w) => Math.min(t, segmentRectHit(x1, y1, x1 + dx * spell.beamLength, y1 + dy * spell.beamLength, w) ?? 1), 1);
-    return { x1, y1, x2: x1 + dx * spell.beamLength * reach, y2: y1 + dy * spell.beamLength * reach };
+  /**
+   * The path of a laser fired by `p` along (dx, dy): straight segments that bounce off walls until
+   * the beam has travelled `spell.beamLength` (measured from the caster's edge). `bounces` is how
+   * many walls a segment has bounced off before it.
+   */
+  beamPath(p: { x: number; y: number; radius: number }, spell: SpellConfig, dx: number, dy: number): BeamSegment[] {
+    const segments: BeamSegment[] = [];
+    // Trace from the caster's centre (never inside a wall), but draw/hit from their edge.
+    let x = p.x;
+    let y = p.y;
+    let left = spell.beamLength + p.radius;
+    for (let bounces = 0; left > 1e-6 && bounces <= MAX_BEAM_BOUNCES; bounces++) {
+      const ex = x + dx * left;
+      const ey = y + dy * left;
+      let t = 1;
+      let wall: (typeof this.map.walls)[number] | undefined;
+      for (const w of this.map.walls) {
+        const hit = segmentRectHit(x, y, ex, ey, w);
+        if (hit !== undefined && hit > 1e-9 && hit < t) {
+          t = hit;
+          wall = w;
+        }
+      }
+      const hx = x + (ex - x) * t;
+      const hy = y + (ey - y) * t;
+      const start = bounces === 0 ? { x: x + dx * p.radius, y: y + dy * p.radius } : { x, y };
+      segments.push({ x1: start.x, y1: start.y, x2: hx, y2: hy, bounces });
+      if (!wall) break;
+      left -= left * t;
+      // Reflect off the face we hit (both components at a corner).
+      const near = (a: number, b: number) => Math.abs(a - b) < 0.5;
+      const side = near(hx, wall.x) || near(hx, wall.x + wall.w);
+      const cap = near(hy, wall.y) || near(hy, wall.y + wall.h);
+      if (side || !cap) dx = -dx;
+      if (cap || !side) dy = -dy;
+      x = hx + dx * 0.01;
+      y = hy + dy * 0.01;
+    }
+    return segments;
   }
 
+  /**
+   * Instant beam that bounces off walls: damages every enemy (and opponent) it touches, more with
+   * each bounce. Anything the beam passes through several times takes the damage of every pass
+   * (added up and dealt as one hit, so a player's brief post-hit invulnerability can't swallow it).
+   */
   private fireLaser(p: PlayerState, spell: SpellConfig, spellIndex: number, dx: number, dy: number): void {
-    const { x1, y1, x2, y2 } = this.beamFrom(p, spell, dx, dy);
+    const path = this.beamPath(p, spell, dx, dy);
     const halfWidth = spell.radius;
-    this.events.push({ type: 'beam', playerId: p.id, x1, y1, x2, y2, width: halfWidth * 2, color: spell.color });
-    const damage = spell.damage * this.cfg.player.damageDealtMult;
-    const hit = this.enemies.filter((e) => distanceToSegment(e.x, e.y, x1, y1, x2, y2) <= e.radius + halfWidth);
-    for (const e of hit) this.damageEnemy(e, damage);
+    const points = [{ x: path[0].x1, y: path[0].y1 }, ...path.map((s) => ({ x: s.x2, y: s.y2 }))];
+    this.events.push({ type: 'beam', playerId: p.id, points, width: halfWidth * 2, color: spell.color });
+    const base = spell.damage * this.cfg.player.damageDealtMult;
+    const growth = 1 + Math.max(0, spell.bounceDamagePercent ?? 0) / 100;
+    /** The damage a target takes: every pass of the beam through it, added up (0 = untouched). */
+    const damageTo = (t: { x: number; y: number; radius: number }) =>
+      path.reduce((sum, s) => (distanceToSegment(t.x, t.y, s.x1, s.y1, s.x2, s.y2) <= t.radius + halfWidth ? sum + base * growth ** s.bounces : sum), 0);
+    for (const e of [...this.enemies]) {
+      const d = damageTo(e);
+      if (d > 0) this.damageEnemy(e, d);
+    }
     for (const mate of this.teammatesOf(p.id)) {
-      if (distanceToSegment(mate.x, mate.y, x1, y1, x2, y2) <= mate.radius + halfWidth) this.friendlyHit(mate, damage, p.id, spellIndex);
+      const d = damageTo(mate);
+      if (d > 0) this.friendlyHit(mate, d, p.id, spellIndex);
     }
   }
 
@@ -949,6 +994,19 @@ export class World {
     return this.players.find((d) => !d.alive && Math.hypot(p.x - d.x, p.y - d.y) <= p.radius + d.radius + reach);
   }
 }
+
+/** One straight piece of a laser's path. */
+export interface BeamSegment {
+  x1: number;
+  y1: number;
+  x2: number;
+  y2: number;
+  /** Walls bounced off before this segment (its damage grows with each). */
+  bounces: number;
+}
+
+/** Safety cap on laser bounces (corners could otherwise trap a beam). */
+const MAX_BEAM_BOUNCES = 20;
 
 /** Distance over which steering eases off, so enemies settle on their spot instead of jittering. */
 const STEER_EASE = 40;

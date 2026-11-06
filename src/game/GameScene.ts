@@ -246,7 +246,7 @@ export class GameScene extends Phaser.Scene {
         this.burst(e.x, e.y, ENEMY_COLORS[e.kind], 10);
         break;
       case 'beam':
-        this.beam(e.x1, e.y1, e.x2, e.y2, e.width, colorToInt(e.color));
+        this.beam(e.points, e.width, colorToInt(e.color));
         break;
       case 'explosion':
         this.explosion(e.x, e.y, e.radius, colorToInt(e.color));
@@ -409,11 +409,18 @@ export class GameScene extends Phaser.Scene {
     }
   }
 
-  private beam(x1: number, y1: number, x2: number, y2: number, width: number, color: number): void {
+  /** A laser's path; each bounce glows a little thicker, since it hits harder. */
+  private beam(points: { x: number; y: number }[], width: number, color: number): void {
     const g = this.add.graphics().setDepth(15).setBlendMode(Phaser.BlendModes.ADD);
-    g.lineStyle(width * 2.5, color, 0.35).lineBetween(x1, y1, x2, y2);
-    g.lineStyle(width, color, 0.9).lineBetween(x1, y1, x2, y2);
-    g.lineStyle(Math.max(1, width / 3), 0xffffff, 1).lineBetween(x1, y1, x2, y2);
+    for (let i = 1; i < points.length; i++) {
+      const a = points[i - 1];
+      const b = points[i];
+      const w = width * (1 + 0.15 * (i - 1));
+      g.lineStyle(w * 2.5, color, 0.35).lineBetween(a.x, a.y, b.x, b.y);
+      g.lineStyle(w, color, 0.9).lineBetween(a.x, a.y, b.x, b.y);
+      g.lineStyle(Math.max(1, w / 3), 0xffffff, 1).lineBetween(a.x, a.y, b.x, b.y);
+      if (i > 1) g.fillStyle(0xffffff, 0.9).fillCircle(a.x, a.y, w * 0.6); // spark where it bounced
+    }
     this.tweens.add({ targets: g, alpha: 0, duration: 220, ease: 'Quad.easeIn', onComplete: () => g.destroy() });
   }
 

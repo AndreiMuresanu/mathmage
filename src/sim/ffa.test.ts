@@ -156,6 +156,18 @@ describe('FFA PvP', () => {
     expect(world.player('a')!.kills).toBe(0);
   });
 
+  it('a laser that passes through an opponent twice (out and back after a bounce) deals both passes', () => {
+    const world = ffaWorld((c) => (c.map = 'boxy'));
+    const [a, b] = world.players;
+    a.x = 300; // under Boxy's solid top wall
+    a.y = 360;
+    b.x = 300;
+    b.y = 100; // between a and the top wall: hit going up, and again coming back down
+    run(world, DT, { a: { ...idle, aim: -Math.PI / 2, casting: true, spell: LASER } });
+    const laser = DEFAULT_CONFIG.spells[LASER];
+    expect(b.hp).toBeCloseTo(100 - (laser.damage + laser.damage * (1 + laser.bounceDamagePercent / 100)), 6);
+  });
+
   it('players start spread out and clear of walls', () => {
     const world = ffaWorld((c) => (c.map = 'buttons'), ['a', 'b', 'c', 'd']);
     world.placeForPvp();

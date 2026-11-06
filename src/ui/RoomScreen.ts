@@ -10,7 +10,10 @@ const PING_EVERY_MS = 2000;
  * The game room before (and between) matches: Room ID to share, who's here with their pings,
  * and Start for the host. Call refresh() when the roster changes.
  */
-export function createRoomScreen(room: RoomSession, opts: { onStart(): void; onLeave(): void }): { el: HTMLDivElement; refresh(): void } {
+export function createRoomScreen(
+  room: RoomSession,
+  opts: { onStart(): void; onLeave(): void; /** Host: change mode, map, size, visibility, settings. */ onEditSettings?(): void },
+): { el: HTMLDivElement; refresh(): void } {
   const pings = new Map<string, number>();
   const list = h('ul.room-players');
   const info = h('p.muted');
@@ -79,7 +82,12 @@ export function createRoomScreen(room: RoomSession, opts: { onStart(): void; onL
       {},
       h('div.screen-header', {}, h('h1', {}, 'Game room'), h('button', { onclick: () => { clearInterval(timer); opts.onLeave(); } }, 'Leave')),
       h('div.room-code', {}, h('span.muted', {}, 'Room ID'), h('strong', {}, room.code), copy),
-      info,
+      h(
+        'div.room-info',
+        {},
+        info,
+        room.isHost && opts.onEditSettings ? h('button.small', { type: 'button', onclick: () => opts.onEditSettings?.() }, 'Edit settings') : null,
+      ),
       h('h3', {}, 'Players'),
       list,
       footer,
